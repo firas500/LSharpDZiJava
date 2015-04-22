@@ -532,7 +532,8 @@ namespace iDZed
                 Player.ServerPosition, _spells[SpellSlot.Q].Range, MinionTypes.All, MinionTeam.NotAlly);
             var allMinionsE = MinionManager.GetMinions(
                 Player.ServerPosition, _spells[SpellSlot.Q].Range, MinionTypes.All, MinionTeam.NotAlly);
-            if (Menu.Item("com.idz.zed.laneclear.useQ").GetValue<bool>() && _spells[SpellSlot.Q].IsReady() && !Player.IsWindingUp)
+            if (Menu.Item("com.idz.zed.laneclear.useQ").GetValue<bool>() && _spells[SpellSlot.Q].IsReady() &&
+                !Player.IsWindingUp)
             {
                 var bestPositionQ =
                     MinionManager.GetBestLineFarmLocation(
@@ -543,7 +544,8 @@ namespace iDZed
                     _spells[SpellSlot.Q].Cast(bestPositionQ.Position);
                 }
             }
-            if (Menu.Item("com.idz.zed.laneclear.useE").GetValue<bool>() && _spells[SpellSlot.E].IsReady() && !Player.IsWindingUp)
+            if (Menu.Item("com.idz.zed.laneclear.useE").GetValue<bool>() && _spells[SpellSlot.E].IsReady() &&
+                !Player.IsWindingUp)
             {
                 var eLocation =
                     MinionManager.GetBestLineFarmLocation(
@@ -729,8 +731,7 @@ namespace iDZed
         private static void Game_OnUpdate(EventArgs args)
         {
             OnFlee();
-            var target = TargetSelector.GetTarget(
-                _spells[SpellSlot.W].Range + _spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(_spells[SpellSlot.W].Range + _spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
             if (MenuHelper.GetKeybindValue("com.idz.zed.harass.toggle"))
             {
                 CastW(target);

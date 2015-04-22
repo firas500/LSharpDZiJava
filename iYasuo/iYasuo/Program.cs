@@ -132,7 +132,8 @@ namespace iYasuo
                 _spells[Spells.R].IsInRange(target))
             {
                 var enemiesKnockedUp =
-                    ObjectManager.Get<Obj_AI_Hero>().Where(x => x.IsValidTarget(_spells[Spells.R].Range) && x.HasBuffOfType(BuffType.Knockup));
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(x => x.IsValidTarget(_spells[Spells.R].Range) && x.HasBuffOfType(BuffType.Knockup));
 
                 if (enemiesKnockedUp.Count() >= Menu.Item("rCount").GetValue<Slider>().Value)
                 {
@@ -143,7 +144,7 @@ namespace iYasuo
                     if (Menu.Item("delayUltimate").GetValue<bool>() && target.IsAirborne())
                     {
                         Utility.DelayAction.Add(
-                            (int)(AirborneTimeLeft(target) * 1000 - 200), () => _spells[Spells.R].Cast());
+                            (int) (AirborneTimeLeft(target) * 1000 - 200), () => _spells[Spells.R].Cast());
                     }
                 }
             }
@@ -180,7 +181,7 @@ namespace iYasuo
 
         private static void OnHarass()
         {
-            var target = TargetSelector.GetTarget(1500f, TargetSelector.DamageType.Physical);
+            Obj_AI_Hero target = TargetSelector.GetTarget(1500f, TargetSelector.DamageType.Physical);
 
             //Q Casting
             if (Menu.Item("useQH").GetValue<bool>() && _spells[Spells.Q].IsReady() && target != null)
@@ -363,7 +364,8 @@ namespace iYasuo
             Obj_SpellMissile args = (Obj_SpellMissile) sender;
 
 
-            if (args.SData.Name == "CaitlynAceintheHoleMissile" && args.Type == GameObjectType.obj_SpellLineMissile && args.Target.IsMe)
+            if (args.SData.Name == "CaitlynAceintheHoleMissile" && args.Type == GameObjectType.obj_SpellLineMissile &&
+                args.Target.IsMe)
             {
                 if (_spells[Spells.W].IsReady() && Menu.Item("blockDangerous").GetValue<bool>())
                 {
@@ -376,7 +378,7 @@ namespace iYasuo
 
         private static void OnProcessSpell(Obj_AI_Base sender1, GameObjectProcessSpellCastEventArgs args)
         {
-            var sender = sender1 as Obj_AI_Hero;
+            Obj_AI_Hero sender = sender1 as Obj_AI_Hero;
             if (sender == null || sender.IsMe || sender.IsAlly || !args.Target.IsMe)
             {
                 //Game.PrintChat(string.Format("Spell Name: {0} - Delay: {1}", args.SData.Name, args.SData.SpellCastTime));
@@ -392,11 +394,11 @@ namespace iYasuo
                 {
                     Utility.DelayAction.Add((int) 0.25f, () => _spells[Spells.W].Cast(castPosition));
                 }
-                else if (sender.ChampionName == "Vayne" && args.SData.Name == "VayneCondemn")
+                /*else if (sender.ChampionName == "Vayne" && args.SData.Name == "VayneCondemn")
                 {
                     Utility.DelayAction.Add((int) 0.25f, () => _spells[Spells.W].Cast(castPosition));
-                    // TODO possible check if the condem is going to stun, if not then dont block.
-                }
+                    // TODO possible check if the condem is going to stun, if not then don't block.
+                }*/
                 else if (sender.ChampionName == "Tristana" && args.SData.Name == "TristanaR")
                 {
                     //Game.PrintChat(string.Format("Spell Name: {0} - Delay: {1}", args.SData.Name, args.SData.SpellCastTime));
@@ -420,7 +422,7 @@ namespace iYasuo
         {
             //Check if the skillshot is already added.
             var alreadyAdded = false;
-            foreach (var item in EvadeDetectedSkillshots)
+            foreach (Skillshot item in EvadeDetectedSkillshots)
             {
                 if (item.SpellData.SpellName == skillshot.SpellData.SpellName &&
                     (item.Caster.NetworkId == skillshot.Caster.NetworkId &&
@@ -681,7 +683,7 @@ namespace iYasuo
                 {
                     continue;
                 }
-                var dashObjects =
+                Obj_AI_Base dashObjects =
                     ObjectManager.Get<Obj_AI_Base>()
                         .Where(x => _player.CanDash(x) && x.IsValidTarget(_spells[Spells.E].Range))
                         .OrderBy(x => x.Distance(_player.Position))
@@ -690,13 +692,15 @@ namespace iYasuo
                 bool isSafe = dashObjects != null &&
                               skillshot.IsSafe(V3E(_player.Position, dashObjects.Position, 475).To2D());
 
-                if (dashObjects != null && _spells[Spells.E].IsReady() && isSafe && dashObjects.Name != skillshot.Caster.Name)
+                if (dashObjects != null && _spells[Spells.E].IsReady() && isSafe &&
+                    dashObjects.Name != skillshot.Caster.Name)
                 {
                     _spells[Spells.E].CastOnUnit(dashObjects);
                 }
             }
         }
 
+        //WHAT IS SCRIPT?! DIS BE ASSEMBLY KAPPA
         private static Obj_AI_Base GetBestDashObject(Obj_AI_Hero target)
         {
             return

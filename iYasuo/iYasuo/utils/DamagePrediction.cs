@@ -35,8 +35,8 @@ namespace iYasuo.utils
             {
                 return;
             }
-            var senderH = (Obj_AI_Hero) sender;
-            var targetH = (Obj_AI_Hero) args.Target;
+            Obj_AI_Hero senderH = (Obj_AI_Hero) sender;
+            Obj_AI_Hero targetH = (Obj_AI_Hero) args.Target;
             var damage = Orbwalking.IsAutoAttack(args.SData.Name)
                 ? sender.GetAutoAttackDamage(targetH)
                 : GetDamage(senderH, targetH, senderH.GetSpellSlot(args.SData.Name));

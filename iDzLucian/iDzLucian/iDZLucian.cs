@@ -109,7 +109,8 @@ namespace iDzLucian
         {
             if (MenuHelper.IsMenuEnabled("com.idzlucian.misc.antigpe") && _spells[SpellSlot.E].IsReady())
             {
-                var extended = gapcloser.Start.Extend(_player.Position, gapcloser.Start.Distance(_player.ServerPosition) + _spells[SpellSlot.E].Range);
+                var extended = gapcloser.Start.Extend(
+                    _player.Position, gapcloser.Start.Distance(_player.ServerPosition) + _spells[SpellSlot.E].Range);
                 if (PositionHelper.IsSafePosition(extended))
                 {
                     _spells[SpellSlot.E].Cast(extended);
@@ -121,15 +122,18 @@ namespace iDzLucian
         {
             if (sender.IsMe)
             {
-                if (ObjectManager.Player.GetSpellSlot(args.SData.Name) != SpellSlot.R)
+                if (_player.GetSpellSlot(args.SData.Name) != SpellSlot.R)
                 {
                     _shouldHavePassive = true;
                     Utility.DelayAction.Add((int) Math.Floor(2000 - (Game.Ping / 2f)), () => _shouldHavePassive = false);
+                    //Game.PrintChat(HasPassive() ? "Got Passive" : " no passive");
                 }
                 else
                 {
                     if (MenuHelper.IsMenuEnabled("com.idzlucian.skilloptions.lockR"))
+                    {
                         UltimateLock();
+                    }
                 }
                 switch (args.SData.Name)
                 {
@@ -306,9 +310,10 @@ namespace iDzLucian
             }
             var target = TargetSelector.GetTarget(_spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
             var targetExtended = TargetSelector.GetTarget(_qExtended.Range, TargetSelector.DamageType.Physical);
-            if (!target.IsValidTarget(_spells[SpellSlot.Q].Range) && targetExtended.IsValidTarget(_qExtended.Range))
+            if (!target.IsValidTarget(_spells[SpellSlot.Q].Range) && targetExtended.IsValidTarget(_qExtended.Range) &&
+                !(HasPassive() && Orbwalking.InAutoAttackRange(target)))
             {
-                var targetPrediction = _qExtended.GetPrediction(targetExtended).CastPosition.To2D();
+                Vector2 targetPrediction = _qExtended.GetPrediction(targetExtended).CastPosition.To2D();
                 var qCollision = _qExtended.GetCollision(
                     ObjectManager.Player.ServerPosition.To2D(), new List<Vector2> { targetPrediction });
                 if (qCollision.Any())
@@ -320,8 +325,8 @@ namespace iDzLucian
 
         private static void UltimateLock()
         {
-            var target = TargetSelector.GetTarget(_spells[SpellSlot.R].Range, TargetSelector.DamageType.Physical);
-            var targetPrediction = _spells[SpellSlot.R].GetPrediction(target);
+            Obj_AI_Hero target = TargetSelector.GetTarget(_spells[SpellSlot.R].Range, TargetSelector.DamageType.Physical);
+            PredictionOutput targetPrediction = _spells[SpellSlot.R].GetPrediction(target);
 
             Vector3 endPosition = Vector3.Normalize(_player.ServerPosition - target.ServerPosition);
             Vector3 castPosition = targetPrediction.CastPosition;
@@ -353,7 +358,7 @@ namespace iDzLucian
         {
             //TODO test this, remains untesed due to my high ping. cmon dz embaress me
             var minions = MinionManager.GetMinions(_player.ServerPosition, _spells[SpellSlot.Q].Range);
-            var extendedQTarget = TargetSelector.GetTarget(_qExtended.Range, TargetSelector.DamageType.Physical);
+            Obj_AI_Hero extendedQTarget = TargetSelector.GetTarget(_qExtended.Range, TargetSelector.DamageType.Physical);
 
             if (extendedQTarget == null || !extendedQTarget.IsValidTarget(_qExtended.Range) ||
                 !_spells[SpellSlot.Q].IsReady() || !_spells[SpellSlot.E].IsReady())
@@ -361,11 +366,11 @@ namespace iDzLucian
                 return;
             }
 
-            foreach (var selectedMinion in
+            foreach (Obj_AI_Base selectedMinion in
                 minions.Where(minion => _spells[SpellSlot.Q].IsInRange(minion) && _qExtended.IsInRange(extendedQTarget))
                 )
             {
-                var bestPosition = _qExtended.GetPrediction(extendedQTarget, true).CastPosition.To2D();
+                Vector2 bestPosition = _qExtended.GetPrediction(extendedQTarget, true).CastPosition.To2D();
                 var collisionObjects = _qExtended.GetCollision(
                     selectedMinion.Position.To2D(), new List<Vector2> { bestPosition }); // FROM e endPositiono
 
@@ -409,7 +414,8 @@ namespace iDzLucian
 
             var comboMenu = new Menu("Lucian - Combo", "com.idzlucian.combo");
             comboMenu.AddModeMenu(
-                Mode.Combo, new[] { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R }, new[] { true, true, false, false });
+                Mode.Combo, new[] { SpellSlot.Q, SpellSlot.W, SpellSlot.E, SpellSlot.R },
+                new[] { true, true, false, false });
             comboMenu.AddManaManager(Mode.Combo, new[] { SpellSlot.Q, SpellSlot.W, SpellSlot.E }, new[] { 35, 35, 25 });
 
             var skillOptionsCombo = new Menu("Skill Options", "com.idzlucian.combo.skilloptions");
@@ -420,7 +426,8 @@ namespace iDzLucian
                     new MenuItem("com.idzlucian.combo.useextendedq", "Use Extended Q Combo").SetValue(true));
                 skillOptionsCombo.AddItem(
                     new MenuItem("com.idzlucian.harass.useextendedq", "Use Extended Q Harass").SetValue(true));
-                skillOptionsCombo.AddItem(new MenuItem("com.idzlucian.skilloptions.lockR", "Auto Lock Ultimate").SetValue(false));
+                skillOptionsCombo.AddItem(
+                    new MenuItem("com.idzlucian.skilloptions.lockR", "Auto Lock Ultimate").SetValue(false));
             }
             comboMenu.AddSubMenu(skillOptionsCombo);
 

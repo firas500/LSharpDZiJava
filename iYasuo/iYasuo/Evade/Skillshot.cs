@@ -438,10 +438,10 @@ namespace iYasuo.Evade
                 if (allIntersections.Count > 0)
                 {
                     //Check only for the exit point
-                    var exitIntersection = allIntersections[0];
-                    var exitIntersectionProjection = exitIntersection.PointVector2.ProjectOn(Start, End).SegmentPoint;
+                    FoundIntersection exitIntersection = allIntersections[0];
+                    Vector2 exitIntersectionProjection = exitIntersection.PointVector2.ProjectOn(Start, End).SegmentPoint;
 
-                    var missilePosOnExit = GetMissilePosition(exitIntersection.Time + timeOffset);
+                    Vector2 missilePosOnExit = GetMissilePosition(exitIntersection.Time + timeOffset);
                     if (missilePosOnExit.Distance(End) <= exitIntersectionProjection.Distance(End))
                     {
                         return new SafePathResult(false, allIntersections[0]);
@@ -475,14 +475,14 @@ namespace iYasuo.Evade
                                 (Environment.TickCount - StartTick);
 
 
-            var myPositionWhenExplodes = Geometry.PositionAfter(path, timeToExplode, speed, delay);
+            Vector2 myPositionWhenExplodes = path.PositionAfter(timeToExplode, speed, delay);
 
             if (!IsSafe(myPositionWhenExplodes))
             {
                 return new SafePathResult(false, allIntersections[0]);
             }
 
-            var myPositionWhenExplodesWithOffset = Geometry.PositionAfter(path, timeToExplode, speed, timeOffset);
+            Vector2 myPositionWhenExplodesWithOffset = path.PositionAfter(timeToExplode, speed, timeOffset);
 
             return new SafePathResult(IsSafe(myPositionWhenExplodesWithOffset), allIntersections[0]);
         }
@@ -502,9 +502,9 @@ namespace iYasuo.Evade
         {
             if (SpellData.Type == SkillShotType.SkillshotMissileLine)
             {
-                var missilePos = GetMissilePosition(0);
-                var missilePosAfterT = GetMissilePosition(time);
-                var projection = unit.ServerPosition.To2D().ProjectOn(missilePos, missilePosAfterT);
+                Vector2 missilePos = GetMissilePosition(0);
+                Vector2 missilePosAfterT = GetMissilePosition(time);
+                LeagueSharp.Common.Geometry.ProjectionInfo projection = unit.ServerPosition.To2D().ProjectOn(missilePos, missilePosAfterT);
 
                 return projection.IsOnSegment &&
                        projection.SegmentPoint.Distance(unit.ServerPosition) < SpellData.Radius;

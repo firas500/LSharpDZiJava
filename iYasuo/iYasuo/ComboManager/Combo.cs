@@ -71,13 +71,13 @@ namespace iYasuo.ComboManager
                         {
                             CurrentComboIndex += 1;
                             InProgress = false;
+                            GetCurrentAction().CurrentActionListener.ResetOccurred();
                         });
                 }
                 else
                 {
                     Console.WriteLine("Something went wrong!");
-                }
-                
+                }  
             }
             IncrementIndex();
         }

@@ -9,6 +9,11 @@
             HasOccured = true;
         }
 
+        public void ResetOccurred()
+        {
+            HasOccured = false;
+        }
+
         public bool GetOccured()
         {
             return HasOccured;

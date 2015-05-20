@@ -17,7 +17,7 @@ using System.Collections.Generic;
 
 namespace iYasuo
 {
-    internal class ComboManager
+    internal class ComboManager_Old
     {
         public delegate void OnAction();
 

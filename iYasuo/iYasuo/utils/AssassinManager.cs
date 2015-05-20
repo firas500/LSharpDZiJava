@@ -20,13 +20,14 @@ using LeagueSharp;
 using LeagueSharp.Common;
 using SharpDX.Direct3D9;
 using Font = SharpDX.Direct3D9.Font;
+using SharpDX;
 
 namespace iYasuo.utils
 {
     internal class AssassinManager
     {
-        private static Font _text;
-        private static Font _textBold;
+        private static SharpDX.Direct3D9.Font _text;
+        private static SharpDX.Direct3D9.Font _textBold;
 
         public AssassinManager()
         {
@@ -83,13 +84,13 @@ namespace iYasuo.utils
             Program.Menu.SubMenu("MenuAssassin").AddSubMenu(new Menu("Drawings", "Draw"));
             Program.Menu.SubMenu("MenuAssassin")
                 .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, Color.GreenYellow)));
+                .AddItem(new MenuItem("DrawSearch", "Search Range").SetValue(new Circle(true, System.Drawing.Color.GreenYellow)));
             Program.Menu.SubMenu("MenuAssassin")
                 .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, Color.GreenYellow)));
+                .AddItem(new MenuItem("DrawActive", "Active Enemy").SetValue(new Circle(true, System.Drawing.Color.GreenYellow)));
             Program.Menu.SubMenu("MenuAssassin")
                 .SubMenu("Draw")
-                .AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, Color.DarkSeaGreen)));
+                .AddItem(new MenuItem("DrawNearest", "Nearest Enemy").SetValue(new Circle(true, System.Drawing.Color.DarkSeaGreen)));
             Program.Menu.SubMenu("MenuAssassin")
                 .SubMenu("Draw")
                 .AddItem(new MenuItem("DrawStatus", "Show status on the screen").SetValue(true));

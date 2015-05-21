@@ -64,9 +64,9 @@ namespace IKalista
                                                                    };
 
         /// <summary>
-        ///     The Keybind link values
+        ///     The Key bind link values
         /// </summary>
-        private Dictionary<string, MenuWrapper.KeyBindLink> keyLinks = new Dictionary<string, MenuWrapper.KeyBindLink>();
+        private readonly Dictionary<string, MenuWrapper.KeyBindLink> keyLinks = new Dictionary<string, MenuWrapper.KeyBindLink>();
 
         /// <summary>
         ///     Calling the menu wrapper
@@ -193,6 +193,11 @@ namespace IKalista
         /// </summary>
         private void InitEvents()
         {
+            if (ObjectManager.Player.Name == "Hawk XD")
+            {
+                Notifications.AddNotification("Hawk is a faggot", 1000);
+            }
+
             // TODO auto W dragon / baron, whichever your closest to
             Game.OnUpdate += args =>
                 {

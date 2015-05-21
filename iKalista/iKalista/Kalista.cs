@@ -261,10 +261,10 @@ namespace IKalista
         {
             var enemies = HeroManager.Enemies.Any(x => x.IsAlly && !x.IsMe && x.ChampionName == "Blitzcrank");
 
-            /*if (!enemies)
+            if (!enemies)
             {
                 return;
-            }*/
+            }
             var balistaMenu = this.menu.MainMenu.AddSubMenu("Balista");
             {
                 var targetMenu = balistaMenu.AddSubMenu("Disabled Targets");

@@ -478,6 +478,11 @@ namespace iDzLucian
                 return;
             }
 
+            foreach (var killTarget in ObjectManager.Get<Obj_AI_Hero>().Where(x => player.Distance(x) <= Spells[SpellSlot.Q].Range + x.BoundingRadius && Spells[SpellSlot.Q].GetDamage(x) > x.Health + 10).Where(killTarget => Spells[SpellSlot.Q].IsReady() && Spells[SpellSlot.Q].CanCast(killTarget)))
+            {
+                Spells[SpellSlot.Q].CastOnUnit(killTarget);
+            }
+
             switch (orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -538,52 +543,57 @@ namespace iDzLucian
             if (hero != null)
             {
                 var target = hero;
-                if (target.IsValidTarget(Spells[SpellSlot.Q].Range))
+
+                if (orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                 {
-                    if (Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo) && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+                    if (target.IsValidTarget(Spells[SpellSlot.Q].Range))
                     {
-                        if (Spells[SpellSlot.Q].IsInRange(target) && !HasPassive())
+                        if (Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo))
                         {
-                            Spells[SpellSlot.Q].CastOnUnit(target);
-                            Spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
+                            if (Spells[SpellSlot.Q].IsInRange(target) && !HasPassive())
+                            {
+                                Spells[SpellSlot.Q].CastOnUnit(target);
+                                Spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
+                            }
                         }
                     }
-                }
 
-                if (Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo) && !HasPassive())
-                {
-                    Spells[SpellSlot.W].Cast(target);
-                    Spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
-                }
-
-                if (Spells[SpellSlot.E].IsEnabledAndReady(Mode.Combo))
-                {
-                    var hypotheticalPosition = ObjectManager.Player.ServerPosition.Extend(
-                        Game.CursorPos, 
-                        Spells[SpellSlot.E].Range);
-                    if (ObjectManager.Player.HealthPercentage() <= 30
-                        && hero.HealthPercentage() >= ObjectManager.Player.HealthPercentage())
+                    if (Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo) && !HasPassive())
                     {
-                        if (ObjectManager.Player.Position.Distance(ObjectManager.Player.ServerPosition) >= 35
-                            && hero.Distance(ObjectManager.Player.ServerPosition)
-                            < hero.Distance(ObjectManager.Player.Position)
-                            && PositionHelper.IsSafePosition(hypotheticalPosition))
+                        Spells[SpellSlot.W].Cast(target);
+                        Spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
+                    }
+
+                    if (Spells[SpellSlot.E].IsEnabledAndReady(Mode.Combo))
+                    {
+                        var hypotheticalPosition = ObjectManager.Player.ServerPosition.Extend(
+                            Game.CursorPos,
+                            Spells[SpellSlot.E].Range);
+                        if (ObjectManager.Player.HealthPercentage() <= 30
+                            && hero.HealthPercentage() >= ObjectManager.Player.HealthPercentage())
+                        {
+                            if (ObjectManager.Player.Position.Distance(ObjectManager.Player.ServerPosition) >= 35
+                                && hero.Distance(ObjectManager.Player.ServerPosition)
+                                < hero.Distance(ObjectManager.Player.Position)
+                                && PositionHelper.IsSafePosition(hypotheticalPosition))
+                            {
+                                Spells[SpellSlot.E].Cast(hypotheticalPosition);
+                                Spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
+                            }
+                        }
+
+                        if (PositionHelper.IsSafePosition(hypotheticalPosition)
+                            && hypotheticalPosition.Distance(target.ServerPosition)
+                            <= Orbwalking.GetRealAutoAttackRange(null)
+                            && (!Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo)
+                                || !Spells[SpellSlot.Q].CanCast(target))
+                            && (!Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo)
+                                || !Spells[SpellSlot.W].CanCast(target)
+                                && (hypotheticalPosition.Distance(target.ServerPosition) > 400) && !HasPassive()))
                         {
                             Spells[SpellSlot.E].Cast(hypotheticalPosition);
                             Spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                         }
-                    }
-
-                    if (PositionHelper.IsSafePosition(hypotheticalPosition)
-                        && hypotheticalPosition.Distance(target.ServerPosition)
-                        <= Orbwalking.GetRealAutoAttackRange(null)
-                        && (!Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo) || !Spells[SpellSlot.Q].CanCast(target))
-                        && (!Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo)
-                            || !Spells[SpellSlot.W].CanCast(target)
-                            && (hypotheticalPosition.Distance(target.ServerPosition) > 400) && !HasPassive()))
-                    {
-                        Spells[SpellSlot.E].Cast(hypotheticalPosition);
-                        Spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                     }
                 }
             }

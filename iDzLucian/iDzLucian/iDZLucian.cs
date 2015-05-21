@@ -132,23 +132,7 @@ namespace iDzLucian
         /// </summary>
         private static void Combo()
         {
-            var target = TargetSelector.GetTarget(1000F, TargetSelector.DamageType.Physical);
-
             ExtendedQ(Mode.Combo);
-
-            if (Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo) && !HasPassive())
-            {
-                Spells[SpellSlot.W].Cast(target);
-                Spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
-            }
-
-            if (Spells[SpellSlot.R].IsEnabledAndReady(Mode.Combo) && target.IsValidTarget(Spells[SpellSlot.R].Range)
-                && Spells[SpellSlot.R].GetPrediction(target).Hitchance >= HitChance.Medium
-                && !player.IsCastingInterruptableSpell(true))
-            {
-                Spells[SpellSlot.R].Cast(target.Position);
-                Spells[SpellSlot.R].LastCastAttemptT = Environment.TickCount;
-            }
         }
 
         /// <summary>
@@ -558,12 +542,18 @@ namespace iDzLucian
                 {
                     if (Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo) && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                     {
-                        if (Spells[SpellSlot.Q].CanCast(target) && !HasPassive())
+                        if (Spells[SpellSlot.Q].IsInRange(target) && !HasPassive())
                         {
                             Spells[SpellSlot.Q].CastOnUnit(target);
                             Spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
                         }
                     }
+                }
+
+                if (Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo) && !HasPassive())
+                {
+                    Spells[SpellSlot.W].Cast(target);
+                    Spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
                 }
 
                 if (Spells[SpellSlot.E].IsEnabledAndReady(Mode.Combo))

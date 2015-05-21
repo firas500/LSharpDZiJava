@@ -129,7 +129,8 @@ namespace IKalista
         {
             Game.OnUpdate += args =>
             {
-                this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode](); if (this.boolLinks["useJungleSteal"].Value)
+                this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode](); 
+                if (this.boolLinks["useJungleSteal"].Value)
                 {
                     this.DoMobSteal();
                 }

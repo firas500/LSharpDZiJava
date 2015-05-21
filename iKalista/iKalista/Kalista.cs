@@ -1,22 +1,9 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Kalista.cs" company="LeagueSharp">
-//   Copyright (C) 2015 LeagueSharp
+// <copyright file="Kalista.cs" company="">
 //   
-//             This program is free software: you can redistribute it and/or modify
-//             it under the terms of the GNU General Public License as published by
-//             the Free Software Foundation, either version 3 of the License, or
-//             (at your option) any later version.
-//   
-//             This program is distributed in the hope that it will be useful,
-//             but WITHOUT ANY WARRANTY; without even the implied warranty of
-//             MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//             GNU General Public License for more details.
-//   
-//             You should have received a copy of the GNU General Public License
-//             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
 // <summary>
-//   An Assembly for <see cref="Kalista" />
+//   An Assembly for <see cref="Kalista" /> okay
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 namespace IKalista
@@ -28,6 +15,8 @@ namespace IKalista
     using LeagueSharp.Common;
 
     using SharpDX;
+
+    using Color = System.Drawing.Color;
 
     /// <summary>
     ///     An Assembly for <see cref="Kalista" /> okay
@@ -41,6 +30,12 @@ namespace IKalista
         /// </summary>
         private readonly Dictionary<string, MenuWrapper.BoolLink> boolLinks =
             new Dictionary<string, MenuWrapper.BoolLink>();
+
+        /// <summary>
+        ///     The Key bind link values
+        /// </summary>
+        private readonly Dictionary<string, MenuWrapper.KeyBindLink> keyLinks =
+            new Dictionary<string, MenuWrapper.KeyBindLink>();
 
         /// <summary>
         ///     The dictionary to store the current mode and the on orb walking event
@@ -62,11 +57,6 @@ namespace IKalista
                                                                        { SpellSlot.W, new Spell(SpellSlot.W, 5200) }, 
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 1000) }
                                                                    };
-
-        /// <summary>
-        ///     The Key bind link values
-        /// </summary>
-        private readonly Dictionary<string, MenuWrapper.KeyBindLink> keyLinks = new Dictionary<string, MenuWrapper.KeyBindLink>();
 
         /// <summary>
         ///     Calling the menu wrapper
@@ -104,6 +94,35 @@ namespace IKalista
         ///     The delegate for the On orb walking Event
         /// </summary>
         private delegate void OnOrbwalkingMode();
+
+        #endregion
+
+        #region Public Methods and Operators
+
+        /// <summary>
+        ///     TODO The show notification.
+        /// </summary>
+        /// <param name="message">
+        ///     TODO The message.
+        /// </param>
+        /// <param name="colour">
+        ///     TODO The color.
+        /// </param>
+        /// <param name="duration">
+        ///     TODO The duration.
+        /// </param>
+        /// <param name="dispose">
+        ///     TODO The dispose.
+        /// </param>
+        public static void ShowNotification(string message, Color colour, int duration = -1, bool dispose = true)
+        {
+            var notify = new Notification(message).SetTextColor(colour);
+            Notifications.AddNotification(notify);
+            if (dispose)
+            {
+                Utility.DelayAction.Add(duration, () => notify.Dispose());
+            }
+        }
 
         #endregion
 
@@ -195,7 +214,7 @@ namespace IKalista
         {
             if (ObjectManager.Player.Name == "Hawk XD")
             {
-                Notifications.AddNotification("Hawk is a faggot", 1000);
+                ShowNotification("Hawk is a faggot <3", Color.Aqua, 10000);
             }
 
             // TODO auto W dragon / baron, whichever your closest to

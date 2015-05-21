@@ -127,7 +127,13 @@ namespace IKalista
         /// </summary>
         private void InitEvents()
         {
-            Game.OnUpdate += args => { this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode](); };
+            Game.OnUpdate += args =>
+            {
+                this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode](); if (this.boolLinks["useJungleSteal"].Value)
+                {
+                    this.DoMobSteal();
+                }
+            };
 
             Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
                 {
@@ -327,11 +333,6 @@ namespace IKalista
         /// </summary>
         private void OnLaneClear()
         {
-            if (this.boolLinks["useJungleSteal"].Value)
-            {
-                this.DoMobSteal();
-            }
-
             var minion =
                 MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
                     .Where(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x))

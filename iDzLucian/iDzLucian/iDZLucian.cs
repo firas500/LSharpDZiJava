@@ -277,7 +277,8 @@ namespace iDzLucian
 
             var target = TargetSelector.GetTarget(Spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
             var targetExtended = TargetSelector.GetTarget(qExtended.Range, TargetSelector.DamageType.Physical);
-            if (target.IsValidTarget(Spells[SpellSlot.Q].Range) || !targetExtended.IsValidTarget(qExtended.Range) || (HasPassive() && Orbwalking.InAutoAttackRange(target)))
+            if (target.IsValidTarget(Spells[SpellSlot.Q].Range) || !targetExtended.IsValidTarget(qExtended.Range)
+                || (HasPassive() && Orbwalking.InAutoAttackRange(target)))
             {
                 return;
             }
@@ -294,7 +295,7 @@ namespace iDzLucian
                 return;
             }
 
-            //Credits xSalice
+            // Credits xSalice
             foreach (var minion in minions)
             {
                 var polygon = new Geometry.Polygon.Rectangle(
@@ -302,7 +303,8 @@ namespace iDzLucian
                     player.ServerPosition.Extend(minion.ServerPosition, qExtended.Range), 
                     qExtended.Width);
 
-                if (polygon.IsInside(targetPrediction) && Spells[SpellSlot.Q].Cast(minion) == Spell.CastStates.SuccessfullyCasted)
+                if (polygon.IsInside(targetPrediction)
+                    && Spells[SpellSlot.Q].Cast(minion) == Spell.CastStates.SuccessfullyCasted)
                 {
                     Spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
                 }
@@ -352,7 +354,7 @@ namespace iDzLucian
         ///     TODO The target.
         /// </param>
         /// <returns>
-        ///     <see cref="double"/>
+        ///     <see cref="double" />
         /// </returns>
         private static double GetCullingDamage(Obj_AI_Hero target)
         {
@@ -534,10 +536,10 @@ namespace iDzLucian
         ///     the after attack event
         /// </summary>
         /// <param name="unit">
-        ///     The <see cref="AttackableUnit"/> unit
+        ///     The <see cref="AttackableUnit" /> unit
         /// </param>
         /// <param name="attackableTarget">
-        ///     The <see cref="AttackableUnit"/> target
+        ///     The <see cref="AttackableUnit" /> target
         /// </param>
         private static void OrbwalkingAfterAttack(AttackableUnit unit, AttackableUnit attackableTarget)
         {
@@ -554,7 +556,7 @@ namespace iDzLucian
                 var target = hero;
                 if (target.IsValidTarget(Spells[SpellSlot.Q].Range))
                 {
-                    if (Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo))
+                    if (Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo) && orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
                     {
                         if (Spells[SpellSlot.Q].CanCast(target) && !HasPassive())
                         {
@@ -563,6 +565,7 @@ namespace iDzLucian
                         }
                     }
                 }
+
                 if (Spells[SpellSlot.E].IsEnabledAndReady(Mode.Combo))
                 {
                     var hypotheticalPosition = ObjectManager.Player.ServerPosition.Extend(
@@ -582,7 +585,8 @@ namespace iDzLucian
                     }
 
                     if (PositionHelper.IsSafePosition(hypotheticalPosition)
-                        && hypotheticalPosition.Distance(target.ServerPosition) <= Orbwalking.GetRealAutoAttackRange(null)
+                        && hypotheticalPosition.Distance(target.ServerPosition)
+                        <= Orbwalking.GetRealAutoAttackRange(null)
                         && (!Spells[SpellSlot.Q].IsEnabledAndReady(Mode.Combo) || !Spells[SpellSlot.Q].CanCast(target))
                         && (!Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo)
                             || !Spells[SpellSlot.W].CanCast(target)

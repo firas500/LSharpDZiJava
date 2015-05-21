@@ -30,7 +30,7 @@ namespace IKalista
     using SharpDX;
 
     /// <summary>
-    ///     An Assembly for <see cref="Kalista" />
+    ///     An Assembly for <see cref="Kalista" /> okay
     /// </summary>
     public class Kalista
     {
@@ -59,8 +59,14 @@ namespace IKalista
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
                                                                        { SpellSlot.Q, new Spell(SpellSlot.Q, 1150) }, 
+                                                                       { SpellSlot.W, new Spell(SpellSlot.W, 5200) }, 
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 1000) }
                                                                    };
+
+        /// <summary>
+        ///     The Keybind link values
+        /// </summary>
+        private Dictionary<string, MenuWrapper.KeyBindLink> keyLinks = new Dictionary<string, MenuWrapper.KeyBindLink>();
 
         /// <summary>
         ///     Calling the menu wrapper
@@ -123,18 +129,80 @@ namespace IKalista
         }
 
         /// <summary>
+        ///     Handles the grab
+        /// </summary>
+        private void HandleBalista()
+        {
+            var allTargets = HeroManager.Enemies.Where(x => x.IsValid && x.Distance(ObjectManager.Player) <= 2450f);
+
+            var blitzcrank =
+                HeroManager.Allies.SingleOrDefault(
+                    x =>
+                    x.IsAlly && ObjectManager.Player.Distance(x.ServerPosition) < 1500
+                    && ObjectManager.Player.Distance(x.ServerPosition) >= 700 && x.ChampionName == "Blitzcrank");
+
+            if (blitzcrank == null)
+            {
+                return;
+            }
+
+            foreach (var target in allTargets)
+            {
+                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
+                    || !this.boolLinks["useBalista"].Value)
+                {
+                    return;
+                }
+
+                foreach (var buff in
+                    target.Buffs.Where(
+                        buff => buff.Name == "rocketgrab2" && buff.IsActive && this.spells[SpellSlot.R].IsReady()))
+                {
+                    this.spells[SpellSlot.R].Cast();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     Handles the Sentinel Bug
+        /// </summary>
+        private void HandleSentinels()
+        {
+            var baronPosition = new Vector3(4944, 10388, -712406f);
+            var dragonPosition = new Vector3(9918f, 4474f, -71.2406f);
+
+            if (!this.spells[SpellSlot.W].IsReady())
+            {
+                return;
+            }
+
+            if (this.keyLinks["sentBaron"].Value.Active
+                && ObjectManager.Player.Distance(baronPosition) <= this.spells[SpellSlot.W].Range)
+            {
+                this.spells[SpellSlot.W].Cast(baronPosition);
+            }
+            else if (this.keyLinks["sentDragon"].Value.Active
+                     && ObjectManager.Player.Distance(dragonPosition) <= this.spells[SpellSlot.W].Range)
+            {
+                this.spells[SpellSlot.W].Cast(dragonPosition);
+            }
+        }
+
+        /// <summary>
         ///     Initialize all the events
         /// </summary>
         private void InitEvents()
         {
+            // TODO auto W dragon / baron, whichever your closest to
             Game.OnUpdate += args =>
-            {
-                this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode](); 
-                if (this.boolLinks["useJungleSteal"].Value)
                 {
-                    this.DoMobSteal();
-                }
-            };
+                    this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
+                    this.HandleSentinels();
+                    if (this.boolLinks["useJungleSteal"].Value)
+                    {
+                        this.DoMobSteal();
+                    }
+                };
 
             Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
                 {
@@ -160,6 +228,33 @@ namespace IKalista
                         this.spells[SpellSlot.E].Cast();
                     }
                 };
+        }
+
+        /// <summary>
+        ///     The Initialization
+        /// </summary>
+        private void InitializeBalista()
+        {
+            var enemies = HeroManager.Enemies.Any(x => x.IsAlly && !x.IsMe && x.ChampionName == "Blitzcrank");
+
+            /*if (!enemies)
+            {
+                return;
+            }*/
+            var balistaMenu = this.menu.MainMenu.AddSubMenu("Balista");
+            {
+                var targetMenu = balistaMenu.AddSubMenu("Disabled Targets");
+                {
+                    foreach (var hero in HeroManager.Enemies.Where(x => x.IsValid))
+                    {
+                        this.ProcessLink(
+                            "disable" + hero.ChampionName, 
+                            targetMenu.AddLinkedBool("Disable " + hero.ChampionName));
+                    }
+                }
+
+                this.ProcessLink("useBalista", balistaMenu.AddLinkedBool("Use Balista"));
+            }
         }
 
         /// <summary>
@@ -191,10 +286,18 @@ namespace IKalista
                 this.ProcessLink("eHit", laneclear.AddLinkedSlider("Min Minions E", 4, 2, 10));
             }
 
+            this.InitializeBalista();
+
             var misc = this.menu.MainMenu.AddSubMenu("Misc Options");
             {
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
-                this.ProcessLink("Save Mana for Q", misc.AddLinkedBool("qMana"));
+                this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
+                this.ProcessLink(
+                    "sentBaron", 
+                    misc.AddLinkedKeyBind("Sentinel Baron", "T".ToCharArray()[0], KeyBindType.Press));
+                this.ProcessLink(
+                    "sentDragon", 
+                    misc.AddLinkedKeyBind("Sentinel Dragon", "Y".ToCharArray()[0], KeyBindType.Press));
             }
         }
 
@@ -214,6 +317,8 @@ namespace IKalista
             var spearTarget = TargetSelector.GetTarget(
                 this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
+
+            this.HandleBalista();
 
             if (this.boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady())
             {
@@ -240,6 +345,7 @@ namespace IKalista
                         case HitChance.Collision:
                             this.QCollisionCheck(spearTarget);
                             break;
+                        case HitChance.High:
                         case HitChance.VeryHigh:
                             this.spells[SpellSlot.Q].Cast(spearTarget);
                             break;
@@ -348,8 +454,8 @@ namespace IKalista
                     .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                     .FirstOrDefault();
 
-            if (this.boolLinks["minLC"].Value && minion != null && rendTarget != null && this.spells[SpellSlot.E].CanCast(minion)
-                && this.spells[SpellSlot.E].CanCast(rendTarget))
+            if (this.boolLinks["minLC"].Value && minion != null && rendTarget != null
+                && this.spells[SpellSlot.E].CanCast(minion) && this.spells[SpellSlot.E].CanCast(rendTarget))
             {
                 this.spells[SpellSlot.E].Cast();
             }
@@ -398,6 +504,12 @@ namespace IKalista
             {
                 this.sliderLinks.Add(key, sliderLink);
             }
+
+            var keybindLink = value as MenuWrapper.KeyBindLink;
+            if (keybindLink != null)
+            {
+                this.keyLinks.Add(key, keybindLink);
+            }
         }
 
         /// <summary>
@@ -423,7 +535,7 @@ namespace IKalista
                     var point =
                         minion.ServerPosition.To2D().Extend(ObjectManager.Player.ServerPosition.To2D(), -i).To3D();
                     var time = this.spells[SpellSlot.Q].Delay
-                               + (ObjectManager.Player.Distance(point) / this.spells[SpellSlot.Q].Speed) * 1000f;
+                               + (ObjectManager.Player.Distance(point) / this.spells[SpellSlot.Q].Speed * 1000f);
 
                     var prediction = Prediction.GetPrediction(target, time);
 

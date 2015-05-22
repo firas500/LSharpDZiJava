@@ -49,11 +49,6 @@ namespace IKalista
             new Dictionary<string, MenuWrapper.SliderLink>();
 
         /// <summary>
-        ///     The Slider Link Values
-        /// </summary>
-        private Dictionary<string, MenuWrapper.CircleLink> circleLinks = new Dictionary<string, MenuWrapper.CircleLink>();
-
-        /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
@@ -63,6 +58,12 @@ namespace IKalista
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 1000) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 1200) }
                                                                    };
+
+        /// <summary>
+        ///     The Slider Link Values
+        /// </summary>
+        private Dictionary<string, MenuWrapper.CircleLink> circleLinks =
+            new Dictionary<string, MenuWrapper.CircleLink>();
 
         /// <summary>
         ///     Calling the menu wrapper
@@ -130,20 +131,6 @@ namespace IKalista
             }
         }
 
-        /// <summary>
-        /// TODO The get e damage.
-        /// </summary>
-        /// <param name="target">
-        /// TODO The target.
-        /// </param>
-        /// <returns>
-        ///     The E Damage
-        /// </returns>
-        private float GetEDamage(Obj_AI_Base target)
-        {
-            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
-        }
-
         #endregion
 
         #region Methods
@@ -165,6 +152,20 @@ namespace IKalista
             {
                 this.spells[SpellSlot.E].Cast();
             }
+        }
+
+        /// <summary>
+        ///     TODO The get e damage.
+        /// </summary>
+        /// <param name="target">
+        ///     TODO The target.
+        /// </param>
+        /// <returns>
+        ///     The E Damage
+        /// </returns>
+        private float GetEDamage(Obj_AI_Base target)
+        {
+            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
         }
 
         /// <summary>
@@ -272,10 +273,14 @@ namespace IKalista
                 };
             Drawing.OnDraw += args =>
                 {
-
-                    foreach (var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                    foreach (
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
+                        )
                     {
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, link.Value.Value.Radius, link.Value.Value.Color);
+                        Render.Circle.DrawCircle(
+                            ObjectManager.Player.Position, 
+                            link.Value.Value.Radius, 
+                            link.Value.Value.Color);
                     }
 
                     CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
@@ -358,9 +363,23 @@ namespace IKalista
 
             var drawing = this.menu.MainMenu.AddSubMenu("Drawing Options");
             {
-                this.ProcessLink("drawEDamage", drawing.AddLinkedCircle("Draw E Damage", true, Color.FromArgb(150, Color.LawnGreen), 0));
-                this.ProcessLink("drawQ", drawing.AddLinkedCircle("Draw Q Range", true, Color.FromArgb(150, Color.Red), this.spells[SpellSlot.Q].Range));
-                this.ProcessLink("drawE", drawing.AddLinkedCircle("Draw E Range", true, Color.FromArgb(150, Color.Red), this.spells[SpellSlot.E].Range));
+                this.ProcessLink(
+                    "drawEDamage", 
+                    drawing.AddLinkedCircle("Draw E Damage", true, Color.FromArgb(150, Color.LawnGreen), 0));
+                this.ProcessLink(
+                    "drawQ", 
+                    drawing.AddLinkedCircle(
+                        "Draw Q Range", 
+                        true, 
+                        Color.FromArgb(150, Color.Red), 
+                        this.spells[SpellSlot.Q].Range));
+                this.ProcessLink(
+                    "drawE", 
+                    drawing.AddLinkedCircle(
+                        "Draw E Range", 
+                        true, 
+                        Color.FromArgb(150, Color.Red), 
+                        this.spells[SpellSlot.E].Range));
             }
         }
 

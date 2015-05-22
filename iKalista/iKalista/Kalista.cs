@@ -49,13 +49,19 @@ namespace IKalista
             new Dictionary<string, MenuWrapper.SliderLink>();
 
         /// <summary>
+        ///     The Slider Link Values
+        /// </summary>
+        private Dictionary<string, MenuWrapper.CircleLink> circleLinks = new Dictionary<string, MenuWrapper.CircleLink>();
+
+        /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
                                                                        { SpellSlot.Q, new Spell(SpellSlot.Q, 1150) }, 
                                                                        { SpellSlot.W, new Spell(SpellSlot.W, 5200) }, 
-                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000) }
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000) }, 
+                                                                       { SpellSlot.R, new Spell(SpellSlot.R, 1200) }
                                                                    };
 
         /// <summary>
@@ -122,6 +128,20 @@ namespace IKalista
             {
                 Utility.DelayAction.Add(duration, () => notify.Dispose());
             }
+        }
+
+        /// <summary>
+        /// TODO The get e damage.
+        /// </summary>
+        /// <param name="target">
+        /// TODO The target.
+        /// </param>
+        /// <returns>
+        ///     The E Damage
+        /// </returns>
+        private float GetEDamage(Obj_AI_Base target)
+        {
+            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
         }
 
         #endregion
@@ -212,12 +232,11 @@ namespace IKalista
         /// </summary>
         private void InitEvents()
         {
-            if (ObjectManager.Player.Name == "Hawk XD")
-            {
-                ShowNotification("Hawk is a faggot <3", Color.Aqua, 10000);
-            }
+            Utility.HpBarDamageIndicator.DamageToUnit = this.GetEDamage;
+            Utility.HpBarDamageIndicator.Enabled = true;
 
-            // TODO auto W dragon / baron, whichever your closest to
+            CustomDamageIndicator.Initialize(this.GetEDamage);
+
             Game.OnUpdate += args =>
                 {
                     this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
@@ -232,7 +251,6 @@ namespace IKalista
                 {
                     if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
                     {
-                        ////Utility.DelayAction.Add(250, Orbwalking.ResetAutoAttackTimer);
                         Orbwalking.ResetAutoAttackTimer();
                     }
                 };
@@ -241,16 +259,27 @@ namespace IKalista
                 {
                     var killableMinion = minion as Obj_AI_Base;
                     if (killableMinion == null || !killableMinion.HasBuff("KalistaExpungeMarker")
-                        || !this.spells[SpellSlot.E].IsReady())
+                        || !this.spells[SpellSlot.E].IsReady() || !this.boolLinks["eUnkillable"].Value)
                     {
                         return;
                     }
 
-                    if (killableMinion.Health <= this.spells[SpellSlot.E].GetDamage(killableMinion)
+                    if (this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
                         && this.spells[SpellSlot.E].CanCast(killableMinion))
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
+                };
+            Drawing.OnDraw += args =>
+                {
+
+                    foreach (var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                    {
+                        Render.Circle.DrawCircle(ObjectManager.Player.Position, link.Value.Value.Radius, link.Value.Value.Color);
+                    }
+
+                    CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
+                    CustomDamageIndicator.Enabled = this.circleLinks["drawEDamage"].Value.Active;
                 };
         }
 
@@ -265,6 +294,7 @@ namespace IKalista
             {
                 return;
             }
+
             var balistaMenu = this.menu.MainMenu.AddSubMenu("Balista");
             {
                 var targetMenu = balistaMenu.AddSubMenu("Disabled Targets");
@@ -294,6 +324,7 @@ namespace IKalista
                 this.ProcessLink("useQMin", comboMenu.AddLinkedBool("Q > Minon Combo"));
                 this.ProcessLink("useE", comboMenu.AddLinkedBool("useE"));
                 this.ProcessLink("minStacks", comboMenu.AddLinkedSlider("Min Stacks E", 10, 5, 20));
+                this.ProcessLink("eDamageReduction", comboMenu.AddLinkedSlider("Damage Reduction", 20, 100, 0));
             }
 
             var harassMenu = this.menu.MainMenu.AddSubMenu("Harass Options");
@@ -308,6 +339,7 @@ namespace IKalista
                 this.ProcessLink("useELC", laneclear.AddLinkedBool("Use E"));
                 this.ProcessLink("minLC", laneclear.AddLinkedBool("Minion Harass"));
                 this.ProcessLink("eHit", laneclear.AddLinkedSlider("Min Minions E", 4, 2, 10));
+                this.ProcessLink("E Unkillable Minions", laneclear.AddLinkedBool("eUnkillable"));
             }
 
             this.InitializeBalista();
@@ -322,6 +354,13 @@ namespace IKalista
                 this.ProcessLink(
                     "sentDragon", 
                     misc.AddLinkedKeyBind("Sentinel Dragon", "Y".ToCharArray()[0], KeyBindType.Press));
+            }
+
+            var drawing = this.menu.MainMenu.AddSubMenu("Drawing Options");
+            {
+                this.ProcessLink("drawEDamage", drawing.AddLinkedCircle("Draw E Damage", true, Color.FromArgb(150, Color.LawnGreen), 0));
+                this.ProcessLink("drawQ", drawing.AddLinkedCircle("Draw Q Range", true, Color.FromArgb(150, Color.Red), this.spells[SpellSlot.Q].Range));
+                this.ProcessLink("drawE", drawing.AddLinkedCircle("Draw E Range", true, Color.FromArgb(150, Color.Red), this.spells[SpellSlot.E].Range));
             }
         }
 
@@ -395,7 +434,8 @@ namespace IKalista
                 var stackCount =
                     rendTarget.Buffs.Find(
                         b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
-                if (this.spells[SpellSlot.E].GetDamage(rendTarget) > rendTarget.Health
+                if (this.spells[SpellSlot.E].GetDamage(rendTarget)
+                    > rendTarget.Health + this.sliderLinks["eDamageReduction"].Value.Value
                     || stackCount >= this.sliderLinks["harassStacks"].Value.Value)
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -533,6 +573,12 @@ namespace IKalista
             if (keybindLink != null)
             {
                 this.keyLinks.Add(key, keybindLink);
+            }
+
+            var circleLink = value as MenuWrapper.CircleLink;
+            if (circleLink != null)
+            {
+                this.circleLinks.Add(key, circleLink);
             }
         }
 

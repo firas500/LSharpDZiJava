@@ -274,8 +274,7 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
-                        )
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -343,8 +342,8 @@ namespace IKalista
             {
                 this.ProcessLink("useELC", laneclear.AddLinkedBool("Use E"));
                 this.ProcessLink("minLC", laneclear.AddLinkedBool("Minion Harass"));
+                this.ProcessLink("eUnkillable", laneclear.AddLinkedBool("E Unkillable Minions"));
                 this.ProcessLink("eHit", laneclear.AddLinkedSlider("Min Minions E", 4, 2, 10));
-                this.ProcessLink("E Unkillable Minions", laneclear.AddLinkedBool("eUnkillable"));
             }
 
             this.InitializeBalista();

@@ -453,8 +453,7 @@ namespace IKalista
                     rendTarget.Buffs.Find(
                         b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
                 if (this.spells[SpellSlot.E].GetDamage(rendTarget)
-                    > rendTarget.Health + this.sliderLinks["eDamageReduction"].Value.Value
-                    || stackCount >= this.sliderLinks["harassStacks"].Value.Value)
+                    > rendTarget.Health + this.sliderLinks["eDamageReduction"].Value.Value || (stackCount >= this.sliderLinks["minStacks"].Value.Value && rendTarget.HealthPercent > 20))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

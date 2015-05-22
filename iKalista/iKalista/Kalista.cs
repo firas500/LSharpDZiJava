@@ -32,6 +32,12 @@ namespace IKalista
             new Dictionary<string, MenuWrapper.BoolLink>();
 
         /// <summary>
+        ///     The Slider Link Values
+        /// </summary>
+        private readonly Dictionary<string, MenuWrapper.CircleLink> circleLinks =
+            new Dictionary<string, MenuWrapper.CircleLink>();
+
+        /// <summary>
         ///     The Key bind link values
         /// </summary>
         private readonly Dictionary<string, MenuWrapper.KeyBindLink> keyLinks =
@@ -60,10 +66,10 @@ namespace IKalista
                                                                    };
 
         /// <summary>
-        ///     The Slider Link Values
+        ///     The StringList Link Values
         /// </summary>
-        private Dictionary<string, MenuWrapper.CircleLink> circleLinks =
-            new Dictionary<string, MenuWrapper.CircleLink>();
+        private readonly Dictionary<string, MenuWrapper.StringListLink> stringListLinks =
+            new Dictionary<string, MenuWrapper.StringListLink>();
 
         /// <summary>
         ///     Calling the menu wrapper
@@ -142,15 +148,48 @@ namespace IKalista
         {
             var minion =
                 MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.Enemy, 
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(
+                        x =>
+                        x.Health <= this.spells[SpellSlot.E].GetDamage(x)
+                        && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
+
+            var bikMinion =
+                MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
                     .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
 
-            if (minion != null)
+            switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
-                this.spells[SpellSlot.E].Cast();
+                case 0:
+                    if (bikMinion != null)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
+
+                    break;
+                case 1:
+                    if (minion != null)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
+
+                    break;
+                case 2:
+                    if (bikMinion != null || minion != null)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
+
+                    break;
             }
         }
 
@@ -179,7 +218,8 @@ namespace IKalista
                 HeroManager.Allies.SingleOrDefault(
                     x =>
                     x.IsAlly && ObjectManager.Player.Distance(x.ServerPosition) < 1500
-                    && ObjectManager.Player.Distance(x.ServerPosition) >= 700 && x.ChampionName == "Blitzcrank");
+                    && ObjectManager.Player.Distance(x.ServerPosition) >= Orbwalking.GetRealAutoAttackRange(null)
+                    && x.ChampionName == "Blitzcrank");
 
             if (blitzcrank == null)
             {
@@ -195,8 +235,7 @@ namespace IKalista
                 }
 
                 foreach (var buff in
-                    target.Buffs.Where(
-                        buff => buff.Name == "rocketgrab2" && buff.IsActive && this.spells[SpellSlot.R].IsReady()))
+                    target.Buffs.Where(buff => buff.Name == "rocketgrab2" && buff.IsActive))
                 {
                     this.spells[SpellSlot.R].Cast();
                 }
@@ -233,6 +272,7 @@ namespace IKalista
         /// </summary>
         private void InitEvents()
         {
+            // TODO Soulbound saver
             Utility.HpBarDamageIndicator.DamageToUnit = this.GetEDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
@@ -254,6 +294,16 @@ namespace IKalista
                     {
                         Orbwalking.ResetAutoAttackTimer();
                     }
+
+                    if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && this.boolLinks["saveAllyR"].Value)
+                    {
+                        var soulboundhero = HeroManager.Allies.FirstOrDefault(hero => hero.HasBuff("kalistacoopstrikeally", true) && args.Target.NetworkId == hero.NetworkId && hero.HealthPercent <= 15);
+
+                        if (soulboundhero != null && soulboundhero.HealthPercent < this.sliderLinks["allyPercent"].Value.Value)
+                        {
+                            this.spells[SpellSlot.R].Cast();
+                        }
+                    }
                 };
 
             Orbwalking.OnNonKillableMinion += minion =>
@@ -273,8 +323,7 @@ namespace IKalista
                 };
             Drawing.OnDraw += args =>
                 {
-                    foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                    foreach (var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -292,6 +341,7 @@ namespace IKalista
         /// </summary>
         private void InitializeBalista()
         {
+            // TODO fix balista bs..
             var enemies = HeroManager.Enemies.Any(x => x.IsAlly && !x.IsMe && x.ChampionName == "Blitzcrank");
 
             if (!enemies)
@@ -329,10 +379,13 @@ namespace IKalista
                 this.ProcessLink("useE", comboMenu.AddLinkedBool("useE"));
                 this.ProcessLink("minStacks", comboMenu.AddLinkedSlider("Min Stacks E", 10, 5, 20));
                 this.ProcessLink("eDamageReduction", comboMenu.AddLinkedSlider("Damage Reduction", 20, 100, 0));
+                this.ProcessLink("saveAllyR", comboMenu.AddLinkedBool("Save Ally with R"));
+                this.ProcessLink("allyPercent", comboMenu.AddLinkedSlider("Save Ally Percentage", 20));
             }
 
             var harassMenu = this.menu.MainMenu.AddSubMenu("Harass Options");
             {
+                this.ProcessLink("useQH", harassMenu.AddLinkedBool("Use Q"));
                 this.ProcessLink("useEH", harassMenu.AddLinkedBool("Use E"));
                 this.ProcessLink("harassStacks", harassMenu.AddLinkedSlider("Min Stacks for E", 6, 2, 15));
                 this.ProcessLink("useEMin", harassMenu.AddLinkedBool("Use Minion Harass"));
@@ -351,6 +404,9 @@ namespace IKalista
             var misc = this.menu.MainMenu.AddSubMenu("Misc Options");
             {
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
+                this.ProcessLink(
+                    "jungStealMode", 
+                    misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
                 this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
                 this.ProcessLink(
                     "sentBaron", 
@@ -426,7 +482,6 @@ namespace IKalista
                         case HitChance.Collision:
                             this.QCollisionCheck(spearTarget);
                             break;
-                        case HitChance.High:
                         case HitChance.VeryHigh:
                             this.spells[SpellSlot.Q].Cast(spearTarget);
                             break;
@@ -453,7 +508,8 @@ namespace IKalista
                     rendTarget.Buffs.Find(
                         b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
                 if (this.spells[SpellSlot.E].GetDamage(rendTarget)
-                    > rendTarget.Health + this.sliderLinks["eDamageReduction"].Value.Value || (stackCount >= this.sliderLinks["minStacks"].Value.Value && rendTarget.HealthPercent > 20))
+                    > rendTarget.Health + this.sliderLinks["eDamageReduction"].Value.Value
+                    || (stackCount >= this.sliderLinks["minStacks"].Value.Value && rendTarget.HealthPercent > 20))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -465,9 +521,39 @@ namespace IKalista
         /// </summary>
         private void OnHarass()
         {
-            if (!this.spells[SpellSlot.E].IsReady())
+            var spearTarget = TargetSelector.GetTarget(
+                this.spells[SpellSlot.Q].Range,
+                TargetSelector.DamageType.Physical);
+            if (this.boolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady())
             {
-                return;
+                if (this.boolLinks["qMana"].Value
+                    && ObjectManager.Player.Mana
+                    < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost
+                    && this.spells[SpellSlot.Q].GetDamage(spearTarget) < spearTarget.Health)
+                {
+                    return;
+                }
+
+                foreach (var unit in
+                    HeroManager.Enemies.Where(x => x.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                        .Where(unit => this.spells[SpellSlot.Q].GetPrediction(unit).Hitchance == HitChance.Immobile))
+                {
+                    this.spells[SpellSlot.Q].Cast(unit);
+                }
+
+                var prediction = this.spells[SpellSlot.Q].GetPrediction(spearTarget);
+                if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
+                {
+                    switch (prediction.Hitchance)
+                    {
+                        case HitChance.Collision:
+                            this.QCollisionCheck(spearTarget);
+                            break;
+                        case HitChance.VeryHigh:
+                            this.spells[SpellSlot.Q].Cast(spearTarget);
+                            break;
+                    }
+                }
             }
 
             if (this.boolLinks["useEH"].Value)
@@ -596,6 +682,12 @@ namespace IKalista
             if (circleLink != null)
             {
                 this.circleLinks.Add(key, circleLink);
+            }
+
+            var stringLink = value as MenuWrapper.StringListLink;
+            if (stringLink != null)
+            {
+                this.stringListLinks.Add(key, stringLink);
             }
         }
 

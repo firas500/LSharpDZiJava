@@ -8,7 +8,9 @@
 // --------------------------------------------------------------------------------------------------------------------
 namespace IKalista
 {
+    using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using LeagueSharp;
@@ -194,6 +196,84 @@ namespace IKalista
         }
 
         /// <summary>
+        ///     TODO The get actual rend damage.
+        /// </summary>
+        /// <param name="target">
+        ///     TODO The target.
+        /// </param>
+        /// <returns>
+        ///     Actual Spell Damage
+        /// </returns>
+        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation", 
+            Justification = "Reviewed. Suppression is OK here.")]
+        private float GetActualRendDamage(Obj_AI_Base target)
+        {
+            var buff =
+                target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
+
+            if (buff != null && this.spells[SpellSlot.E].IsReady())
+            {
+                var damageReduction = this.sliderLinks["eDamageReduction"].Value.Value;
+                double armourPenetration = ObjectManager.Player.PercentArmorMod;
+                double armourPenFlat = ObjectManager.Player.FlatArmorPenetrationMod;
+
+                var armour = target.Armor;
+                double increasedDamageFactor;
+
+                if (armour < 0)
+                {
+                    increasedDamageFactor = (2 - 100) / (100 - armour);
+                }
+                else if ((target.Armor * armourPenetration) - armourPenFlat < 0)
+                {
+                    increasedDamageFactor = 1;
+                }
+                else
+                {
+                    increasedDamageFactor = 100 / (100 + (target.Armor * armourPenetration) - armourPenFlat);
+                }
+
+                if (!(target is Obj_AI_Hero))
+                {
+                    return 1;
+                }
+
+                var aaDamage = ObjectManager.Player.GetAutoAttackDamage(target) * 0.3;
+                if (
+                    ObjectManager.Player.Masteries.Any(
+                        m => m.Page == MasteryPage.Offense && m.Id == 65 && m.Points == 1))
+                {
+                    increasedDamageFactor = increasedDamageFactor * 1.015;
+                }
+
+                if (
+                    ObjectManager.Player.Masteries.Any(
+                        m => m.Page == MasteryPage.Offense && m.Id == 146 && m.Points == 1))
+                {
+                    increasedDamageFactor = increasedDamageFactor * 1.03;
+                }
+
+                var mastery =
+                    ObjectManager.Player.Masteries.FirstOrDefault(x => x.Page == MasteryPage.Offense && x.Id == 100);
+                if (mastery != null && target.Health / target.MaxHealth <= (0.05D + 0.15D) * mastery.Points
+                    && mastery.Points >= 1)
+                {
+                    increasedDamageFactor = increasedDamageFactor * 1.05;
+                }
+
+                var eDamage = this.spells[SpellSlot.E].GetDamage(target);
+                if (target.InventoryItems.Any(x => x.DisplayName == "Doran's Shield"))
+                {
+                    return (float)(increasedDamageFactor * (eDamage - damageReduction));
+                }
+
+                return (float)(increasedDamageFactor * (eDamage + aaDamage - damageReduction));
+            }
+
+            return 1;
+        }
+
+        /// <summary>
         ///     TODO The get e damage.
         /// </summary>
         /// <param name="target">
@@ -273,10 +353,10 @@ namespace IKalista
         private void InitEvents()
         {
             // TODO Soulbound saver
-            Utility.HpBarDamageIndicator.DamageToUnit = this.GetEDamage;
+            Utility.HpBarDamageIndicator.DamageToUnit = this.GetActualRendDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
-            CustomDamageIndicator.Initialize(this.GetEDamage);
+            CustomDamageIndicator.Initialize(this.GetActualRendDamage);
 
             Game.OnUpdate += args =>
                 {
@@ -297,9 +377,14 @@ namespace IKalista
 
                     if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && this.boolLinks["saveAllyR"].Value)
                     {
-                        var soulboundhero = HeroManager.Allies.FirstOrDefault(hero => hero.HasBuff("kalistacoopstrikeally", true) && args.Target.NetworkId == hero.NetworkId && hero.HealthPercent <= 15);
+                        var soulboundhero =
+                            HeroManager.Allies.FirstOrDefault(
+                                hero =>
+                                hero.HasBuff("kalistacoopstrikeally", true) && args.Target.NetworkId == hero.NetworkId
+                                && hero.HealthPercent <= 15);
 
-                        if (soulboundhero != null && soulboundhero.HealthPercent < this.sliderLinks["allyPercent"].Value.Value)
+                        if (soulboundhero != null
+                            && soulboundhero.HealthPercent < this.sliderLinks["allyPercent"].Value.Value)
                         {
                             this.spells[SpellSlot.R].Cast();
                         }
@@ -323,7 +408,8 @@ namespace IKalista
                 };
             Drawing.OnDraw += args =>
                 {
-                    foreach (var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                    foreach (
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -376,7 +462,8 @@ namespace IKalista
             {
                 this.ProcessLink("useQ", comboMenu.AddLinkedBool("Use Q"));
                 this.ProcessLink("useQMin", comboMenu.AddLinkedBool("Q > Minon Combo"));
-                this.ProcessLink("useE", comboMenu.AddLinkedBool("useE"));
+                this.ProcessLink("useE", comboMenu.AddLinkedBool("Use E"));
+                this.ProcessLink("eLeaving", comboMenu.AddLinkedBool("Auto E Leaving"));
                 this.ProcessLink("minStacks", comboMenu.AddLinkedSlider("Min Stacks E", 10, 5, 20));
                 this.ProcessLink("eDamageReduction", comboMenu.AddLinkedSlider("Damage Reduction", 20, 100, 0));
                 this.ProcessLink("saveAllyR", comboMenu.AddLinkedBool("Save Ally with R"));
@@ -504,12 +591,19 @@ namespace IKalista
 
             if (rendTarget != null)
             {
-                var stackCount =
+                var rendBuff =
                     rendTarget.Buffs.Find(
-                        b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
-                if (this.spells[SpellSlot.E].GetDamage(rendTarget)
-                    > rendTarget.Health + this.sliderLinks["eDamageReduction"].Value.Value
-                    || (stackCount >= this.sliderLinks["minStacks"].Value.Value && rendTarget.HealthPercent > 20))
+                        b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
+
+                if ((this.boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
+                     && rendTarget.HealthPercent > 20
+                     && rendTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
+                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2)) || (rendBuff.EndTime - Game.Time < 0.3))
+                {
+                    this.spells[SpellSlot.E].Cast();
+                }
+
+                if (this.GetActualRendDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -522,7 +616,7 @@ namespace IKalista
         private void OnHarass()
         {
             var spearTarget = TargetSelector.GetTarget(
-                this.spells[SpellSlot.Q].Range,
+                this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
             if (this.boolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady())
             {

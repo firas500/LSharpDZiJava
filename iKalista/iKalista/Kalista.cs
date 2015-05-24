@@ -368,8 +368,7 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
-                        )
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 

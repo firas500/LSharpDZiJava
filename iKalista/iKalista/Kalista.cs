@@ -10,7 +10,6 @@ namespace IKalista
 {
     using System;
     using System.Collections.Generic;
-    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using LeagueSharp;
@@ -206,16 +205,40 @@ namespace IKalista
         /// </returns>
         private float GetEDamage(Obj_AI_Base target)
         {
-            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
+            return this.GetRealRendDamage(target);
         }
 
-        private float GetRealRendDamage(Obj_AI_Base target)
+        /// <summary>
+        ///     TODO The get real rend damage.
+        /// </summary>
+        /// <param name="target">
+        ///     TODO The target.
+        /// </param>
+        /// <param name="includeAutoAttacks">Auto Attack</param>
+        /// <returns>
+        ///     The real rend damage
+        /// </returns>
+        private float GetRealRendDamage(Obj_AI_Base target, bool includeAutoAttacks = false)
         {
-            var baseDamage = new double[] { 20, 30, 40, 50, 60 }[this.spells[SpellSlot.E].Level] + (0.6f * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod));
-            var stacks = target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
-            var additionalDamage = baseDamage + stacks.Count - 1;
+            var baseDamage = new double[] { 20, 30, 40, 50, 60 }[this.spells[SpellSlot.E].Level]
+                             + (0.6
+                                * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod));
+            var rendBuff =
+                target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
+            var additionalDamage = (baseDamage + rendBuff.Count - 1)
+                                   * (new double[] { 10, 14, 19, 25, 32 }[this.spells[SpellSlot.E].Level]
+                                      + new[] { 0.2, 0.225, 0.25, 0.275, 0.3 }[this.spells[SpellSlot.E].Level])
+                                   * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod);
+            var autoAttackDamage = ObjectManager.Player.GetAutoAttackDamage(target, true);
 
-            return 1;
+            var totalDamage = ObjectManager.Player.CalcDamage(target, Damage.DamageType.Physical, (baseDamage + additionalDamage) - (this.sliderLinks["eDamageReduction"].Value.Value * 0.98f));
+
+            if (target.HasBuff("KalistaExpungeMarker") && rendBuff.Count > 0)
+            {
+                return (float)(includeAutoAttacks ? (totalDamage + autoAttackDamage) * 2 : totalDamage);
+            }
+
+            return 0;
         }
 
         /// <summary>
@@ -331,7 +354,8 @@ namespace IKalista
                         return;
                     }
 
-                    if (this.boolLinks["eUnkillable"].Value && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
+                    if (this.boolLinks["eUnkillable"].Value
+                        && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
                         && this.spells[SpellSlot.E].CanCast(killableMinion))
                     {
                         this.spells[SpellSlot.E].Cast();
@@ -340,7 +364,8 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
+                        )
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -527,14 +552,15 @@ namespace IKalista
                         b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
 
                 if (this.boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
-                     && rendTarget.HealthPercent > 20
-                     && rendTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
-                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
+                    && rendTarget.HealthPercent > 20
+                    && rendTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
+                    > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetEDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if (this.GetEDamage(rendTarget) >= rendTarget.Health
+                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

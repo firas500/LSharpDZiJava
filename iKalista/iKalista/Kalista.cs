@@ -205,7 +205,7 @@ namespace IKalista
         /// </returns>
         private float GetEDamage(Obj_AI_Base target)
         {
-            return this.GetRealRendDamage(target);
+            return this.spells[SpellSlot.E].GetDamage(target);
         }
 
         /// <summary>

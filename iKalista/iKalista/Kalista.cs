@@ -317,12 +317,12 @@ namespace IKalista
                 {
                     var killableMinion = minion as Obj_AI_Base;
                     if (killableMinion == null || !killableMinion.HasBuff("KalistaExpungeMarker")
-                        || !this.spells[SpellSlot.E].IsReady() || !this.boolLinks["eUnkillable"].Value)
+                        || !this.spells[SpellSlot.E].IsReady())
                     {
                         return;
                     }
 
-                    if (this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
+                    if (this.boolLinks["eUnkillable"].Value && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
                         && this.spells[SpellSlot.E].CanCast(killableMinion))
                     {
                         this.spells[SpellSlot.E].Cast();

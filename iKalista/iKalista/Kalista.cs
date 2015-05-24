@@ -62,7 +62,7 @@ namespace IKalista
                                                                    {
                                                                        { SpellSlot.Q, new Spell(SpellSlot.Q, 1150) }, 
                                                                        { SpellSlot.W, new Spell(SpellSlot.W, 5200) }, 
-                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000) }, 
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 950) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 1200) }
                                                                    };
 
@@ -231,7 +231,10 @@ namespace IKalista
                                    * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod);
             var autoAttackDamage = ObjectManager.Player.GetAutoAttackDamage(target, true);
 
-            var totalDamage = ObjectManager.Player.CalcDamage(target, Damage.DamageType.Physical, (baseDamage + additionalDamage) - (this.sliderLinks["eDamageReduction"].Value.Value * 0.98f));
+            var totalDamage = ObjectManager.Player.CalcDamage(
+                target, 
+                Damage.DamageType.Physical, 
+                (baseDamage + additionalDamage) - (this.sliderLinks["eDamageReduction"].Value.Value * 0.98f));
 
             if (target.HasBuff("KalistaExpungeMarker") && rendBuff.Count > 0)
             {
@@ -314,6 +317,7 @@ namespace IKalista
 
             Game.OnUpdate += args =>
                 {
+                    this.KillstealQ();
                     this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
                     this.HandleSentinels();
                     if (this.boolLinks["useJungleSteal"].Value)
@@ -486,7 +490,24 @@ namespace IKalista
         /// </summary>
         private void InitSpells()
         {
-            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 40f, 1200f, true, SkillshotType.SkillshotLine);
+            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
+        }
+
+        /// <summary>
+        ///     Kill steal
+        /// </summary>
+        private void KillstealQ()
+        {
+            var target =
+                HeroManager.Enemies.FirstOrDefault(x => this.spells[SpellSlot.Q].IsInRange(x) && this.spells[SpellSlot.Q].GetDamage(x) > x.Health + 10);
+            if (target != null && this.spells[SpellSlot.Q].IsReady() && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
+            {
+                var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
+                if (prediction.Hitchance >= HitChance.VeryHigh || prediction.Hitchance == HitChance.Immobile)
+                {
+                    this.spells[SpellSlot.Q].Cast(target);
+                }
+            }
         }
 
         /// <summary>
@@ -540,11 +561,10 @@ namespace IKalista
             var rendTarget =
                 HeroManager.Enemies.Where(
                     x =>
-                    this.spells[SpellSlot.E].IsInRange(x) && x.HasBuff("KalistaExpungeMarker")
-                    && !x.HasBuffOfType(BuffType.Invulnerability))
+                    x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= 1
+                    && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
                     .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                     .FirstOrDefault();
-
             if (rendTarget != null)
             {
                 var rendBuff =
@@ -610,19 +630,19 @@ namespace IKalista
             if (this.boolLinks["useEH"].Value)
             {
                 var rendTarget =
-                    HeroManager.Enemies.Where(
-                        x =>
-                        this.spells[SpellSlot.E].IsInRange(x) && x.HasBuff("KalistaExpungeMarker")
-                        && !x.HasBuffOfType(BuffType.Invulnerability))
-                        .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
-                        .FirstOrDefault();
+               HeroManager.Enemies.Where(
+                   x =>
+                   x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= 1
+                   && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
+                   .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
+                   .FirstOrDefault();
 
                 if (rendTarget != null)
                 {
                     var stackCount =
                         rendTarget.Buffs.Find(
                             b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
-                    if (this.spells[SpellSlot.E].GetDamage(rendTarget) > rendTarget.Health + 10
+                    if (this.GetEDamage(rendTarget) > rendTarget.Health + 10
                         || stackCount >= this.sliderLinks["minStacks"].Value.Value)
                     {
                         this.spells[SpellSlot.E].Cast();
@@ -640,7 +660,7 @@ namespace IKalista
                 var target =
                     HeroManager.Enemies.Where(
                         x =>
-                        this.spells[SpellSlot.E].CanCast(x) && x.HasBuff("KalistaExpungeMarker")
+                        this.spells[SpellSlot.E].CanCast(x) && this.spells[SpellSlot.E].GetDamage(x) >= 1
                         && !x.HasBuffOfType(BuffType.SpellShield))
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
@@ -667,8 +687,8 @@ namespace IKalista
             var rendTarget =
                 HeroManager.Enemies.Where(
                     x =>
-                    this.spells[SpellSlot.E].IsInRange(x) && x.HasBuff("KalistaExpungeMarker")
-                    && !x.HasBuffOfType(BuffType.Invulnerability))
+                    this.spells[SpellSlot.E].IsInRange(x) && this.spells[SpellSlot.E].GetDamage(x) >= 1
+                    && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
                     .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                     .FirstOrDefault();
 

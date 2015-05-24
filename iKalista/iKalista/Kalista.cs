@@ -196,84 +196,6 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     TODO The get actual rend damage.
-        /// </summary>
-        /// <param name="target">
-        ///     TODO The target.
-        /// </param>
-        /// <returns>
-        ///     Actual Spell Damage
-        /// </returns>
-        [SuppressMessage("StyleCop.CSharp.NamingRules", "SA1305:FieldNamesMustNotUseHungarianNotation", 
-            Justification = "Reviewed. Suppression is OK here.")]
-        private float GetActualRendDamage(Obj_AI_Base target)
-        {
-            var buff =
-                target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
-
-            if (buff != null && this.spells[SpellSlot.E].IsReady())
-            {
-                var damageReduction = this.sliderLinks["eDamageReduction"].Value.Value;
-                double armourPenetration = ObjectManager.Player.PercentArmorMod;
-                double armourPenFlat = ObjectManager.Player.FlatArmorPenetrationMod;
-
-                var armour = target.Armor;
-                double increasedDamageFactor;
-
-                if (armour < 0)
-                {
-                    increasedDamageFactor = (2 - 100) / (100 - armour);
-                }
-                else if ((target.Armor * armourPenetration) - armourPenFlat < 0)
-                {
-                    increasedDamageFactor = 1;
-                }
-                else
-                {
-                    increasedDamageFactor = 100 / (100 + (target.Armor * armourPenetration) - armourPenFlat);
-                }
-
-                if (!(target is Obj_AI_Hero))
-                {
-                    return 1;
-                }
-
-                var aaDamage = ObjectManager.Player.GetAutoAttackDamage(target) * 0.3;
-                if (
-                    ObjectManager.Player.Masteries.Any(
-                        m => m.Page == MasteryPage.Offense && m.Id == 65 && m.Points == 1))
-                {
-                    increasedDamageFactor = increasedDamageFactor * 1.015;
-                }
-
-                if (
-                    ObjectManager.Player.Masteries.Any(
-                        m => m.Page == MasteryPage.Offense && m.Id == 146 && m.Points == 1))
-                {
-                    increasedDamageFactor = increasedDamageFactor * 1.03;
-                }
-
-                var mastery =
-                    ObjectManager.Player.Masteries.FirstOrDefault(x => x.Page == MasteryPage.Offense && x.Id == 100);
-                if (mastery != null && target.Health / target.MaxHealth <= (0.05D + 0.15D) * mastery.Points
-                    && mastery.Points >= 1)
-                {
-                    increasedDamageFactor = increasedDamageFactor * 1.05;
-                }
-
-                var eDamage = this.spells[SpellSlot.E].GetDamage(target);
-                if (target.InventoryItems.Any(x => x.DisplayName == "Doran's Shield"))
-                {
-                    return (float)(increasedDamageFactor * (eDamage - damageReduction));
-                }
-
-                return (float)(increasedDamageFactor * (eDamage + aaDamage - damageReduction));
-            }
-
-            return 1;
-        }
-
-        /// <summary>
         ///     TODO The get e damage.
         /// </summary>
         /// <param name="target">
@@ -353,10 +275,10 @@ namespace IKalista
         private void InitEvents()
         {
             // TODO Soulbound saver
-            Utility.HpBarDamageIndicator.DamageToUnit = this.GetActualRendDamage;
+            Utility.HpBarDamageIndicator.DamageToUnit = this.GetEDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
-            CustomDamageIndicator.Initialize(this.GetActualRendDamage);
+            CustomDamageIndicator.Initialize(this.GetEDamage);
 
             Game.OnUpdate += args =>
                 {
@@ -603,7 +525,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetActualRendDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if (this.GetEDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

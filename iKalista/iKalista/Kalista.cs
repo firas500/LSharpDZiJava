@@ -209,6 +209,15 @@ namespace IKalista
             return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
         }
 
+        private float GetRealRendDamage(Obj_AI_Base target)
+        {
+            var baseDamage = new double[] { 20, 30, 40, 50, 60 }[this.spells[SpellSlot.E].Level] + (0.6f * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod));
+            var stacks = target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
+            var additionalDamage = baseDamage + stacks.Count - 1;
+
+            return 1;
+        }
+
         /// <summary>
         ///     Handles the grab
         /// </summary>
@@ -517,10 +526,10 @@ namespace IKalista
                     rendTarget.Buffs.Find(
                         b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
 
-                if ((this.boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
+                if (this.boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
                      && rendTarget.HealthPercent > 20
                      && rendTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
-                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2)) || (rendBuff.EndTime - Game.Time < 0.3))
+                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

@@ -525,8 +525,7 @@ namespace IKalista
             {
                 if (this.boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
-                    < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost
-                    && this.spells[SpellSlot.Q].GetDamage(spearTarget) < spearTarget.Health)
+                    < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
                 {
                     return;
                 }

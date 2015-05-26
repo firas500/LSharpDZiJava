@@ -196,6 +196,34 @@ namespace IKalista
         }
 
         /// <summary>
+        ///     Gets the collision minions
+        /// </summary>
+        /// <param name="source">
+        ///     the source
+        /// </param>
+        /// <param name="targetPosition">
+        ///     the target position
+        /// </param>
+        /// <returns>
+        ///     The list of minions
+        /// </returns>
+        private List<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
+        {
+            var input = new PredictionInput
+                            {
+                                Unit = source, Radius = this.spells[SpellSlot.Q].Width, 
+                                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed, 
+                            };
+
+            input.CollisionObjects[0] = CollisionableObjects.Minions;
+
+            return
+                Collision.GetCollision(new List<Vector3> { targetPosition }, input)
+                    .OrderBy(obj => obj.Distance(source))
+                    .ToList();
+        }
+
+        /// <summary>
         ///     TODO The get e damage.
         /// </summary>
         /// <param name="target">
@@ -255,8 +283,9 @@ namespace IKalista
             var blitzcrank =
                 HeroManager.Allies.SingleOrDefault(
                     x =>
-                    x.IsAlly && ObjectManager.Player.Distance(x.ServerPosition) < 1500
-                    && ObjectManager.Player.Distance(x.ServerPosition) >= Orbwalking.GetRealAutoAttackRange(null)
+                    x.IsAlly
+                    && ObjectManager.Player.Distance(x.ServerPosition) < this.sliderLinks["maxRange"].Value.Value
+                    && ObjectManager.Player.Distance(x.ServerPosition) >= this.sliderLinks["minRange"].Value.Value
                     && x.ChampionName == "Blitzcrank");
 
             if (blitzcrank == null)
@@ -272,10 +301,17 @@ namespace IKalista
                     return;
                 }
 
-                foreach (var buff in
-                    target.Buffs.Where(buff => buff.Name == "rocketgrab2" && buff.IsActive))
+                if (target.Buffs == null)
                 {
-                    this.spells[SpellSlot.R].Cast();
+                    continue;
+                }
+
+                for (var i = 0; i < target.Buffs.Count(); i++)
+                {
+                    if (target.Buffs[i].Name == "rocketgrab2" && target.Buffs[i].IsActive)
+                    {
+                        this.spells[SpellSlot.R].Cast();
+                    }
                 }
             }
         }
@@ -339,7 +375,7 @@ namespace IKalista
                         var soulboundhero =
                             HeroManager.Allies.FirstOrDefault(
                                 hero =>
-                                hero.HasBuff("kalistacoopstrikeally", true) && args.Target.NetworkId == hero.NetworkId
+                                hero.HasBuff("kalistacoopstrikeally") && args.Target.NetworkId == hero.NetworkId
                                 && hero.HealthPercent <= 15);
 
                         if (soulboundhero != null
@@ -368,9 +404,14 @@ namespace IKalista
                 };
             Drawing.OnDraw += args =>
                 {
-                    foreach (var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                    foreach (
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
+                        )
                     {
-                        Render.Circle.DrawCircle(ObjectManager.Player.Position, link.Value.Value.Radius, link.Value.Value.Color);
+                        Render.Circle.DrawCircle(
+                            ObjectManager.Player.Position, 
+                            link.Value.Value.Radius, 
+                            link.Value.Value.Color);
                     }
 
                     CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
@@ -383,10 +424,9 @@ namespace IKalista
         /// </summary>
         private void InitializeBalista()
         {
-            // TODO fix balista bs..
-            var enemies = HeroManager.Enemies.Any(x => x.IsAlly && !x.IsMe && x.ChampionName == "Blitzcrank");
+            var blitzAlly = HeroManager.Allies.Any(x => x.IsAlly && !x.IsMe && x.ChampionName == "Blitzcrank");
 
-            if (!enemies)
+            if (!blitzAlly)
             {
                 return;
             }
@@ -403,6 +443,8 @@ namespace IKalista
                     }
                 }
 
+                this.ProcessLink("minRange", balistaMenu.AddLinkedSlider("Min Range", 700, 100, 1450));
+                this.ProcessLink("maxRange", balistaMenu.AddLinkedSlider("Max Range", 1500, 100, 1500));
                 this.ProcessLink("useBalista", balistaMenu.AddLinkedBool("Use Balista"));
             }
         }
@@ -497,8 +539,10 @@ namespace IKalista
         private void KillstealQ()
         {
             var target =
-                HeroManager.Enemies.FirstOrDefault(x => this.spells[SpellSlot.Q].IsInRange(x) && this.spells[SpellSlot.Q].GetDamage(x) > x.Health + 10);
-            if (target != null && this.spells[SpellSlot.Q].IsReady() && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                HeroManager.Enemies.FirstOrDefault(
+                    x => this.spells[SpellSlot.Q].IsInRange(x) && this.spells[SpellSlot.Q].GetDamage(x) > x.Health + 10);
+            if (target != null && this.spells[SpellSlot.Q].IsReady()
+                && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
             {
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
                 if (prediction.Hitchance >= HitChance.VeryHigh || prediction.Hitchance == HitChance.Immobile)
@@ -629,12 +673,12 @@ namespace IKalista
             if (this.boolLinks["useEH"].Value)
             {
                 var rendTarget =
-               HeroManager.Enemies.Where(
-                   x =>
-                   x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= 1
-                   && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
-                   .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
-                   .FirstOrDefault();
+                    HeroManager.Enemies.Where(
+                        x =>
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= 1
+                        && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
+                        .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
+                        .FirstOrDefault();
 
                 if (rendTarget != null)
                 {
@@ -679,7 +723,20 @@ namespace IKalista
         {
             if (this.boolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
             {
-                foreach (var selectedMinion in from selectedMinion in MinionManager.GetMinions(this.spells[SpellSlot.Q].Range) let killcount = this.GetCollisionMinions(ObjectManager.Player, ObjectManager.Player.ServerPosition.Extend(selectedMinion.ServerPosition, this.spells[SpellSlot.Q].Range)).Count(collisionMinion => collisionMinion.Health < this.spells[SpellSlot.Q].GetDamage(collisionMinion)) where killcount >= this.sliderLinks["minHitQ"].Value.Value where !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing() select selectedMinion)
+                foreach (var selectedMinion in
+                    from selectedMinion in MinionManager.GetMinions(this.spells[SpellSlot.Q].Range)
+                    let killcount =
+                        this.GetCollisionMinions(
+                            ObjectManager.Player, 
+                            ObjectManager.Player.ServerPosition.Extend(
+                                selectedMinion.ServerPosition, 
+                                this.spells[SpellSlot.Q].Range))
+                        .Count(
+                            collisionMinion =>
+                            collisionMinion.Health <= this.spells[SpellSlot.Q].GetDamage(collisionMinion))
+                    where killcount >= this.sliderLinks["minHitQ"].Value.Value
+                    where !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing()
+                    select selectedMinion)
                 {
                     this.spells[SpellSlot.Q].Cast(selectedMinion.ServerPosition);
                 }
@@ -705,10 +762,12 @@ namespace IKalista
                 this.spells[SpellSlot.E].Cast();
             }
 
-
             if (this.spells[SpellSlot.E].IsReady() && this.boolLinks["useELC"].Value)
             {
-                var minions = MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly);
+                var minions = MinionManager.GetMinions(
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.NotAlly);
                 var count =
                     minions.Count(
                         x => this.spells[SpellSlot.E].CanCast(x) && x.Health < this.spells[SpellSlot.E].GetDamage(x));
@@ -718,33 +777,6 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
             }
-        }
-
-        /// <summary>
-        ///     Gets the collision minions
-        /// </summary>
-        /// <param name="source">
-        ///     the source
-        /// </param>
-        /// <param name="targetPosition">
-        ///     the target position
-        /// </param>
-        /// <returns>
-        /// The list of minions
-        /// </returns>
-        private List<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
-        {
-            var input = new PredictionInput
-            {
-                Unit = source,
-                Radius = this.spells[SpellSlot.Q].Width,
-                Delay = this.spells[SpellSlot.Q].Delay,
-                Speed = this.spells[SpellSlot.Q].Speed,
-            };
-
-            input.CollisionObjects[0] = CollisionableObjects.Minions;
-
-            return Collision.GetCollision(new List<Vector3> { targetPosition }, input).OrderBy(obj => obj.Distance(source)).ToList();
         }
 
         /// <summary>

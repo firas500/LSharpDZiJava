@@ -278,8 +278,6 @@ namespace IKalista
         /// </summary>
         private void HandleBalista()
         {
-            var allTargets = HeroManager.Enemies.Where(x => x.IsValid && x.Distance(ObjectManager.Player) <= 2450f);
-
             var blitzcrank =
                 HeroManager.Allies.SingleOrDefault(
                     x =>
@@ -293,24 +291,21 @@ namespace IKalista
                 return;
             }
 
-            foreach (var target in allTargets)
+            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
             {
-                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
-                    || !this.boolLinks["useBalista"].Value)
+                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady() || !this.boolLinks["useBalista"].Value)
                 {
                     return;
                 }
 
-                if (target.Buffs == null)
+                if (target.Buffs != null && target.Health > 200 && blitzcrank.Distance(target) > 450f)
                 {
-                    continue;
-                }
-
-                for (var i = 0; i < target.Buffs.Count(); i++)
-                {
-                    if (target.Buffs[i].Name == "rocketgrab2" && target.Buffs[i].IsActive)
+                    for (var i = 0; i < target.Buffs.Count(); i++)
                     {
-                        this.spells[SpellSlot.R].Cast();
+                        if (target.Buffs[i].Name == "rocketgrab2" && target.Buffs[i].IsActive)
+                        {
+                            this.spells[SpellSlot.R].Cast();
+                        }
                     }
                 }
             }
@@ -355,6 +350,7 @@ namespace IKalista
             Game.OnUpdate += args =>
                 {
                     this.KillstealQ();
+                    this.HandleBalista();
                     this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
                     this.HandleSentinels();
                     if (this.boolLinks["useJungleSteal"].Value)
@@ -531,6 +527,7 @@ namespace IKalista
         private void InitSpells()
         {
             this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
+            this.spells[SpellSlot.R].SetSkillshot(0.50f, 1500, float.MaxValue, false, SkillshotType.SkillshotCircle);
         }
 
         /// <summary>
@@ -560,8 +557,6 @@ namespace IKalista
             var spearTarget = TargetSelector.GetTarget(
                 this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
-
-            this.HandleBalista();
 
             if (this.boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady())
             {

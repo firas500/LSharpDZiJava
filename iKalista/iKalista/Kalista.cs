@@ -388,7 +388,6 @@ namespace IKalista
             this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
             this.HandleSentinels();
             this.KillstealQ();
-            this.HandleBalista();
             if (this.boolLinks["useJungleSteal"].Value)
             {
                 this.DoMobSteal();
@@ -397,6 +396,7 @@ namespace IKalista
             {
                 ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
+            this.HandleBalista();
         }
 
         /// <summary>

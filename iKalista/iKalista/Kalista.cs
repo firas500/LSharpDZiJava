@@ -310,17 +310,7 @@ namespace IKalista
 
             CustomDamageIndicator.Initialize(this.GetEDamage);
 
-            Game.OnUpdate += args =>
-                {
-                    this.KillstealQ();
-                    this.HandleBalista();
-                    this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
-                    this.HandleSentinels();
-                    if (this.boolLinks["useJungleSteal"].Value)
-                    {
-                        this.DoMobSteal();
-                    }
-                };
+            Game.OnUpdate += this.OnUpdate;
 
             Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
                 {
@@ -376,6 +366,23 @@ namespace IKalista
                     CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
                     CustomDamageIndicator.Enabled = this.circleLinks["drawEDamage"].Value.Active;
                 };
+        }
+
+        /// <summary>
+        /// TODO The on update.
+        /// </summary>
+        /// <param name="args">
+        /// TODO The args.
+        /// </param>
+        private void OnUpdate(EventArgs args)
+        {
+            this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
+            this.HandleSentinels();
+            this.KillstealQ();
+            if (this.boolLinks["useJungleSteal"].Value)
+            {
+                this.DoMobSteal();
+            }
         }
 
         /// <summary>
@@ -579,8 +586,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetEDamage(rendTarget) >= rendTarget.Health
-                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if (this.GetEDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

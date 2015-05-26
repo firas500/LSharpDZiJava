@@ -312,6 +312,16 @@ namespace IKalista
 
             Game.OnUpdate += this.OnUpdate;
 
+            /**
+             *      Vi R 
+                    Morgana R
+                    Sejuani R
+                    Maokai W (if HP <15%)
+                    Nautilus R
+                    Ashe R
+                    Riven R (if HP low)
+                    Leona R
+             */
             Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
                 {
                     if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
@@ -382,6 +392,10 @@ namespace IKalista
             if (this.boolLinks["useJungleSteal"].Value)
             {
                 this.DoMobSteal();
+            }
+            if (this.boolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
+            {
+                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
         }
 
@@ -467,6 +481,7 @@ namespace IKalista
                 this.ProcessLink(
                     "sentDragon", 
                     misc.AddLinkedKeyBind("Sentinel Dragon", "Y".ToCharArray()[0], KeyBindType.Press));
+                this.ProcessLink("autoTrinket", misc.AddLinkedBool("Auto Blue Trinket"));
             }
 
             var drawing = this.menu.MainMenu.AddSubMenu("Drawing Options");

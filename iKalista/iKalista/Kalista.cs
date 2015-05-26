@@ -354,8 +354,7 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
-                        )
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -379,6 +378,7 @@ namespace IKalista
             this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
             this.HandleSentinels();
             this.KillstealQ();
+            this.HandleBalista();
             if (this.boolLinks["useJungleSteal"].Value)
             {
                 this.DoMobSteal();

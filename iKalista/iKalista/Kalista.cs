@@ -224,10 +224,10 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     TODO The get e damage.
+        ///     Gets the Common E Damage
         /// </summary>
         /// <param name="target">
-        ///     TODO The target.
+        ///     The Target
         /// </param>
         /// <returns>
         ///     The E Damage
@@ -235,42 +235,6 @@ namespace IKalista
         private float GetEDamage(Obj_AI_Base target)
         {
             return this.spells[SpellSlot.E].GetDamage(target);
-        }
-
-        /// <summary>
-        ///     TODO The get real rend damage.
-        /// </summary>
-        /// <param name="target">
-        ///     TODO The target.
-        /// </param>
-        /// <param name="includeAutoAttacks">Auto Attack</param>
-        /// <returns>
-        ///     The real rend damage
-        /// </returns>
-        private float GetRealRendDamage(Obj_AI_Base target, bool includeAutoAttacks = false)
-        {
-            var baseDamage = new double[] { 20, 30, 40, 50, 60 }[this.spells[SpellSlot.E].Level]
-                             + (0.6
-                                * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod));
-            var rendBuff =
-                target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
-            var additionalDamage = (baseDamage + rendBuff.Count - 1)
-                                   * (new double[] { 10, 14, 19, 25, 32 }[this.spells[SpellSlot.E].Level]
-                                      + new[] { 0.2, 0.225, 0.25, 0.275, 0.3 }[this.spells[SpellSlot.E].Level])
-                                   * (ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod);
-            var autoAttackDamage = ObjectManager.Player.GetAutoAttackDamage(target, true);
-
-            var totalDamage = ObjectManager.Player.CalcDamage(
-                target, 
-                Damage.DamageType.Physical, 
-                (baseDamage + additionalDamage) - (this.sliderLinks["eDamageReduction"].Value.Value * 0.98f));
-
-            if (target.HasBuff("KalistaExpungeMarker") && rendBuff.Count > 0)
-            {
-                return (float)(includeAutoAttacks ? (totalDamage + autoAttackDamage) * 2 : totalDamage);
-            }
-
-            return 0;
         }
 
         /// <summary>
@@ -312,7 +276,7 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     Handles the Sentinel Bug
+        ///     Handles the Sentinel trick
         /// </summary>
         private void HandleSentinels()
         {
@@ -341,7 +305,6 @@ namespace IKalista
         /// </summary>
         private void InitEvents()
         {
-            // TODO Soulbound saver
             Utility.HpBarDamageIndicator.DamageToUnit = this.GetEDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 

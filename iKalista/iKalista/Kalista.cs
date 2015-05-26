@@ -439,7 +439,7 @@ namespace IKalista
                     {
                         this.ProcessLink(
                             "disable" + hero.ChampionName, 
-                            targetMenu.AddLinkedBool("Disable " + hero.ChampionName));
+                            targetMenu.AddLinkedBool("Disable " + hero.ChampionName, false));
                     }
                 }
 

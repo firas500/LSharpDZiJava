@@ -260,8 +260,7 @@ namespace IKalista
                     ObjectManager.Get<Obj_AI_Hero>()
                         .Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
             {
-                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
-                    || !this.boolLinks["useBalista"].Value)
+                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady() || !this.boolLinks["useBalista"].Value)
                 {
                     return;
                 }
@@ -366,9 +365,7 @@ namespace IKalista
         /// </summary>
         private void InitializeBalista()
         {
-            var blitzAlly = HeroManager.Allies.Any(x => x.IsAlly && !x.IsMe && x.ChampionName == "Blitzcrank");
-
-            if (!blitzAlly)
+            if (!HeroManager.Allies.Any(x => x.IsAlly && !x.IsMe && x.ChampionName == "Blitzcrank"))
             {
                 return;
             }

@@ -255,9 +255,13 @@ namespace IKalista
                 return;
             }
 
-            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
+            foreach (
+                var target in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
             {
-                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady() || !this.boolLinks["useBalista"].Value)
+                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
+                    || !this.boolLinks["useBalista"].Value)
                 {
                     return;
                 }
@@ -313,37 +317,16 @@ namespace IKalista
             Game.OnUpdate += this.OnUpdate;
 
             /**
-             *      Vi R 
+             *      Vi R  // NO
                     Morgana R
                     Sejuani R
                     Maokai W (if HP <15%)
-                    Nautilus R
+                    Nautilus R // NOP
                     Ashe R
                     Riven R (if HP low)
                     Leona R
              */
-            Obj_AI_Base.OnProcessSpellCast += (sender, args) =>
-                {
-                    if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
-                    {
-                        Orbwalking.ResetAutoAttackTimer();
-                    }
-
-                    if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && this.boolLinks["saveAllyR"].Value)
-                    {
-                        var soulboundhero =
-                            HeroManager.Allies.FirstOrDefault(
-                                hero =>
-                                hero.HasBuff("kalistacoopstrikeally") && args.Target.NetworkId == hero.NetworkId
-                                && hero.HealthPercent <= 15);
-
-                        if (soulboundhero != null
-                            && soulboundhero.HealthPercent < this.sliderLinks["allyPercent"].Value.Value)
-                        {
-                            this.spells[SpellSlot.R].Cast();
-                        }
-                    }
-                };
+            Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpell;
 
             Orbwalking.OnNonKillableMinion += minion =>
                 {
@@ -364,7 +347,8 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
+                        )
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -375,28 +359,6 @@ namespace IKalista
                     CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
                     CustomDamageIndicator.Enabled = this.circleLinks["drawEDamage"].Value.Active;
                 };
-        }
-
-        /// <summary>
-        /// TODO The on update.
-        /// </summary>
-        /// <param name="args">
-        /// TODO The args.
-        /// </param>
-        private void OnUpdate(EventArgs args)
-        {
-            this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
-            this.HandleSentinels();
-            this.KillstealQ();
-            if (this.boolLinks["useJungleSteal"].Value)
-            {
-                this.DoMobSteal();
-            }
-            if (this.boolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
-            {
-                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
-            }
-            this.HandleBalista();
         }
 
         /// <summary>
@@ -601,7 +563,8 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetEDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if (this.GetEDamage(rendTarget) >= rendTarget.Health
+                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -762,6 +725,62 @@ namespace IKalista
         /// </summary>
         private void OnLastHit()
         {
+        }
+
+        /// <summary>
+        ///     The on process spell function
+        /// </summary>
+        /// <param name="sender">
+        ///     The Spell Sender
+        /// </param>
+        /// <param name="args">
+        ///     The Arguments
+        /// </param>
+        private void OnProcessSpell(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
+            {
+                Orbwalking.ResetAutoAttackTimer();
+            }
+
+            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && this.boolLinks["saveAllyR"].Value)
+            {
+                var soulboundhero =
+                    HeroManager.Allies.FirstOrDefault(
+                        hero =>
+                        hero.HasBuff("kalistacoopstrikeally") && args.Target.NetworkId == hero.NetworkId
+                        && hero.HealthPercent <= 15);
+
+                if (soulboundhero != null && soulboundhero.HealthPercent < this.sliderLinks["allyPercent"].Value.Value)
+                {
+                    this.spells[SpellSlot.R].Cast();
+                }
+            }
+        }
+
+        /// <summary>
+        ///     TODO The on update.
+        /// </summary>
+        /// <param name="args">
+        ///     TODO The args.
+        /// </param>
+        private void OnUpdate(EventArgs args)
+        {
+            this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
+            this.HandleSentinels();
+            this.KillstealQ();
+            if (this.boolLinks["useJungleSteal"].Value)
+            {
+                this.DoMobSteal();
+            }
+
+            if (this.boolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop()
+                && !(Items.HasItem(3342) || Items.HasItem(3363)))
+            {
+                ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
+            }
+
+            this.HandleBalista();
         }
 
         /// <summary>

@@ -139,22 +139,21 @@ namespace IKalista
             }
         }
 
-        #endregion
-
         /// <summary>
-        /// TODO The has undying buff.
+        ///     TODO The has undying buff.
         /// </summary>
         /// <param name="target">
-        /// TODO The target.
+        ///     TODO The target.
         /// </param>
         /// <returns>
-        /// The <see cref="bool"/>.
+        ///     The <see cref="bool" />.
         /// </returns>
         public bool HasUndyingBuff(Obj_AI_Hero target)
         {
             // Tryndamere R
-            if (target.ChampionName == "Tryndamere" &&
-                target.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValidBuff() && b.DisplayName == "Undying Rage"))
+            if (target.ChampionName == "Tryndamere"
+                && target.Buffs.Any(
+                    b => b.Caster.NetworkId == target.NetworkId && b.IsValidBuff() && b.DisplayName == "Undying Rage"))
             {
                 return true;
             }
@@ -174,9 +173,14 @@ namespace IKalista
             // Poppy R
             if (target.ChampionName == "Poppy")
             {
-                if (HeroManager.Allies.Any(o =>
-                    !o.IsMe &&
-                    o.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValidBuff() && b.DisplayName == "PoppyDITarget")))
+                if (
+                    HeroManager.Allies.Any(
+                        o =>
+                        !o.IsMe
+                        && o.Buffs.Any(
+                            b =>
+                            b.Caster.NetworkId == target.NetworkId && b.IsValidBuff()
+                            && b.DisplayName == "PoppyDITarget")))
                 {
                     return true;
                 }
@@ -184,6 +188,8 @@ namespace IKalista
 
             return false;
         }
+
+        #endregion
 
         #region Methods
 
@@ -210,8 +216,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
-                    MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
+                    MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
@@ -299,12 +304,12 @@ namespace IKalista
                 return;
             }
 
-            foreach (
-                var target in
-                    ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
+            foreach (var target in
+                ObjectManager.Get<Obj_AI_Hero>()
+                    .Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
             {
-                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady() || !this.boolLinks["useBalista"].Value)
+                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
+                    || !this.boolLinks["useBalista"].Value)
                 {
                     return;
                 }
@@ -604,7 +609,8 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetEDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if (this.GetEDamage(rendTarget) >= rendTarget.Health
+                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

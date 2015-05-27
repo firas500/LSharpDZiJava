@@ -141,6 +141,50 @@ namespace IKalista
 
         #endregion
 
+        /// <summary>
+        /// TODO The has undying buff.
+        /// </summary>
+        /// <param name="target">
+        /// TODO The target.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        public bool HasUndyingBuff(Obj_AI_Hero target)
+        {
+            // Tryndamere R
+            if (target.ChampionName == "Tryndamere" &&
+                target.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValidBuff() && b.DisplayName == "Undying Rage"))
+            {
+                return true;
+            }
+
+            // Zilean R
+            if (target.Buffs.Any(b => b.IsValidBuff() && b.DisplayName == "Chrono Shift"))
+            {
+                return true;
+            }
+
+            // Kayle R
+            if (target.Buffs.Any(b => b.IsValidBuff() && b.DisplayName == "JudicatorIntervention"))
+            {
+                return true;
+            }
+
+            // Poppy R
+            if (target.ChampionName == "Poppy")
+            {
+                if (HeroManager.Allies.Any(o =>
+                    !o.IsMe &&
+                    o.Buffs.Any(b => b.Caster.NetworkId == target.NetworkId && b.IsValidBuff() && b.DisplayName == "PoppyDITarget")))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         #region Methods
 
         /// <summary>
@@ -167,7 +211,7 @@ namespace IKalista
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
@@ -546,7 +590,7 @@ namespace IKalista
                     .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                     .FirstOrDefault();
 
-            if (rendTarget != null)
+            if (rendTarget != null && !this.HasUndyingBuff(rendTarget))
             {
                 var rendBuff =
                     rendTarget.Buffs.Find(
@@ -560,8 +604,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetEDamage(rendTarget) >= rendTarget.Health
-                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if (this.GetEDamage(rendTarget) >= rendTarget.Health || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

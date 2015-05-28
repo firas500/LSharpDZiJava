@@ -289,16 +289,15 @@ namespace IKalista
             var damageMultiplier = 0.6f;
             var damagePerSpear = new[] { 5, 9, 14, 20, 27 };
             var damageSpearMultiplier = new[] { .15, .18, .21, .24, .27 };
-            var targetDamage = target.BaseAttackDamage + target.FlatPhysicalDamageMod;
 
             if (buff != null)
             {
                 return
                     (float)
-                    (rawDamage[this.spells[SpellSlot.E].Level] + (damageMultiplier * targetDamage)
+                    (rawDamage[this.spells[SpellSlot.E].Level] + (damageMultiplier)
                      + ((buff.Count - 1)
                         * ((damagePerSpear[this.spells[SpellSlot.E].Level]
-                            + damageSpearMultiplier[this.spells[SpellSlot.E].Level]) * targetDamage)));
+                            + damageSpearMultiplier[this.spells[SpellSlot.E].Level]))));
             }
 
             return 0;
@@ -504,9 +503,7 @@ namespace IKalista
             var misc = this.menu.MainMenu.AddSubMenu("Misc Options");
             {
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
-                this.ProcessLink(
-                    "jungStealMode", 
-                    misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
+                this.ProcessLink("jungStealMode", misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
                 this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
                 this.ProcessLink(
                     "sentBaron", 

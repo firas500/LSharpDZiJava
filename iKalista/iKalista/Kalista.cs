@@ -291,6 +291,11 @@ namespace IKalista
         /// </summary>
         private void HandleBalista()
         {
+            if (ObjectManager.Player.IsDead)
+            {
+                return;
+            }
+
             var blitzcrank =
                 HeroManager.Allies.SingleOrDefault(
                     x =>
@@ -379,8 +384,7 @@ namespace IKalista
             Orbwalking.OnNonKillableMinion += minion =>
                 {
                     var killableMinion = minion as Obj_AI_Base;
-                    if (killableMinion == null
-                        || !this.spells[SpellSlot.E].IsReady())
+                    if (killableMinion == null || !this.spells[SpellSlot.E].IsReady())
                     {
                         return;
                     }
@@ -393,7 +397,8 @@ namespace IKalista
 
                     if (this.boolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
-                        && this.spells[SpellSlot.E].CanCast(killableMinion) && killableMinion.HasBuff("KalistaExpungeMarker"))
+                        && this.spells[SpellSlot.E].CanCast(killableMinion)
+                        && killableMinion.HasBuff("KalistaExpungeMarker"))
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -486,7 +491,9 @@ namespace IKalista
             var misc = this.menu.MainMenu.AddSubMenu("Misc Options");
             {
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
-                this.ProcessLink("jungStealMode", misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
+                this.ProcessLink(
+                    "jungStealMode", 
+                    misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
                 this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
                 this.ProcessLink(
                     "sentBaron", 
@@ -536,6 +543,13 @@ namespace IKalista
             var target =
                 HeroManager.Enemies.FirstOrDefault(
                     x => this.spells[SpellSlot.Q].IsInRange(x) && this.spells[SpellSlot.Q].GetDamage(x) > x.Health + 10);
+
+            if (target != null && this.GetEDamage(target) > target.Health && target.HasBuff("KalistaExpungeMarker")
+                && this.spells[SpellSlot.E].IsInRange(target))
+            {
+                return;
+            }
+
             if (target != null && this.spells[SpellSlot.Q].IsReady()
                 && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
             {

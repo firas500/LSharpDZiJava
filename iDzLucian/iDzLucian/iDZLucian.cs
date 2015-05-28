@@ -604,7 +604,6 @@ namespace iDzLucian
                             Spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                         }
                     }
-
                     break;
             }
         }

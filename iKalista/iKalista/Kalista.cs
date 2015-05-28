@@ -289,15 +289,16 @@ namespace IKalista
             var damageMultiplier = 0.6f;
             var damagePerSpear = new[] { 5, 9, 14, 20, 27 };
             var damageSpearMultiplier = new[] { .15, .18, .21, .24, .27 };
+            var playerDamage = ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod;
 
             if (buff != null)
             {
                 return
                     (float)
-                    (rawDamage[this.spells[SpellSlot.E].Level] + (damageMultiplier)
+                    (rawDamage[this.spells[SpellSlot.E].Level] + (damageMultiplier * playerDamage)
                      + ((buff.Count - 1)
                         * ((damagePerSpear[this.spells[SpellSlot.E].Level]
-                            + damageSpearMultiplier[this.spells[SpellSlot.E].Level]))));
+                            + damageSpearMultiplier[this.spells[SpellSlot.E].Level]) * playerDamage)));
             }
 
             return 0;

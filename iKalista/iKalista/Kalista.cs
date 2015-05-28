@@ -283,7 +283,25 @@ namespace IKalista
         /// </returns>
         private float GetEDamage(Obj_AI_Base target)
         {
-            return this.spells[SpellSlot.E].GetDamage(target);
+            var buff =
+                target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
+            var rawDamage = new[] { 20, 30, 40, 50, 60 };
+            var damageMultiplier = 0.6f;
+            var damagePerSpear = new[] { 5, 9, 14, 20, 27 };
+            var damageSpearMultiplier = new[] { .15, .18, .21, .24, .27 };
+            var targetDamage = target.BaseAttackDamage + target.FlatPhysicalDamageMod;
+
+            if (buff != null)
+            {
+                return
+                    (float)
+                    (rawDamage[this.spells[SpellSlot.E].Level] + (damageMultiplier * targetDamage)
+                     + ((buff.Count - 1)
+                        * ((damagePerSpear[this.spells[SpellSlot.E].Level]
+                            + damageSpearMultiplier[this.spells[SpellSlot.E].Level]) * targetDamage)));
+            }
+
+            return 0;
         }
 
         /// <summary>
@@ -379,15 +397,21 @@ namespace IKalista
             Orbwalking.OnNonKillableMinion += minion =>
                 {
                     var killableMinion = minion as Obj_AI_Base;
-                    if (killableMinion == null || !killableMinion.HasBuff("KalistaExpungeMarker")
+                    if (killableMinion == null
                         || !this.spells[SpellSlot.E].IsReady())
                     {
                         return;
                     }
 
+                    if (this.boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
+                        && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion))
+                    {
+                        this.spells[SpellSlot.Q].Cast(killableMinion);
+                    }
+
                     if (this.boolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
-                        && this.spells[SpellSlot.E].CanCast(killableMinion))
+                        && this.spells[SpellSlot.E].CanCast(killableMinion) && killableMinion.HasBuff("KalistaExpungeMarker"))
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -471,6 +495,7 @@ namespace IKalista
                 this.ProcessLink("useELC", laneclear.AddLinkedBool("Use E"));
                 this.ProcessLink("minLC", laneclear.AddLinkedBool("Minion Harass"));
                 this.ProcessLink("eUnkillable", laneclear.AddLinkedBool("E Unkillable Minions"));
+                this.ProcessLink("qKillable", laneclear.AddLinkedBool("Q Unkillable if no buff"));
                 this.ProcessLink("eHit", laneclear.AddLinkedSlider("Min Minions E", 4, 2, 10));
             }
 

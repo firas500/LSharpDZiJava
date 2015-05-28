@@ -283,25 +283,7 @@ namespace IKalista
         /// </returns>
         private float GetEDamage(Obj_AI_Base target)
         {
-            var buff =
-                target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
-            var rawDamage = new[] { 20, 30, 40, 50, 60 };
-            var damageMultiplier = 0.6f;
-            var damagePerSpear = new[] { 5, 9, 14, 20, 27 };
-            var damageSpearMultiplier = new[] { .15, .18, .21, .24, .27 };
-            var playerDamage = ObjectManager.Player.BaseAttackDamage + ObjectManager.Player.FlatPhysicalDamageMod;
-
-            if (buff != null)
-            {
-                return
-                    (float)
-                    (rawDamage[this.spells[SpellSlot.E].Level] + (damageMultiplier * playerDamage)
-                     + ((buff.Count - 1)
-                        * ((damagePerSpear[this.spells[SpellSlot.E].Level]
-                            + damageSpearMultiplier[this.spells[SpellSlot.E].Level]) * playerDamage)));
-            }
-
-            return 0;
+            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
         }
 
         /// <summary>

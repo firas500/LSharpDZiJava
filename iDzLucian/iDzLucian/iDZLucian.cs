@@ -165,6 +165,7 @@ namespace iDzLucian
                     new MenuItem("com.idzlucian.combo.useextendedq", "Use Extended Q Combo").SetValue(true));
                 skillOptionsCombo.AddItem(
                     new MenuItem("com.idzlucian.harass.useextendedq", "Use Extended Q Harass").SetValue(true));
+                skillOptionsCombo.AddItem(new MenuItem("com.idzlucian.combo.useEQSteal", "Use EQ KS").SetValue(true));
             }
 
             comboMenu.AddSubMenu(skillOptionsCombo);
@@ -207,38 +208,68 @@ namespace iDzLucian
         }
 
         /// <summary>
-        ///     Goes ham on a target using a minion for collision, and finishing the target with an extended Q
+        /// Goes ham on a target using a minion for collision, and finishing the target with an extended Q
         /// </summary>
-        private static void DashKillsteal()
+        /// <param name="target">
+        /// The target.
+        /// </param>
+        private static void DashKillsteal(Obj_AI_Hero target)
         {
-            // TODO test this, remains untesed due to my high ping. cmon dz embaress me
-            var minions = MinionManager.GetMinions(player.ServerPosition, Spells[SpellSlot.Q].Range);
-            var extendedQTarget = TargetSelector.GetTarget(qExtended.Range, TargetSelector.DamageType.Physical);
+            var dashSpeed = Spells[SpellSlot.E].Range / (700 + player.MoveSpeed);
+            var targetPrediction = GetPredictionWithDelay(target, dashSpeed).To2D();
+            var minions = MinionManager.GetMinions(player.Position, 1000)
+                    .Where(min => min.Distance(targetPrediction, true) < 900 * 900)
+                    .OrderByDescending(min => min.Distance(targetPrediction, true));
 
-            if (extendedQTarget == null || !extendedQTarget.IsValidTarget(qExtended.Range)
-                || !Spells[SpellSlot.Q].IsReady() || !Spells[SpellSlot.E].IsReady())
+            foreach (Obj_AI_Base minion in minions)
             {
-                return;
-            }
+                var minionPrediction = Prediction.GetPrediction(minion, dashSpeed);
 
-            foreach (var selectedMinion in
-                minions.Where(minion => Spells[SpellSlot.Q].IsInRange(minion) && qExtended.IsInRange(extendedQTarget)))
-            {
-                var bestPosition = qExtended.GetPrediction(extendedQTarget, true).CastPosition.To2D();
-                var collisionObjects = qExtended.GetCollision(
-                    selectedMinion.Position.To2D(), 
-                    new List<Vector2> { bestPosition }); // FROM e endPositiono
+                var inter = MathHelper.GetCicleLineInteraction(
+                    minionPrediction.UnitPosition.To2D(),
+                    targetPrediction,
+                    player.Position.To2D(),
+                    Spells[SpellSlot.E].Range);
 
-                if (Spells[SpellSlot.E].IsInRange(bestPosition) && bestPosition != player.Position.To2D())
+                var best = inter.GetBestInter(target);
+                if (Math.Abs(best.X) < 1)
                 {
-                    Spells[SpellSlot.E].Cast(bestPosition);
+                    return;
                 }
 
-                if (Spells[SpellSlot.Q].IsReady() && collisionObjects.Any())
+                Spells[SpellSlot.E].Cast(best);
+                var polygon = new Geometry.Polygon.Rectangle(
+                    player.ServerPosition,
+                    player.ServerPosition.Extend(minion.ServerPosition, qExtended.Range),
+                    qExtended.Width);
+
+                if (polygon.IsInside(targetPrediction)
+                    && Spells[SpellSlot.Q].Cast(minion) == Spell.CastStates.SuccessfullyCasted)
                 {
-                    Spells[SpellSlot.Q].CastOnUnit(selectedMinion);
+                    Spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
                 }
             }
+        }
+
+        /// <summary>
+        /// TODO The get prediction with delay.
+        /// </summary>
+        /// <param name="target">
+        /// TODO The target.
+        /// </param>
+        /// <param name="delay">
+        /// TODO The delay.
+        /// </param>
+        /// <returns>
+        /// The <see cref="Vector3"/>.
+        /// </returns>
+        public static Vector3 GetPredictionWithDelay(Obj_AI_Base target, float delay)
+        {
+            var res = Spells[SpellSlot.Q].GetPrediction(target);
+            var del = Prediction.GetPrediction(target, delay);
+
+            var dif = del.UnitPosition - target.Position;
+            return res.CastPosition + dif;
         }
 
         /// <summary>
@@ -478,16 +509,9 @@ namespace iDzLucian
                 return;
             }
 
-            foreach (
-                var killTarget in
-                    ObjectManager.Get<Obj_AI_Hero>()
-                        .Where(
-                            x =>
-                            player.Distance(x) <= Spells[SpellSlot.Q].Range + x.BoundingRadius
-                            && Spells[SpellSlot.Q].GetDamage(x) > x.Health + 10)
-                        .Where(killTarget => Spells[SpellSlot.Q].IsReady() && Spells[SpellSlot.Q].CanCast(killTarget)))
+            foreach (var target in ObjectManager.Get<Obj_AI_Hero>().Where(ene => ene.IsEnemy && ene.IsValidTarget(1500)))
             {
-                Spells[SpellSlot.Q].CastOnUnit(killTarget);
+                Killsteal(target);
             }
 
             switch (orbwalker.ActiveMode)
@@ -505,6 +529,34 @@ namespace iDzLucian
                     Farm();
                     break;
             }
+        }
+
+        /// <summary>
+        ///     Kill steal
+        /// </summary>
+        /// <param name="target">
+        ///     The target.
+        /// </param>
+        private static void Killsteal(Obj_AI_Hero target)
+        {
+            foreach (
+              var killTarget in
+                  ObjectManager.Get<Obj_AI_Hero>()
+                      .Where(
+                          x =>
+                          player.Distance(x) <= Spells[SpellSlot.Q].Range + x.BoundingRadius
+                          && Spells[SpellSlot.Q].GetDamage(x) > x.Health + 10)
+                      .Where(killTarget => Spells[SpellSlot.Q].IsReady() && Spells[SpellSlot.Q].CanCast(killTarget)))
+            {
+                Spells[SpellSlot.Q].CastOnUnit(killTarget);
+            }
+
+            if (MenuHelper.IsMenuEnabled("com.idzlucian.combo.useEQSteal") && Spells[SpellSlot.Q].GetDamage(target) - 20 > target.Health && Spells[SpellSlot.E].IsReady() && Spells[SpellSlot.Q].IsReady() && target.Distance(player) - target.BoundingRadius + 10 < 1100 + Spells[SpellSlot.E].Range && target.Distance(player) - target.BoundingRadius + 10 > Spells[SpellSlot.Q].Range + 100)
+            {
+                DashKillsteal(target);
+                Orbwalking.Orbwalk(target, Game.CursorPos);
+            }
+
         }
 
         /// <summary>
@@ -561,9 +613,9 @@ namespace iDzLucian
 
                     if (target.IsValidTarget(Spells[SpellSlot.W].Range) && target != null)
                     {
-                        if (Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo) && Spells[SpellSlot.W].IsInRange(target) && !HasPassive())
+                        if (Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo))
                         {
-                            Spells[SpellSlot.W].CastOnUnit(target);
+                            Spells[SpellSlot.W].Cast(target.ServerPosition);
                             Spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
                         }
                     }

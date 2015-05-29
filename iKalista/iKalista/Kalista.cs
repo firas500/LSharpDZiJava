@@ -389,11 +389,11 @@ namespace IKalista
                         return;
                     }
 
-                    if (this.boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
+/*                    if (this.boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
                         && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion))
                     {
                         this.spells[SpellSlot.Q].Cast(killableMinion);
-                    }
+                    }*/
 
                     if (this.boolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10

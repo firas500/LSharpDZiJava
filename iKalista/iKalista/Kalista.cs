@@ -389,11 +389,10 @@ namespace IKalista
                         return;
                     }
 
-                    /*                    if (this.boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
-                        && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion))
+                    if (this.boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker") && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion) && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].Cast(killableMinion);
-                    }*/
+                    }
                     if (this.boolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
                         && this.spells[SpellSlot.E].CanCast(killableMinion)
@@ -405,8 +404,7 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
-                        )
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -550,7 +548,7 @@ namespace IKalista
             }
 
             if (target != null && this.spells[SpellSlot.Q].IsReady()
-                && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                && target.IsValidTarget(this.spells[SpellSlot.Q].Range) && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
             {
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
                 if (prediction.Hitchance >= HitChance.VeryHigh || prediction.Hitchance == HitChance.Immobile)
@@ -569,7 +567,7 @@ namespace IKalista
                 this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
 
-            if (this.boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady())
+            if (this.boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
             {
                 if (this.boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
@@ -586,8 +584,7 @@ namespace IKalista
                 }
 
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(spearTarget);
-                if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
-                {
+
                     switch (prediction.Hitchance)
                     {
                         case HitChance.Collision:
@@ -597,7 +594,7 @@ namespace IKalista
                             this.spells[SpellSlot.Q].Cast(spearTarget);
                             break;
                     }
-                }
+                
             }
 
             if (!this.boolLinks["useE"].Value || !this.spells[SpellSlot.E].IsReady())
@@ -643,7 +640,7 @@ namespace IKalista
             var spearTarget = TargetSelector.GetTarget(
                 this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
-            if (this.boolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady())
+            if (this.boolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
             {
                 if (this.boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
@@ -897,9 +894,8 @@ namespace IKalista
         {
             var minions = MinionManager.GetMinions(ObjectManager.Player.Position, this.spells[SpellSlot.Q].Range);
 
-            if (minions.Count < 1 || !this.boolLinks["useQMin"].Value)
+            if (minions.Count < 1 || !this.boolLinks["useQMin"].Value || ObjectManager.Player.IsWindingUp || ObjectManager.Player.IsDashing())
             {
-                // TODO possibly Projection checking
                 return;
             }
 

@@ -491,6 +491,7 @@ namespace IKalista
 
             var misc = this.menu.MainMenu.AddSubMenu("Misc Options");
             {
+                this.ProcessLink("fleeKey", misc.AddLinkedKeyBind("Flee Key", "G".ToCharArray()[0], KeyBindType.Press));
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
                 this.ProcessLink(
                     "jungStealMode", 
@@ -525,6 +526,16 @@ namespace IKalista
                         Color.FromArgb(150, Color.Red), 
                         this.spells[SpellSlot.E].Range));
             }
+        }
+
+        private void OnFlee()
+        {
+            var bestTarget =
+                ObjectManager.Get<Obj_AI_Base>()
+                    .Where(x => x.IsEnemy && ObjectManager.Player.Distance(x) <= Orbwalking.GetRealAutoAttackRange(x)).OrderBy(x => ObjectManager.Player.Distance(x)).FirstOrDefault();
+
+            // ReSharper disable once ConstantNullCoalescingCondition
+            Orbwalking.Orbwalk(bestTarget ?? null, Game.CursorPos);
         }
 
         /// <summary>
@@ -839,6 +850,11 @@ namespace IKalista
             if (this.boolLinks["useJungleSteal"].Value)
             {
                 this.DoMobSteal();
+            }
+
+            if (this.keyLinks["fleeKey"].Value.Active)
+            {
+                this.OnFlee();
             }
 
             if (this.boolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop()

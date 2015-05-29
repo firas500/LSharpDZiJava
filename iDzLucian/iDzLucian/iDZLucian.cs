@@ -237,7 +237,11 @@ namespace iDzLucian
                     return;
                 }
 
-                Spells[SpellSlot.E].Cast(best);
+                if (PositionHelper.IsSafePosition(best.To3D()))
+                {
+                    Spells[SpellSlot.E].Cast(best);
+                }
+
                 var polygon = new Geometry.Polygon.Rectangle(
                     player.ServerPosition,
                     player.ServerPosition.Extend(minion.ServerPosition, qExtended.Range),
@@ -556,7 +560,6 @@ namespace iDzLucian
                 DashKillsteal(target);
                 Orbwalking.Orbwalk(target, Game.CursorPos);
             }
-
         }
 
         /// <summary>
@@ -611,7 +614,7 @@ namespace iDzLucian
                         }
                     }
 
-                    if (target.IsValidTarget(Spells[SpellSlot.W].Range) && target != null)
+                    if (target.IsValidTarget(Spells[SpellSlot.W].Range) && target != null && !HasPassive())
                     {
                         if (Spells[SpellSlot.W].IsEnabledAndReady(Mode.Combo))
                         {

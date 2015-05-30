@@ -283,7 +283,7 @@ namespace IKalista
         ///     The correct damage hopefully..
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", Justification = "Reviewed. Suppression is OK here.")]
-        private float GetEDamage(Obj_AI_Hero target)
+        private float GetCustomDamage(Obj_AI_Hero target)
         {
             var baseDamage = new[] { 20, 30, 40, 50, 60 };
             var additionalBaseDamage = new[] { 0.6, 0.6, 0.6, 0.6, 0.6 };
@@ -306,6 +306,21 @@ namespace IKalista
                  * ObjectManager.Player.TotalAttackDamage());
 
             return (float)(100 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod) - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage);
+        }
+
+        /// <summary>
+        ///     Gets the correct Rend Damage
+        /// </summary>
+        /// <param name="target">
+        ///     The target
+        /// </param>
+        /// <returns>
+        ///     The correct damage hopefully..
+        /// </returns>
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", Justification = "Reviewed. Suppression is OK here.")]
+        private float GetRealDamage(Obj_AI_Hero target)
+        {
+            return this.spells[SpellSlot.E].GetDamage(target);
         }
 
         /// <summary>
@@ -384,10 +399,10 @@ namespace IKalista
         /// </summary>
         private void InitEvents()
         {
-            Utility.HpBarDamageIndicator.DamageToUnit = this.GetEDamage;
+            Utility.HpBarDamageIndicator.DamageToUnit = this.GetRealDamage;
             Utility.HpBarDamageIndicator.Enabled = true;
 
-            CustomDamageIndicator.Initialize(this.GetEDamage);
+            CustomDamageIndicator.Initialize(this.GetRealDamage);
 
             Game.OnUpdate += this.OnUpdate;
 
@@ -564,7 +579,7 @@ namespace IKalista
         /// </summary>
         private void KillstealQ()
         {
-            foreach (Obj_AI_Hero source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.E].IsInRange(x) && this.GetEDamage(x) >= x.Health))
+            foreach (Obj_AI_Hero source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
             {
                 if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source))
                 {
@@ -654,7 +669,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetEDamage(rendTarget) >= rendTarget.Health
+                if (this.GetRealDamage(rendTarget) >= rendTarget.Health
                     || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -733,7 +748,7 @@ namespace IKalista
                     var stackCount =
                         rendTarget.Buffs.Find(
                             b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
-                    if (this.GetEDamage(rendTarget) > rendTarget.Health + 10
+                    if (this.GetRealDamage(rendTarget) > rendTarget.Health + 10
                         || stackCount >= this.sliderLinks["minStacks"].Value.Value)
                     {
                         this.spells[SpellSlot.E].Cast();

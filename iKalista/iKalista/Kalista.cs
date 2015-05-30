@@ -10,6 +10,7 @@ namespace IKalista
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using LeagueSharp;
@@ -273,17 +274,38 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     Gets the Common E Damage
+        ///     Gets the correct Rend Damage
         /// </summary>
         /// <param name="target">
-        ///     The Target
+        ///     The target
         /// </param>
         /// <returns>
-        ///     The E Damage
+        ///     The correct damage hopefully..
         /// </returns>
-        private float GetEDamage(Obj_AI_Base target)
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", Justification = "Reviewed. Suppression is OK here.")]
+        private float GetEDamage(Obj_AI_Hero target)
         {
-            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
+            var baseDamage = new[] { 20, 30, 40, 50, 60 };
+            var additionalBaseDamage = new[] { 0.6, 0.6, 0.6, 0.6, 0.6 };
+
+            var spearDamage = new[] { 5, 9, 14, 20, 27 };
+            var additionalSpearDamage = new[] { 0.15, 0.18, 0.21, 0.24, 0.27 };
+
+            var stacks =
+                target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
+
+            if (!target.IsValidTarget(this.spells[SpellSlot.E].Range) || stacks.Count <= 0)
+            {
+                return 0;
+            }
+
+            var totalDamage = 
+                (float) (baseDamage[this.spells[SpellSlot.E].Level - 1] + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage()) + (stacks.Count - 1) *
+                (spearDamage[this.spells[SpellSlot.E].Level - 1]
+                 + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
+                 * ObjectManager.Player.TotalAttackDamage());
+
+            return (float)(100 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod) - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage);
         }
 
         /// <summary>
@@ -528,16 +550,6 @@ namespace IKalista
             }
         }
 
-        private void OnFlee()
-        {
-            var bestTarget =
-                ObjectManager.Get<Obj_AI_Base>()
-                    .Where(x => x.IsEnemy && ObjectManager.Player.Distance(x) <= Orbwalking.GetRealAutoAttackRange(x)).OrderBy(x => ObjectManager.Player.Distance(x)).FirstOrDefault();
-
-            // ReSharper disable once ConstantNullCoalescingCondition
-            Orbwalking.Orbwalk(bestTarget ?? null, Game.CursorPos);
-        }
-
         /// <summary>
         ///     Initialize the spells
         /// </summary>
@@ -646,6 +658,21 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
             }
+        }
+
+        /// <summary>
+        /// TODO The on flee.
+        /// </summary>
+        private void OnFlee()
+        {
+            var bestTarget =
+                ObjectManager.Get<Obj_AI_Base>()
+                    .Where(x => x.IsEnemy && ObjectManager.Player.Distance(x) <= Orbwalking.GetRealAutoAttackRange(x))
+                    .OrderBy(x => ObjectManager.Player.Distance(x))
+                    .FirstOrDefault();
+
+            // ReSharper disable once ConstantNullCoalescingCondition
+            Orbwalking.Orbwalk(bestTarget ?? null, Game.CursorPos);
         }
 
         /// <summary>

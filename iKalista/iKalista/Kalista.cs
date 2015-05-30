@@ -564,15 +564,17 @@ namespace IKalista
         /// </summary>
         private void KillstealQ()
         {
+            foreach (Obj_AI_Hero source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.E].IsInRange(x) && this.GetEDamage(x) >= x.Health))
+            {
+                if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source))
+                {
+                    this.spells[SpellSlot.E].Cast();
+                }
+            }
+
             var target =
                 HeroManager.Enemies.FirstOrDefault(
                     x => this.spells[SpellSlot.Q].IsInRange(x) && this.spells[SpellSlot.Q].GetDamage(x) > x.Health + 10);
-
-            if (target != null && this.GetEDamage(target) > target.Health && target.HasBuff("KalistaExpungeMarker")
-                && this.spells[SpellSlot.E].IsInRange(target))
-            {
-                return;
-            }
 
             if (target != null && this.spells[SpellSlot.Q].IsReady()
                 && target.IsValidTarget(this.spells[SpellSlot.Q].Range) && !ObjectManager.Player.IsWindingUp

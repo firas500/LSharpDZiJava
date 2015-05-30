@@ -294,7 +294,7 @@ namespace IKalista
             var stacks =
                 target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
 
-            if (!target.IsValidTarget(this.spells[SpellSlot.E].Range) || stacks.Count <= 0)
+            if (stacks.Count <= 0)
             {
                 return 0;
             }

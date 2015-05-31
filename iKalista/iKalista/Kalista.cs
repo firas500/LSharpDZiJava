@@ -348,7 +348,7 @@ namespace IKalista
             Justification = "Reviewed. Suppression is OK here.")]
         private float GetRealDamage(Obj_AI_Hero target)
         {
-            return this.spells[SpellSlot.E].GetDamage(target);
+            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
         }
 
         /// <summary>

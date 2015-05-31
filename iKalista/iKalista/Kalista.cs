@@ -299,10 +299,13 @@ namespace IKalista
                 return 0;
             }
 
-            var totalDamage = 
-                (float) (baseDamage[this.spells[SpellSlot.E].Level - 1] + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage()) + (stacks.Count - 1) *
-                (spearDamage[this.spells[SpellSlot.E].Level - 1]
-                 + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
+            var totalDamage =
+                (float)
+                (baseDamage[this.spells[SpellSlot.E].Level - 1]
+                + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage())
+                + (stacks.Count - 1)
+                * (spearDamage[this.spells[SpellSlot.E].Level - 1]
+                   + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
                  * ObjectManager.Player.TotalAttackDamage());
 
             return (float)(100 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod) - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage);

@@ -1000,6 +1000,40 @@ namespace IKalista
             }
         }
 
+        /// <summary>
+        /// Determines if the end point is over a wall
+        /// </summary>
+        /// <param name="start">Start point</param>
+        /// <param name="end">End Point</param>
+        /// <returns>If the End point is over a wall</returns>
+        private bool IsOverWall(Vector3 start, Vector3 end)
+        {
+            double distance = Vector3.Distance(start, end);
+            for (uint i = 0; i < distance; i += 10)
+            {
+                var tempPosition = start.Extend(end, i).To2D();
+                if (tempPosition.IsWall())
+                {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private void DoWallFlee()
+        {
+            if (!spells[SpellSlot.Q].IsReady() || !true) ////Change !true to a check if the flee key is not pressed
+            {
+                return;
+            }
+
+            var jumpRange = 180f;
+            var extendedPosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, jumpRange);
+            if (IsOverWall(ObjectManager.Player.ServerPosition, extendedPosition) && !extendedPosition.IsWall())
+            {
+                spells[SpellSlot.Q].Cast(extendedPosition);
+            }
+        }
         #endregion
     }
 }

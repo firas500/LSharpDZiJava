@@ -298,7 +298,7 @@ namespace IKalista
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
             Justification = "Reviewed. Suppression is OK here.")]
-        private float GetCustomDamage(Obj_AI_Hero target)
+        private float GetCustomDamage(Obj_AI_Base target)
         {
             var baseDamage = new[] { 20, 30, 40, 50, 60 };
             var additionalBaseDamage = new[] { 0.6, 0.6, 0.6, 0.6, 0.6 };
@@ -343,7 +343,17 @@ namespace IKalista
             Justification = "Reviewed. Suppression is OK here.")]
         private float GetRealDamage(Obj_AI_Base target)
         {
-            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
+
+            switch (this.stringListLinks["eDamageType"].Value.SelectedIndex)
+            {
+                case 0:
+                    return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
+                case 1:
+                    return this.GetCustomDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
+                default:
+                    return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
+            }
+
         }
 
         /// <summary>
@@ -554,8 +564,9 @@ namespace IKalista
                 this.ProcessLink("fleeKey", misc.AddLinkedKeyBind("Flee Key", "G".ToCharArray()[0], KeyBindType.Press));
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
                 this.ProcessLink(
-                    "jungStealMode", 
+                    "jungStealMode",
                     misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
+                this.ProcessLink("eDamageType", misc.AddLinkedStringList("E Calc Method", new[] { "Common", "Custom" }));
                 this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
                 this.ProcessLink(
                     "sentBaron", 

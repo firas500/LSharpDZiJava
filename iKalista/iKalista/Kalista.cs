@@ -276,7 +276,7 @@ namespace IKalista
         /// <returns>
         ///     The list of minions
         /// </returns>
-        private List<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
+        private IEnumerable<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
         {
             var input = new PredictionInput
                             {

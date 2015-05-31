@@ -301,10 +301,10 @@ namespace IKalista
         private float GetCustomDamage(Obj_AI_Base target)
         {
             var baseDamage = new[] { 20, 30, 40, 50, 60 };
-            var additionalBaseDamage = new[] { 0.6, 0.6, 0.6, 0.6, 0.6 };
+            var additionalBaseDamage = new[] { 0.6f, 0.6f, 0.6f, 0.6f, 0.6f };
 
             var spearDamage = new[] { 5, 9, 14, 20, 27 };
-            var additionalSpearDamage = new[] { 0.15, 0.18, 0.21, 0.24, 0.27 };
+            var additionalSpearDamage = new[] { 0.15f, 0.18f, 0.21f, 0.24f, 0.27f };
 
             var stacks =
                 target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
@@ -315,19 +315,17 @@ namespace IKalista
             }
 
             var totalDamage =
-                (float)
-                (baseDamage[this.spells[SpellSlot.E].Level - 1]
-                 + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage())
+                baseDamage[this.spells[SpellSlot.E].Level - 1]
+                + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage()
                 + (stacks.Count - 1)
                 * (spearDamage[this.spells[SpellSlot.E].Level - 1]
                    + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
                    * ObjectManager.Player.TotalAttackDamage());
 
             return
-                (float)
-                (100
-                 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod)
-                    - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage);
+                100
+                / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod)
+                   - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage;
         }
 
         /// <summary>

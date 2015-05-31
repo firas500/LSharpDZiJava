@@ -211,29 +211,39 @@ namespace IKalista
                         x.Health <= this.spells[SpellSlot.E].GetDamage(x)
                         && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
-            var otherMobs = MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition,
-                    this.spells[SpellSlot.E].Range,
-                    MinionTypes.All,
-                    MinionTeam.Neutral,
-                    MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(
-                        x =>
-                        x.Health <= this.spells[SpellSlot.E].GetDamage(x));
+            var otherMobs =
+                MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.Neutral, 
+                    MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
             var bikMinion =
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Any(
                         m =>
-                        m.IsValidTarget(this.spells[SpellSlot.E].Range) && m.BaseSkinName.Contains("Dragon") || m.BaseSkinName.Contains("Baron") && m.Health <= this.GetRealDamage(m));
+                        m.IsValidTarget(this.spells[SpellSlot.E].Range) && m.BaseSkinName.Contains("Dragon")
+                        || m.BaseSkinName.Contains("Baron") && m.Health <= this.GetRealDamage(m));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
                 case 0:
-                    if (this.spells[SpellSlot.E].IsReady() && bikMinion || otherMobs != null)
+                    var Mob =
+                        MinionManager.GetMinions(
+                            ObjectManager.Player.ServerPosition, 
+                            this.spells[SpellSlot.E].Range, 
+                            MinionTypes.All, 
+                            MinionTeam.Neutral, 
+                            MinionOrderTypes.MaxHealth)
+                            .FirstOrDefault(
+                                x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+
+                    if (this.spells[SpellSlot.E].CanCast(Mob))
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
+
                     break;
                 case 1:
                     if (minion != null)
@@ -321,18 +331,17 @@ namespace IKalista
             var stacks =
                 target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
 
-            var totalDamage =
-                baseDamage[this.spells[SpellSlot.E].Level - 1]
-                + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage()
-                + (stacks.Count - 1)
-                * (spearDamage[this.spells[SpellSlot.E].Level - 1]
-                   + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
-                   * ObjectManager.Player.TotalAttackDamage());
+            var totalDamage = baseDamage[this.spells[SpellSlot.E].Level - 1]
+                              + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1]
+                              * ObjectManager.Player.TotalAttackDamage()
+                              + (stacks.Count - 1)
+                              * (spearDamage[this.spells[SpellSlot.E].Level - 1]
+                                 + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
+                                 * ObjectManager.Player.TotalAttackDamage());
 
-            return
-                100
-                / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod)
-                   - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage;
+            return 100
+                   / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod)
+                      - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage;
         }
 
         /// <summary>
@@ -357,7 +366,6 @@ namespace IKalista
                 default:
                     return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
             }
-
         }
 
         /// <summary>
@@ -568,7 +576,7 @@ namespace IKalista
                 this.ProcessLink("fleeKey", misc.AddLinkedKeyBind("Flee Key", "G".ToCharArray()[0], KeyBindType.Press));
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
                 this.ProcessLink(
-                    "jungStealMode",
+                    "jungStealMode", 
                     misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
                 this.ProcessLink("eDamageType", misc.AddLinkedStringList("E Calc Method", new[] { "Common", "Custom" }));
                 this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
@@ -638,10 +646,9 @@ namespace IKalista
         /// </summary>
         private void KillstealQ()
         {
-            foreach (
-                var source in
-                    HeroManager.Enemies.Where(
-                        x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
+            foreach (var source in
+                HeroManager.Enemies.Where(
+                    x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
             {
                 if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source))
                 {
@@ -1062,4 +1069,4 @@ namespace IKalista
 
         #endregion
     }
-}
+} 

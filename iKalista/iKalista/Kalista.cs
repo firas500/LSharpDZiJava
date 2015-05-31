@@ -211,6 +211,16 @@ namespace IKalista
                         x.Health <= this.spells[SpellSlot.E].GetDamage(x)
                         && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
+            var otherMobs = MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition,
+                    this.spells[SpellSlot.E].Range,
+                    MinionTypes.All,
+                    MinionTeam.Neutral,
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(
+                        x =>
+                        x.Health <= this.spells[SpellSlot.E].GetDamage(x));
+
             var bikMinion =
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Any(
@@ -234,7 +244,7 @@ namespace IKalista
 
                     break;
                 case 2:
-                    if (bikMinion || minion != null)
+                    if (bikMinion || minion != null || otherMobs != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }

@@ -309,11 +309,6 @@ namespace IKalista
             var stacks =
                 target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
 
-            if (stacks.Count <= 0)
-            {
-                return 0;
-            }
-
             var totalDamage =
                 baseDamage[this.spells[SpellSlot.E].Level - 1]
                 + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage()
@@ -348,8 +343,6 @@ namespace IKalista
                     return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
                 case 1:
                     return this.GetCustomDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
-                default:
-                    return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
             }
 
         }

@@ -225,13 +225,12 @@ namespace IKalista
                 ObjectManager.Get<Obj_AI_Minion>()
                     .Any(
                         m =>
-                        m.IsValidTarget(this.spells[SpellSlot.E].Range) && m.BaseSkinName.Contains("Dragon")
-                        || m.BaseSkinName.Contains("Baron") && m.Health <= this.GetRealDamage(m));
+                        m.IsValidTarget(this.spells[SpellSlot.E].Range) && m.BaseSkinName.Contains("Dragon") || m.BaseSkinName.Contains("Baron") && m.Health <= this.GetRealDamage(m));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
                 case 0:
-                    if (this.spells[SpellSlot.E].IsReady() && bikMinion)
+                    if (this.spells[SpellSlot.E].IsReady() && bikMinion || otherMobs != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }

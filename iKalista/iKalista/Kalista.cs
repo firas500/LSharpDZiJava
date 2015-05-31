@@ -212,21 +212,16 @@ namespace IKalista
                         && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
             var bikMinion =
-                MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition, 
-                    this.spells[SpellSlot.E].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.Neutral, 
-                    MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
+                MinionManager
+                    .GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.Neutral).FirstOrDefault(x => (x.BaseSkinName == "SRU_Baron" || x.BaseSkinName == "SRU_Dragon") && this.GetRealDamage(x) >= x.Health);
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
                 case 0:
-                    if (bikMinion != null)
+                    if (this.spells[SpellSlot.E].IsReady() && bikMinion != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
-
                     break;
                 case 1:
                     if (minion != null)
@@ -346,7 +341,7 @@ namespace IKalista
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
             Justification = "Reviewed. Suppression is OK here.")]
-        private float GetRealDamage(Obj_AI_Hero target)
+        private float GetRealDamage(Obj_AI_Base target)
         {
             return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
         }

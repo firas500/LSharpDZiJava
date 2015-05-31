@@ -212,13 +212,16 @@ namespace IKalista
                         && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
             var bikMinion =
-                MinionManager
-                    .GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.Neutral).FirstOrDefault(x => (x.BaseSkinName == "SRU_Baron" || x.BaseSkinName == "SRU_Dragon") && this.GetRealDamage(x) >= x.Health);
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .Any(
+                        m =>
+                        m.IsValidTarget(this.spells[SpellSlot.E].Range) && m.BaseSkinName.Contains("Dragon")
+                        || m.BaseSkinName.Contains("Baron") && m.Health <= this.GetRealDamage(m));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
                 case 0:
-                    if (this.spells[SpellSlot.E].IsReady() && bikMinion != null)
+                    if (this.spells[SpellSlot.E].IsReady() && bikMinion)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -231,7 +234,7 @@ namespace IKalista
 
                     break;
                 case 2:
-                    if (bikMinion != null || minion != null)
+                    if (bikMinion || minion != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -336,7 +339,6 @@ namespace IKalista
             Justification = "Reviewed. Suppression is OK here.")]
         private float GetRealDamage(Obj_AI_Base target)
         {
-
             switch (this.stringListLinks["eDamageType"].Value.SelectedIndex)
             {
                 case 0:

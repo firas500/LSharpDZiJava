@@ -246,6 +246,25 @@ namespace IKalista
         }
 
         /// <summary>
+        ///     Do Wall Flee
+        /// </summary>
+        private void DoWallFlee()
+        {
+            if (!this.spells[SpellSlot.Q].IsReady() || !this.keyLinks["fleeKey"].Value.Active)
+            {
+                ////Change !true to a check if the flee key is not pressed
+                return;
+            }
+
+            const float JumpRange = 200f;
+            var extendedPosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, JumpRange);
+            if (this.IsOverWall(ObjectManager.Player.ServerPosition, extendedPosition) && !extendedPosition.IsWall())
+            {
+                this.spells[SpellSlot.Q].Cast(extendedPosition);
+            }
+        }
+
+        /// <summary>
         ///     Gets the collision minions
         /// </summary>
         /// <param name="source">
@@ -282,7 +301,8 @@ namespace IKalista
         /// <returns>
         ///     The correct damage hopefully..
         /// </returns>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
+            Justification = "Reviewed. Suppression is OK here.")]
         private float GetCustomDamage(Obj_AI_Hero target)
         {
             var baseDamage = new[] { 20, 30, 40, 50, 60 };
@@ -302,13 +322,17 @@ namespace IKalista
             var totalDamage =
                 (float)
                 (baseDamage[this.spells[SpellSlot.E].Level - 1]
-                + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage())
+                 + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1] * ObjectManager.Player.TotalAttackDamage())
                 + (stacks.Count - 1)
                 * (spearDamage[this.spells[SpellSlot.E].Level - 1]
                    + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
-                 * ObjectManager.Player.TotalAttackDamage());
+                   * ObjectManager.Player.TotalAttackDamage());
 
-            return (float)(100 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod) - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage);
+            return
+                (float)
+                (100
+                 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod)
+                    - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage);
         }
 
         /// <summary>
@@ -320,7 +344,8 @@ namespace IKalista
         /// <returns>
         ///     The correct damage hopefully..
         /// </returns>
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
+            Justification = "Reviewed. Suppression is OK here.")]
         private float GetRealDamage(Obj_AI_Hero target)
         {
             return this.spells[SpellSlot.E].GetDamage(target);
@@ -578,11 +603,35 @@ namespace IKalista
         }
 
         /// <summary>
+        ///     Determines if the end point is over a wall
+        /// </summary>
+        /// <param name="start">Start point</param>
+        /// <param name="end">End Point</param>
+        /// <returns>If the End point is over a wall</returns>
+        private bool IsOverWall(Vector3 start, Vector3 end)
+        {
+            double distance = Vector3.Distance(start, end);
+            for (uint i = 0; i < distance; i += 10)
+            {
+                var tempPosition = start.Extend(end, i).To2D();
+                if (tempPosition.IsWall())
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        /// <summary>
         ///     Kill steal
         /// </summary>
         private void KillstealQ()
         {
-            foreach (Obj_AI_Hero source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
+            foreach (
+                var source in
+                    HeroManager.Enemies.Where(
+                        x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
             {
                 if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source))
                 {
@@ -681,7 +730,7 @@ namespace IKalista
         }
 
         /// <summary>
-        /// TODO The on flee.
+        ///     TODO The on flee.
         /// </summary>
         private void OnFlee()
         {
@@ -693,6 +742,7 @@ namespace IKalista
 
             // ReSharper disable once ConstantNullCoalescingCondition
             Orbwalking.Orbwalk(bestTarget ?? null, Game.CursorPos);
+            this.DoWallFlee();
         }
 
         /// <summary>
@@ -1000,40 +1050,6 @@ namespace IKalista
             }
         }
 
-        /// <summary>
-        /// Determines if the end point is over a wall
-        /// </summary>
-        /// <param name="start">Start point</param>
-        /// <param name="end">End Point</param>
-        /// <returns>If the End point is over a wall</returns>
-        private bool IsOverWall(Vector3 start, Vector3 end)
-        {
-            double distance = Vector3.Distance(start, end);
-            for (uint i = 0; i < distance; i += 10)
-            {
-                var tempPosition = start.Extend(end, i).To2D();
-                if (tempPosition.IsWall())
-                {
-                    return true;
-                }
-            }
-            return false;
-        }
-
-        private void DoWallFlee()
-        {
-            if (!spells[SpellSlot.Q].IsReady() || !true) ////Change !true to a check if the flee key is not pressed
-            {
-                return;
-            }
-
-            var jumpRange = 180f;
-            var extendedPosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, jumpRange);
-            if (IsOverWall(ObjectManager.Player.ServerPosition, extendedPosition) && !extendedPosition.IsWall())
-            {
-                spells[SpellSlot.Q].Cast(extendedPosition);
-            }
-        }
         #endregion
     }
 }

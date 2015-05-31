@@ -239,7 +239,7 @@ namespace IKalista
                             .FirstOrDefault(
                                 x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
 
-                    if (this.spells[SpellSlot.E].CanCast(Mob))
+                    if (this.spells[SpellSlot.E].CanCast(Mob) || otherMobs != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -1031,7 +1031,7 @@ namespace IKalista
             var minions = MinionManager.GetMinions(ObjectManager.Player.Position, this.spells[SpellSlot.Q].Range);
 
             if (minions.Count < 1 || !this.boolLinks["useQMin"].Value || ObjectManager.Player.IsWindingUp
-                || ObjectManager.Player.IsDashing())
+                || ObjectManager.Player.IsDashing())do
             {
                 return;
             }

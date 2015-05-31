@@ -1031,7 +1031,7 @@ namespace IKalista
             var minions = MinionManager.GetMinions(ObjectManager.Player.Position, this.spells[SpellSlot.Q].Range);
 
             if (minions.Count < 1 || !this.boolLinks["useQMin"].Value || ObjectManager.Player.IsWindingUp
-                || ObjectManager.Player.IsDashing())do
+                || ObjectManager.Player.IsDashing())
             {
                 return;
             }

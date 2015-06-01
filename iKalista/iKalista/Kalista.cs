@@ -199,63 +199,94 @@ namespace IKalista
         /// </summary>
         private void DoMobSteal()
         {
-            var minion =
-                MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition, 
-                    this.spells[SpellSlot.E].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.Enemy, 
-                    MinionOrderTypes.MaxHealth)
+            var baron =
+                ObjectManager.Get<Obj_AI_Minion>()
                     .FirstOrDefault(
-                        x =>
-                        x.Health <= this.spells[SpellSlot.E].GetDamage(x)
-                        && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
-
-            var otherMobs =
+                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && x.BaseSkinName.Contains("Baron"));
+            var dragon =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .FirstOrDefault(
+                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && x.BaseSkinName.Contains("Dragon"));
+            var siegeMinion =
+                ObjectManager.Get<Obj_AI_Minion>()
+                    .FirstOrDefault(
+                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && x.BaseSkinName.Contains("MinionSiege"));
+            var jungleMobs =
                 MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
-                    MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
-
-            var bikMinion =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .Any(
-                        m =>
-                        m.IsValidTarget(this.spells[SpellSlot.E].Range) && m.BaseSkinName.Contains("Dragon")
-                        || m.BaseSkinName.Contains("Baron") && m.Health <= this.GetRealDamage(m));
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(x => !x.BaseSkinName.Contains("Baron") && !x.BaseSkinName.Contains("Dragon"));
+            var damage = this.spells[SpellSlot.E].GetDamage(baron);
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
                 case 0:
-                    var Mob =
-                        MinionManager.GetMinions(
-                            ObjectManager.Player.ServerPosition, 
-                            this.spells[SpellSlot.E].Range, 
-                            MinionTypes.All, 
-                            MinionTeam.Neutral, 
-                            MinionOrderTypes.MaxHealth)
-                            .FirstOrDefault(
-                                x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
 
-                    if (this.spells[SpellSlot.E].CanCast(Mob) || otherMobs != null)
+                    if (baron != null)
                     {
-                        this.spells[SpellSlot.E].Cast();
+                        if (damage >= baron.Health + (baron.HPRegenRate / 2) && this.spells[SpellSlot.E].CanCast(baron))
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
+                    }
+                    else if (dragon != null)
+                    {
+                        if (damage >= dragon.Health + 10 && this.spells[SpellSlot.E].CanCast(dragon))
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
+                    }
+                    else if (jungleMobs != null)
+                    {
+                        if (damage >= jungleMobs.Health + 10 && this.spells[SpellSlot.E].CanCast(jungleMobs))
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
                     }
 
                     break;
+
                 case 1:
-                    if (minion != null)
+                    if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
                     {
-                        this.spells[SpellSlot.E].Cast();
+                        if (damage >= siegeMinion.Health + 10)
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
                     }
 
                     break;
+
                 case 2:
-                    if (bikMinion || minion != null || otherMobs != null)
+                    if (baron != null)
                     {
-                        this.spells[SpellSlot.E].Cast();
+                        if (damage >= baron.Health + (baron.HPRegenRate / 2) && this.spells[SpellSlot.E].CanCast(baron))
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
+                    }
+                    else if (dragon != null)
+                    {
+                        if (damage >= dragon.Health + 10 && this.spells[SpellSlot.E].CanCast(dragon))
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
+                    }
+                    else if (jungleMobs != null)
+                    {
+                        if (damage >= jungleMobs.Health + 10 && this.spells[SpellSlot.E].CanCast(jungleMobs))
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
+                    }
+                    else if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
+                    {
+                        if (damage >= siegeMinion.Health + 10)
+                        {
+                            this.spells[SpellSlot.E].Cast();
+                        }
                     }
 
                     break;
@@ -273,7 +304,7 @@ namespace IKalista
                 return;
             }
 
-            const float JumpRange = 200f;
+            const float JumpRange = 300f;
             var extendedPosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, JumpRange);
             if (this.IsOverWall(ObjectManager.Player.ServerPosition, extendedPosition) && !extendedPosition.IsWall())
             {
@@ -1069,4 +1100,4 @@ namespace IKalista
 
         #endregion
     }
-} 
+}

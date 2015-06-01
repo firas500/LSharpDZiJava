@@ -241,9 +241,9 @@ namespace IKalista
                     else if (jungleMobs != null)
                     {
                         if (damage >= jungleMobs.Health + 10 && this.spells[SpellSlot.E].CanCast(jungleMobs))
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
                     }
 
                     break;
@@ -252,9 +252,9 @@ namespace IKalista
                     if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
                     {
                         if (damage >= siegeMinion.Health + 10)
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
                     }
 
                     break;
@@ -284,9 +284,9 @@ namespace IKalista
                     else if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
                     {
                         if (damage >= siegeMinion.Health + 10)
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
                     }
 
                     break;
@@ -304,7 +304,7 @@ namespace IKalista
                 return;
             }
 
-            const float JumpRange = 300f;
+            const float JumpRange = 200f;
             var extendedPosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, JumpRange);
             if (this.IsOverWall(ObjectManager.Player.ServerPosition, extendedPosition) && !extendedPosition.IsWall())
             {
@@ -1100,4 +1100,4 @@ namespace IKalista
 
         #endregion
     }
-}
+} 

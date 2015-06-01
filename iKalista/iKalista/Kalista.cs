@@ -273,7 +273,7 @@ namespace IKalista
                 return;
             }
 
-            const float JumpRange = 200f;
+            const float JumpRange = 250f;
             var extendedPosition = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, JumpRange);
             if (this.IsOverWall(ObjectManager.Player.ServerPosition, extendedPosition) && !extendedPosition.IsWall())
             {

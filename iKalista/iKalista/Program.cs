@@ -15,11 +15,7 @@
 //             You should have received a copy of the GNU General Public License
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
-// <summary>
-//   The initial program
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace IKalista
 {
     using LeagueSharp;
@@ -33,9 +29,11 @@ namespace IKalista
         #region Methods
 
         /// <summary>
-        ///     The main method of our Assembly
+        /// The main method of our Assembly
         /// </summary>
-        /// <param name="args"> the given arguments </param>
+        /// <param name="args">
+        /// the given arguments 
+        /// </param>
         private static void Main(string[] args)
         {
             CustomEvents.Game.OnGameLoad += load =>

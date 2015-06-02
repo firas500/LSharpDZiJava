@@ -1,11 +1,22 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Kalista.cs" company="">
+// <copyright file="Kalista.cs" company="LeagueSharp">
+//   Copyright (C) 2015 LeagueSharp
 //   
+//             This program is free software: you can redistribute it and/or modify
+//             it under the terms of the GNU General Public License as published by
+//             the Free Software Foundation, either version 3 of the License, or
+//             (at your option) any later version.
+//   
+//             This program is distributed in the hope that it will be useful,
+//             but WITHOUT ANY WARRANTY; without even the implied warranty of
+//             MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+//             GNU General Public License for more details.
+//   
+//             You should have received a copy of the GNU General Public License
+//             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
-// <summary>
-//   An Assembly for <see cref="Kalista" /> okay
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace IKalista
 {
     using System;
@@ -26,13 +37,17 @@ namespace IKalista
     /// </summary>
     public class Kalista
     {
-        #region Fields
+        #region Static Fields
 
         /// <summary>
         ///     The Boolean link values
         /// </summary>
-        private readonly Dictionary<string, MenuWrapper.BoolLink> boolLinks =
+        public static readonly Dictionary<string, MenuWrapper.BoolLink> boolLinks =
             new Dictionary<string, MenuWrapper.BoolLink>();
+
+        #endregion
+
+        #region Fields
 
         /// <summary>
         ///     The Slider Link Values
@@ -100,6 +115,7 @@ namespace IKalista
             this.InitMenu();
             this.InitSpells();
             this.InitEvents();
+            //SpriteHandler.InitializeSprite();
         }
 
         #endregion
@@ -116,19 +132,19 @@ namespace IKalista
         #region Public Methods and Operators
 
         /// <summary>
-        ///     TODO The show notification.
+        /// TODO The show notification.
         /// </summary>
         /// <param name="message">
-        ///     TODO The message.
+        /// TODO The message.
         /// </param>
         /// <param name="colour">
-        ///     TODO The color.
+        /// TODO The color.
         /// </param>
         /// <param name="duration">
-        ///     TODO The duration.
+        /// TODO The duration.
         /// </param>
         /// <param name="dispose">
-        ///     TODO The dispose.
+        /// TODO The dispose.
         /// </param>
         public static void ShowNotification(string message, Color colour, int duration = -1, bool dispose = true)
         {
@@ -141,13 +157,13 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     TODO The has undying buff.
+        /// TODO The has undying buff.
         /// </summary>
         /// <param name="target">
-        ///     TODO The target.
+        /// TODO The target.
         /// </param>
         /// <returns>
-        ///     The <see cref="bool" />.
+        /// The <see cref="bool"/>.
         /// </returns>
         public bool HasUndyingBuff(Obj_AI_Hero target)
         {
@@ -192,7 +208,7 @@ namespace IKalista
 
         #endregion
 
-       #region Methods
+        #region Methods
 
         /// <summary>
         ///     This is where the magic happens, we like to steal other peoples stuff.
@@ -209,16 +225,16 @@ namespace IKalista
                     .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
 
             var siegeMinion =
-                       MinionManager.GetMinions(
-                           ObjectManager.Player.ServerPosition,
-                           this.spells[SpellSlot.E].Range,
-                           MinionTypes.All,
-                           MinionTeam.Enemy,
-                           MinionOrderTypes.MaxHealth)
-                           .FirstOrDefault(
-                               x =>
-                               x.Health <= this.spells[SpellSlot.E].GetDamage(x)
-                               && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
+                MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.Enemy, 
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(
+                        x =>
+                        x.Health <= this.spells[SpellSlot.E].GetDamage(x)
+                        && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
@@ -281,23 +297,23 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     Gets the collision minions
+        /// Gets the collision minions
         /// </summary>
         /// <param name="source">
-        ///     the source
+        /// the source
         /// </param>
         /// <param name="targetPosition">
-        ///     the target position
+        /// the target position
         /// </param>
         /// <returns>
-        ///     The list of minions
+        /// The list of minions
         /// </returns>
         private IEnumerable<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
         {
             var input = new PredictionInput
                             {
                                 Unit = source, Radius = this.spells[SpellSlot.Q].Width, 
-                                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed, 
+                                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed 
                             };
 
             input.CollisionObjects[0] = CollisionableObjects.Minions;
@@ -309,13 +325,13 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     Gets the correct Rend Damage
+        /// Gets the correct Rend Damage
         /// </summary>
         /// <param name="target">
-        ///     The target
+        /// The target
         /// </param>
         /// <returns>
-        ///     The correct damage hopefully..
+        /// The correct damage hopefully..
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
             Justification = "Reviewed. Suppression is OK here.")]
@@ -338,17 +354,19 @@ namespace IKalista
                                  + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
                                  * ObjectManager.Player.TotalAttackDamage());
 
-            return 100 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod) - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage;
+            return 100
+                   / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod)
+                      - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage;
         }
 
         /// <summary>
-        ///     Gets the correct Rend Damage
+        /// Gets the correct Rend Damage
         /// </summary>
         /// <param name="target">
-        ///     The target
+        /// The target
         /// </param>
         /// <returns>
-        ///     The correct damage hopefully..
+        /// The correct damage hopefully..
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
             Justification = "Reviewed. Suppression is OK here.")]
@@ -376,35 +394,31 @@ namespace IKalista
             }
 
             var blitzcrank =
-                HeroManager.Allies.SingleOrDefault(
-                    x =>
-                    x.IsAlly
+                HeroManager.Allies.FirstOrDefault(x => x.IsAlly
                     && ObjectManager.Player.Distance(x.ServerPosition) < this.sliderLinks["maxRange"].Value.Value
                     && ObjectManager.Player.Distance(x.ServerPosition) >= this.sliderLinks["minRange"].Value.Value
                     && x.ChampionName == "Blitzcrank");
 
-            if (blitzcrank == null)
+            if (blitzcrank != null)
             {
-                return;
-            }
-
-            foreach (var target in
-                ObjectManager.Get<Obj_AI_Hero>()
-                    .Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
-            {
-                if (this.boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
-                    || !this.boolLinks["useBalista"].Value)
+                foreach (var target in
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
                 {
-                    return;
-                }
-
-                if (target.Buffs != null && target.Health > 200 && blitzcrank.Distance(target) > 450f)
-                {
-                    for (var i = 0; i < target.Buffs.Count(); i++)
+                    if (boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
+                        || !boolLinks["useBalista"].Value)
                     {
-                        if (target.Buffs[i].Name == "rocketgrab2" && target.Buffs[i].IsActive)
+                        return;
+                    }
+
+                    if (target.Buffs != null && target.Health > 200 && blitzcrank.Distance(target) > 450f)
+                    {
+                        for (var i = 0; i < target.Buffs.Count(); i++)
                         {
-                            this.spells[SpellSlot.R].Cast();
+                            if (target.Buffs[i].Name == "rocketgrab2" && target.Buffs[i].IsActive)
+                            {
+                                this.spells[SpellSlot.R].Cast();
+                            }
                         }
                     }
                 }
@@ -468,14 +482,14 @@ namespace IKalista
                         return;
                     }
 
-                    if (this.boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
+                    if (boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
                         && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion)
                         && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].Cast(killableMinion);
                     }
 
-                    if (this.boolLinks["eUnkillable"].Value
+                    if (boolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
                         && this.spells[SpellSlot.E].CanCast(killableMinion)
                         && killableMinion.HasBuff("KalistaExpungeMarker"))
@@ -588,6 +602,7 @@ namespace IKalista
 
             var drawing = this.menu.MainMenu.AddSubMenu("Drawing Options");
             {
+                this.ProcessLink("drawSprite", drawing.AddLinkedBool("Draw Sprite for W"));
                 this.ProcessLink(
                     "drawEDamage", 
                     drawing.AddLinkedCircle("Draw E Damage", true, Color.FromArgb(150, Color.LawnGreen), 0));
@@ -618,11 +633,17 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     Determines if the end point is over a wall
+        /// Determines if the end point is over a wall
         /// </summary>
-        /// <param name="start">Start point</param>
-        /// <param name="end">End Point</param>
-        /// <returns>If the End point is over a wall</returns>
+        /// <param name="start">
+        /// Start point
+        /// </param>
+        /// <param name="end">
+        /// End Point
+        /// </param>
+        /// <returns>
+        /// If the End point is over a wall
+        /// </returns>
         private bool IsOverWall(Vector3 start, Vector3 end)
         {
             double distance = Vector3.Distance(start, end);
@@ -678,10 +699,15 @@ namespace IKalista
                 this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
 
-            if (this.boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp
+            /*if (spearTarget.HasBuff("Kalistacoopstrikeprotect"))
+            {
+                Console.WriteLine(@"target: "+spearTarget.ChampionName+ @" has passive buff");
+            }*/
+
+            if (boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp
                 && !ObjectManager.Player.IsDashing())
             {
-                if (this.boolLinks["qMana"].Value
+                if (boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
                 {
@@ -708,7 +734,7 @@ namespace IKalista
                 }
             }
 
-            if (!this.boolLinks["useE"].Value || !this.spells[SpellSlot.E].IsReady())
+            if (!boolLinks["useE"].Value || !this.spells[SpellSlot.E].IsReady())
             {
                 return;
             }
@@ -727,7 +753,7 @@ namespace IKalista
                     rendTarget.Buffs.Find(
                         b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
 
-                if (this.boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
+                if (boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
                     && rendTarget.HealthPercent > 20
                     && rendTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
@@ -767,10 +793,10 @@ namespace IKalista
             var spearTarget = TargetSelector.GetTarget(
                 this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
-            if (this.boolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp
+            if (boolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp
                 && !ObjectManager.Player.IsDashing())
             {
-                if (this.boolLinks["qMana"].Value
+                if (boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost
                     && this.spells[SpellSlot.Q].GetDamage(spearTarget) < spearTarget.Health)
@@ -800,7 +826,7 @@ namespace IKalista
                 }
             }
 
-            if (this.boolLinks["useEH"].Value)
+            if (boolLinks["useEH"].Value)
             {
                 var rendTarget =
                     HeroManager.Enemies.Where(
@@ -823,7 +849,7 @@ namespace IKalista
                 }
             }
 
-            if (this.boolLinks["useEMin"].Value)
+            if (boolLinks["useEMin"].Value)
             {
                 var minion =
                     MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
@@ -851,7 +877,7 @@ namespace IKalista
         /// </summary>
         private void OnLaneClear()
         {
-            if (this.boolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
+            if (boolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
             {
                 foreach (var selectedMinion in
                     from selectedMinion in MinionManager.GetMinions(this.spells[SpellSlot.Q].Range)
@@ -886,13 +912,13 @@ namespace IKalista
                     .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                     .FirstOrDefault();
 
-            if (this.boolLinks["minLC"].Value && minion != null && rendTarget != null
+            if (boolLinks["minLC"].Value && minion != null && rendTarget != null
                 && this.spells[SpellSlot.E].CanCast(minion) && this.spells[SpellSlot.E].CanCast(rendTarget))
             {
                 this.spells[SpellSlot.E].Cast();
             }
 
-            if (this.spells[SpellSlot.E].IsReady() && this.boolLinks["useELC"].Value)
+            if (this.spells[SpellSlot.E].IsReady() && boolLinks["useELC"].Value)
             {
                 var minions = MinionManager.GetMinions(
                     this.spells[SpellSlot.E].Range, 
@@ -917,13 +943,13 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     The on process spell function
+        /// The on process spell function
         /// </summary>
         /// <param name="sender">
-        ///     The Spell Sender
+        /// The Spell Sender
         /// </param>
         /// <param name="args">
-        ///     The Arguments
+        /// The Arguments
         /// </param>
         private void OnProcessSpell(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
@@ -932,7 +958,7 @@ namespace IKalista
                 Orbwalking.ResetAutoAttackTimer();
             }
 
-            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && this.boolLinks["saveAllyR"].Value)
+            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && boolLinks["saveAllyR"].Value)
             {
                 var soulboundhero =
                     HeroManager.Allies.FirstOrDefault(
@@ -948,17 +974,17 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     TODO The on update.
+        /// TODO The on update.
         /// </summary>
         /// <param name="args">
-        ///     TODO The args.
+        /// TODO The args.
         /// </param>
         private void OnUpdate(EventArgs args)
         {
             this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
             this.HandleSentinels();
             this.KillstealQ();
-            if (this.boolLinks["useJungleSteal"].Value)
+            if (boolLinks["useJungleSteal"].Value)
             {
                 this.DoMobSteal();
             }
@@ -968,30 +994,30 @@ namespace IKalista
                 this.OnFlee();
             }
 
-            if (this.boolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop()
+            if (boolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop()
                 && !(Items.HasItem(3342) || Items.HasItem(3363)))
             {
                 ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
 
-            this.HandleBalista();
+           //this.HandleBalista();
         }
 
         /// <summary>
-        ///     Process The current Link
+        /// Process The current Link
         /// </summary>
         /// <param name="key">
-        ///     The name of the link
+        /// The name of the link
         /// </param>
         /// <param name="value">
-        ///     The Value of the link
+        /// The Value of the link
         /// </param>
         private void ProcessLink(string key, object value)
         {
             var boolLink = value as MenuWrapper.BoolLink;
             if (boolLink != null)
             {
-                this.boolLinks.Add(key, boolLink);
+                boolLinks.Add(key, boolLink);
             }
 
             var sliderLink = value as MenuWrapper.SliderLink;
@@ -1020,14 +1046,16 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     The target to check the collision for.
+        /// The target to check the collision for.
         /// </summary>
-        /// <param name="target">The target</param>
+        /// <param name="target">
+        /// The target
+        /// </param>
         private void QCollisionCheck(Obj_AI_Hero target)
         {
             var minions = MinionManager.GetMinions(ObjectManager.Player.Position, this.spells[SpellSlot.Q].Range);
 
-            if (minions.Count < 1 || !this.boolLinks["useQMin"].Value || ObjectManager.Player.IsWindingUp
+            if (minions.Count < 1 || !boolLinks["useQMin"].Value || ObjectManager.Player.IsWindingUp
                 || ObjectManager.Player.IsDashing())
             {
                 return;

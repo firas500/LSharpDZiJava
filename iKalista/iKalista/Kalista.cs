@@ -199,48 +199,34 @@ namespace IKalista
         /// </summary>
         private void DoMobSteal()
         {
-            var baron =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .FirstOrDefault(
-                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && x.BaseSkinName.Contains("Baron"));
-            var dragon =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .FirstOrDefault(
-                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && x.BaseSkinName.Contains("Dragon"));
-            var siegeMinion =
-                ObjectManager.Get<Obj_AI_Minion>()
-                    .FirstOrDefault(
-                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && x.BaseSkinName.Contains("MinionSiege"));
-            var jungleMobs =
+            var jungleMinion =
                 MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => !x.BaseSkinName.Contains("Baron") && !x.BaseSkinName.Contains("Dragon"));
-            var damage = this.spells[SpellSlot.E].GetDamage(baron);
+                    .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+
+            var siegeMinion =
+                       MinionManager.GetMinions(
+                           ObjectManager.Player.ServerPosition,
+                           this.spells[SpellSlot.E].Range,
+                           MinionTypes.All,
+                           MinionTeam.Enemy,
+                           MinionOrderTypes.MaxHealth)
+                           .FirstOrDefault(
+                               x =>
+                               x.Health <= this.spells[SpellSlot.E].GetDamage(x)
+                               && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
                 case 0:
 
-                    if (baron != null)
+                    if (jungleMinion != null)
                     {
-                        if (damage >= baron.Health + (baron.HPRegenRate / 2) && this.spells[SpellSlot.E].CanCast(baron))
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
-                    }
-                    else if (dragon != null)
-                    {
-                        if (damage >= dragon.Health + 10 && this.spells[SpellSlot.E].CanCast(dragon))
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
-                    }
-                    else if (jungleMobs != null)
-                    {
-                        if (damage >= jungleMobs.Health + 10 && this.spells[SpellSlot.E].CanCast(jungleMobs))
+                        if (this.spells[SpellSlot.E].CanCast(jungleMinion))
                         {
                             this.spells[SpellSlot.E].Cast();
                         }
@@ -249,44 +235,26 @@ namespace IKalista
                     break;
 
                 case 1:
+
                     if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
                     {
-                        if (damage >= siegeMinion.Health + 10)
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
+                        this.spells[SpellSlot.E].Cast();
                     }
 
                     break;
 
                 case 2:
-                    if (baron != null)
+                    if (jungleMinion != null)
                     {
-                        if (damage >= baron.Health + (baron.HPRegenRate / 2) && this.spells[SpellSlot.E].CanCast(baron))
+                        if (this.spells[SpellSlot.E].CanCast(jungleMinion))
                         {
                             this.spells[SpellSlot.E].Cast();
                         }
                     }
-                    else if (dragon != null)
+
+                    if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
                     {
-                        if (damage >= dragon.Health + 10 && this.spells[SpellSlot.E].CanCast(dragon))
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
-                    }
-                    else if (jungleMobs != null)
-                    {
-                        if (damage >= jungleMobs.Health + 10 && this.spells[SpellSlot.E].CanCast(jungleMobs))
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
-                    }
-                    else if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
-                    {
-                        if (damage >= siegeMinion.Health + 10)
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
+                        this.spells[SpellSlot.E].Cast();
                     }
 
                     break;

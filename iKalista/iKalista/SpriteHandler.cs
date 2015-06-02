@@ -35,65 +35,64 @@ namespace IKalista
     /// </summary>
     internal class SpriteHandler
     {
-        /// <summary>
-        /// The R sprite instance.
-        /// </summary>
-        private static Render.Sprite sprite;
+        #region Properties
 
         /// <summary>
-        /// Gets the current target we will draw the sprite on
+        /// Gets the draw position.
         /// </summary>
-        private static Obj_AI_Hero WTarget
+        private static Vector2 DrawPosition
         {
             get
             {
-                foreach (Obj_AI_Hero source in HeroManager.Enemies.Where(x => ObjectManager.Player.Distance(x) <= 1000f))
+                return Target != null
+                           ? new Vector2(
+                        Drawing.WorldToScreen(Target.Position).X - Target.BoundingRadius * 2 +
+                        Target.BoundingRadius / 1.5f,
+                        Drawing.WorldToScreen(Target.Position).Y - Target.BoundingRadius * 2) : Vector2.Zero;
+            }
+        }
+
+        /// <summary>
+        /// Gets a value indicating whether draw sprite.
+        /// </summary>
+        private static bool DrawSprite
+        {
+            get
+            {
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Gets the target.
+        /// </summary>
+        private static Obj_AI_Hero Target
+        {
+            get
+            {
+                return
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .OrderBy(x => x.Health)
+                        .FirstOrDefault(x => x.IsValidTarget(1000f) && x.HasBuff("KalistaCoopStrikeProtect"));
+            }
+        }
+
+        #endregion
+
+        #region Public Methods and Operators
+
+        /// <summary>
+        ///     Loads the sprite.
+        /// </summary>
+        public static void LoadSprite()
+        {
+            new Render.Sprite(Resources.ScopeSprite, new Vector2())
                 {
-                    if (source.IsValidTarget(1000f) && source.HasBuff("KalistaCoopStrikeProtect"))
-                    {
-                        return source;
-                    }
-                }
-                return null;
-            }
+                    PositionUpdate = () => DrawPosition, Scale = new Vector2(1f, 1f), 
+                    VisibleCondition = sender => DrawSprite
+                }.Add();
         }
 
-        /// <summary>
-        /// Gets the R target position on the screen.
-        /// </summary>
-        private static Vector2 WTargetPosition
-        {
-            get
-            {
-                return WTarget != null ?
-                    new Vector2(
-                        Drawing.WorldToScreen(WTarget.Position).X - WTarget.BoundingRadius * 2 +
-                        WTarget.BoundingRadius / 1.5f,
-                        Drawing.WorldToScreen(WTarget.Position).Y - WTarget.BoundingRadius * 2) : new Vector2();
-            }
-        }
-
-        /// <summary>
-        /// Gets a value indicating whether the sprite should be drawn or not.
-        /// </summary>
-        private static bool DrawCondition
-        {
-            get { return WTarget != null && Render.OnScreen(Drawing.WorldToScreen(WTarget.Position)) && Kalista.boolLinks["drawSprite"].Value; }
-        }
-
-        /// <summary>
-        /// Initializes the sprite reference. To be called when the assembly is loaded.
-        /// </summary>
-        internal static void InitializeSprite()
-        {
-            sprite = new Render.Sprite(Properties.Resources.ScopeSprite, new Vector2());
-            {
-                sprite.Scale = new Vector2(1.0f, 1.0f);
-                sprite.PositionUpdate = () => WTargetPosition;
-                sprite.VisibleCondition = s => DrawCondition;
-            }
-
-            sprite.Add();
-        }
+        #endregion
     }
 }

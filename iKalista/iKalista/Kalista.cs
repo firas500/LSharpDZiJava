@@ -115,7 +115,7 @@ namespace IKalista
             this.InitMenu();
             this.InitSpells();
             this.InitEvents();
-            //SpriteHandler.InitializeSprite();
+            //SpriteHandler.LoadSprite();
         }
 
         #endregion

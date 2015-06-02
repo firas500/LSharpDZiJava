@@ -1000,7 +1000,7 @@ namespace IKalista
                 ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
             }
 
-           //this.HandleBalista();
+            this.HandleBalista();
         }
 
         /// <summary>

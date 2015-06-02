@@ -192,7 +192,7 @@ namespace IKalista
 
         #endregion
 
-        #region Methods
+       #region Methods
 
         /// <summary>
         ///     This is where the magic happens, we like to steal other peoples stuff.
@@ -338,9 +338,7 @@ namespace IKalista
                                  + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
                                  * ObjectManager.Player.TotalAttackDamage());
 
-            return 100
-                   / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod)
-                      - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage;
+            return 100 / (100 + (target.Armor * ObjectManager.Player.PercentArmorPenetrationMod) - ObjectManager.Player.FlatArmorPenetrationMod) * totalDamage;
         }
 
         /// <summary>

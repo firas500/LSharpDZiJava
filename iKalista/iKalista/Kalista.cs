@@ -115,7 +115,8 @@ namespace IKalista
             this.InitMenu();
             this.InitSpells();
             this.InitEvents();
-            //SpriteHandler.LoadSprite();
+
+            // SpriteHandler.LoadSprite();
         }
 
         #endregion
@@ -222,7 +223,7 @@ namespace IKalista
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
             var siegeMinion =
                 MinionManager.GetMinions(
@@ -297,16 +298,16 @@ namespace IKalista
         }
 
         /// <summary>
-        /// Gets the collision minions
+        ///     Gets the collision minions
         /// </summary>
         /// <param name="source">
-        /// the source
+        ///     the source
         /// </param>
         /// <param name="targetPosition">
-        /// the target position
+        ///     the target position
         /// </param>
         /// <returns>
-        /// The list of minions
+        ///     The list of minions
         /// </returns>
         private IEnumerable<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
         {
@@ -325,13 +326,13 @@ namespace IKalista
         }
 
         /// <summary>
-        /// Gets the correct Rend Damage
+        ///     Gets the correct Rend Damage
         /// </summary>
         /// <param name="target">
-        /// The target
+        ///     The target
         /// </param>
         /// <returns>
-        /// The correct damage hopefully..
+        ///     The correct damage hopefully..
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
             Justification = "Reviewed. Suppression is OK here.")]
@@ -360,13 +361,13 @@ namespace IKalista
         }
 
         /// <summary>
-        /// Gets the correct Rend Damage
+        ///     Gets the correct Rend Damage
         /// </summary>
         /// <param name="target">
-        /// The target
+        ///     The target
         /// </param>
         /// <returns>
-        /// The correct damage hopefully..
+        ///     The correct damage hopefully..
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
             Justification = "Reviewed. Suppression is OK here.")]

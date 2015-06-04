@@ -705,8 +705,7 @@ namespace IKalista
                 Console.WriteLine(@"target: "+spearTarget.ChampionName+ @" has passive buff");
             }*/
 
-            if (boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp
-                && !ObjectManager.Player.IsDashing())
+            if (boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady())
             {
                 if (boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
@@ -730,7 +729,10 @@ namespace IKalista
                         this.QCollisionCheck(spearTarget);
                         break;
                     case HitChance.VeryHigh:
-                        this.spells[SpellSlot.Q].Cast(spearTarget);
+                        if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
+                        {
+                            this.spells[SpellSlot.Q].Cast(spearTarget);
+                        }
                         break;
                 }
             }

@@ -15,8 +15,10 @@
 //             You should have received a copy of the GNU General Public License
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
+// <summary>
+//   An Assembly for <see cref="Kalista" /> okay
+// </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace IKalista
 {
     using System;
@@ -133,19 +135,19 @@ namespace IKalista
         #region Public Methods and Operators
 
         /// <summary>
-        /// TODO The show notification.
+        ///     TODO The show notification.
         /// </summary>
         /// <param name="message">
-        /// TODO The message.
+        ///     TODO The message.
         /// </param>
         /// <param name="colour">
-        /// TODO The color.
+        ///     TODO The color.
         /// </param>
         /// <param name="duration">
-        /// TODO The duration.
+        ///     TODO The duration.
         /// </param>
         /// <param name="dispose">
-        /// TODO The dispose.
+        ///     TODO The dispose.
         /// </param>
         public static void ShowNotification(string message, Color colour, int duration = -1, bool dispose = true)
         {
@@ -158,13 +160,13 @@ namespace IKalista
         }
 
         /// <summary>
-        /// TODO The has undying buff.
+        ///     TODO The has undying buff.
         /// </summary>
         /// <param name="target">
-        /// TODO The target.
+        ///     TODO The target.
         /// </param>
         /// <returns>
-        /// The <see cref="bool"/>.
+        ///     The <see cref="bool" />.
         /// </returns>
         public bool HasUndyingBuff(Obj_AI_Hero target)
         {
@@ -222,8 +224,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
-                    MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
+                    MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
             var siegeMinion =
                 MinionManager.GetMinions(
@@ -314,7 +315,7 @@ namespace IKalista
             var input = new PredictionInput
                             {
                                 Unit = source, Radius = this.spells[SpellSlot.Q].Width, 
-                                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed 
+                                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed
                             };
 
             input.CollisionObjects[0] = CollisionableObjects.Minions;
@@ -395,7 +396,9 @@ namespace IKalista
             }
 
             var blitzcrank =
-                HeroManager.Allies.FirstOrDefault(x => x.IsAlly
+                HeroManager.Allies.FirstOrDefault(
+                    x =>
+                    x.IsAlly
                     && ObjectManager.Player.Distance(x.ServerPosition) < this.sliderLinks["maxRange"].Value.Value
                     && ObjectManager.Player.Distance(x.ServerPosition) >= this.sliderLinks["minRange"].Value.Value
                     && x.ChampionName == "Blitzcrank");
@@ -634,16 +637,16 @@ namespace IKalista
         }
 
         /// <summary>
-        /// Determines if the end point is over a wall
+        ///     Determines if the end point is over a wall
         /// </summary>
         /// <param name="start">
-        /// Start point
+        ///     Start point
         /// </param>
         /// <param name="end">
-        /// End Point
+        ///     End Point
         /// </param>
         /// <returns>
-        /// If the End point is over a wall
+        ///     If the End point is over a wall
         /// </returns>
         private bool IsOverWall(Vector3 start, Vector3 end)
         {
@@ -696,17 +699,15 @@ namespace IKalista
         /// </summary>
         private void OnCombo()
         {
-            var spearTarget = TargetSelector.GetTarget(
-                this.spells[SpellSlot.Q].Range, 
-                TargetSelector.DamageType.Physical);
-
             /*if (spearTarget.HasBuff("Kalistacoopstrikeprotect"))
             {
                 Console.WriteLine(@"target: "+spearTarget.ChampionName+ @" has passive buff");
             }*/
-
             if (boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady())
             {
+                var spearTarget = TargetSelector.GetTarget(
+                    this.spells[SpellSlot.Q].Range, 
+                    TargetSelector.DamageType.Physical);
                 if (boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
@@ -728,17 +729,18 @@ namespace IKalista
 
                 switch (prediction.Hitchance)
                 {
-                    case HitChance.Collision:
+                    /*case HitChance.Collision:
                         if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
                         {
                             this.QCollisionCheck(spearTarget);
                         }
-                        break;
+                        break;*/
                     case HitChance.VeryHigh:
                         if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
                         {
                             this.spells[SpellSlot.Q].Cast(spearTarget);
                         }
+
                         break;
                 }
             }
@@ -952,13 +954,13 @@ namespace IKalista
         }
 
         /// <summary>
-        /// The on process spell function
+        ///     The on process spell function
         /// </summary>
         /// <param name="sender">
-        /// The Spell Sender
+        ///     The Spell Sender
         /// </param>
         /// <param name="args">
-        /// The Arguments
+        ///     The Arguments
         /// </param>
         private void OnProcessSpell(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
@@ -983,10 +985,10 @@ namespace IKalista
         }
 
         /// <summary>
-        /// TODO The on update.
+        ///     TODO The on update.
         /// </summary>
         /// <param name="args">
-        /// TODO The args.
+        ///     TODO The args.
         /// </param>
         private void OnUpdate(EventArgs args)
         {
@@ -1013,13 +1015,13 @@ namespace IKalista
         }
 
         /// <summary>
-        /// Process The current Link
+        ///     Process The current Link
         /// </summary>
         /// <param name="key">
-        /// The name of the link
+        ///     The name of the link
         /// </param>
         /// <param name="value">
-        /// The Value of the link
+        ///     The Value of the link
         /// </param>
         private void ProcessLink(string key, object value)
         {
@@ -1055,10 +1057,10 @@ namespace IKalista
         }
 
         /// <summary>
-        /// The target to check the collision for.
+        ///     The target to check the collision for.
         /// </summary>
         /// <param name="target">
-        /// The target
+        ///     The target
         /// </param>
         private void QCollisionCheck(Obj_AI_Hero target)
         {

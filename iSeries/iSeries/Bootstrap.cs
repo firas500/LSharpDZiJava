@@ -46,7 +46,7 @@ namespace iSeries
         #region Constructors and Destructors
 
         /// <summary>
-        ///     Initializes static members of the <see cref="Bootstrap"/> class.
+        ///     Initializes static members of the <see cref="Bootstrap" /> class.
         /// </summary>
         static Bootstrap()
         {
@@ -80,8 +80,11 @@ namespace iSeries
                             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
                             TargetSelector.AddToMenu(targetSelectorMenu);
                             Variables.Menu.AddSubMenu(targetSelectorMenu);
-                            Variables.Orbwalker = new Orbwalking.Orbwalker(Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
+                            Variables.Orbwalker =
+                                new Orbwalking.Orbwalker(
+                                    Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
                         }
+
                         Variables.Menu.AddToMainMenu();
                         SupportedChampions[Variables.Player.ChampionName]();
                     };

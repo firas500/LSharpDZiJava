@@ -718,7 +718,10 @@ namespace IKalista
                     HeroManager.Enemies.Where(x => x.IsValidTarget(this.spells[SpellSlot.Q].Range))
                         .Where(unit => this.spells[SpellSlot.Q].GetPrediction(unit).Hitchance == HitChance.Immobile))
                 {
-                    this.spells[SpellSlot.Q].Cast(unit);
+                    if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
+                    {
+                        this.spells[SpellSlot.Q].Cast(unit);
+                    }
                 }
 
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(spearTarget);
@@ -726,7 +729,10 @@ namespace IKalista
                 switch (prediction.Hitchance)
                 {
                     case HitChance.Collision:
-                        this.QCollisionCheck(spearTarget);
+                        if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
+                        {
+                            this.QCollisionCheck(spearTarget);
+                        }
                         break;
                     case HitChance.VeryHigh:
                         if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())

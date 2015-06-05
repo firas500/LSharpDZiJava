@@ -699,85 +699,51 @@ namespace IKalista
         /// </summary>
         private void OnCombo()
         {
-            /*if (spearTarget.HasBuff("Kalistacoopstrikeprotect"))
-            {
-                Console.WriteLine(@"target: "+spearTarget.ChampionName+ @" has passive buff");
-            }*/
-            if (boolLinks["useQ"].Value && this.spells[SpellSlot.Q].IsReady())
-            {
-                var spearTarget = TargetSelector.GetTarget(
-                    this.spells[SpellSlot.Q].Range, 
+            var target =
+                TargetSelector.GetTarget(
+                    boolLinks["useQ"].Value ? this.spells[SpellSlot.Q].Range : this.spells[SpellSlot.E].Range, 
                     TargetSelector.DamageType.Physical);
-                if (boolLinks["qMana"].Value
+
+            if (this.spells[SpellSlot.Q].IsReady() && boolLinks["useQ"].Value && !ObjectManager.Player.IsDashing()
+                && !ObjectManager.Player.IsWindingUp)
+            {
+                if (boolLinks["qMana"].Value && !this.spells[SpellSlot.Q].IsKillable(target)
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
                 {
                     return;
                 }
 
-                foreach (var unit in
-                    HeroManager.Enemies.Where(x => x.IsValidTarget(this.spells[SpellSlot.Q].Range))
-                        .Where(unit => this.spells[SpellSlot.Q].GetPrediction(unit).Hitchance == HitChance.Immobile))
+                var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
+                if (prediction.Hitchance >= HitChance.VeryHigh)
                 {
-                    if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
-                    {
-                        this.spells[SpellSlot.Q].Cast(unit);
-                    }
+                    this.spells[SpellSlot.Q].Cast(target);
                 }
-
-                var prediction = this.spells[SpellSlot.Q].GetPrediction(spearTarget);
-
-                switch (prediction.Hitchance)
+                else if (prediction.Hitchance == HitChance.Collision)
                 {
-                    /*case HitChance.Collision:
-                        if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
-                        {
-                            this.QCollisionCheck(spearTarget);
-                        }
-                        break;*/
-                    case HitChance.VeryHigh:
-                        if (!ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
-                        {
-                            this.spells[SpellSlot.Q].Cast(spearTarget);
-                        }
-
-                        break;
+                    this.QCollisionCheck(target);
                 }
             }
 
-            if (!boolLinks["useE"].Value || !this.spells[SpellSlot.E].IsReady())
-            {
-                return;
-            }
-
-            var rendTarget =
-                HeroManager.Enemies.Where(
-                    x =>
-                    x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= 1
-                    && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
-                    .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
-                    .FirstOrDefault();
-
-            if (rendTarget != null && !this.HasUndyingBuff(rendTarget))
+            if (this.spells[SpellSlot.E].IsReady() && target.HasBuff("KalistaExpungeMarker") && this.spells[SpellSlot.E].IsInRange(target))
             {
                 var rendBuff =
-                    rendTarget.Buffs.Find(
-                        b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
+                    target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
 
                 if (boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
-                    && rendTarget.HealthPercent > 20
-                    && rendTarget.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
-                    > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
+                   && target.HealthPercent > 20
+                   && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
+                   > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if (this.GetRealDamage(rendTarget) >= rendTarget.Health
-                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if ((this.GetRealDamage(target) >= target.Health && !this.HasUndyingBuff(target)) || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
             }
+
         }
 
         /// <summary>

@@ -862,10 +862,12 @@ namespace IKalista
         /// </summary>
         private void OnLaneClear()
         {
+            var minions = MinionManager.GetMinions(this.spells[SpellSlot.E].Range);
+
             if (boolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
             {
                 foreach (var selectedMinion in
-                    from selectedMinion in MinionManager.GetMinions(this.spells[SpellSlot.Q].Range)
+                    from selectedMinion in minions
                     let killcount =
                         this.GetCollisionMinions(
                             ObjectManager.Player, 
@@ -883,7 +885,7 @@ namespace IKalista
                 }
             }
 
-            var minion =
+            var harassableMinion =
                 MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
                     .Where(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x))
                     .OrderBy(x => x.Health)
@@ -897,18 +899,14 @@ namespace IKalista
                     .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                     .FirstOrDefault();
 
-            if (boolLinks["minLC"].Value && minion != null && rendTarget != null
-                && this.spells[SpellSlot.E].CanCast(minion) && this.spells[SpellSlot.E].CanCast(rendTarget))
+            if (boolLinks["minLC"].Value && harassableMinion != null && rendTarget != null
+                && this.spells[SpellSlot.E].CanCast(harassableMinion) && this.spells[SpellSlot.E].CanCast(rendTarget))
             {
                 this.spells[SpellSlot.E].Cast();
             }
 
             if (this.spells[SpellSlot.E].IsReady() && boolLinks["useELC"].Value)
             {
-                var minions = MinionManager.GetMinions(
-                    this.spells[SpellSlot.E].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.NotAlly);
                 var count =
                     minions.Count(
                         x => this.spells[SpellSlot.E].CanCast(x) && x.Health < this.spells[SpellSlot.E].GetDamage(x));

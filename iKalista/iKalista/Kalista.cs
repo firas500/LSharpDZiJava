@@ -218,63 +218,28 @@ namespace IKalista
         /// </summary>
         private void DoMobSteal()
         {
-            var jungleMinion =
-                MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition, 
-                    this.spells[SpellSlot.E].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.Neutral, 
-                    MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
-
-            var siegeMinion =
-                MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition, 
-                    this.spells[SpellSlot.E].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.Enemy, 
-                    MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(
-                        x =>
-                        x.Health <= this.spells[SpellSlot.E].GetDamage(x)
-                        && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
+            var junglelMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+            var bigMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x) && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
-                case 0:
-
-                    if (jungleMinion != null)
-                    {
-                        if (this.spells[SpellSlot.E].CanCast(jungleMinion))
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
-                    }
-
-                    break;
-
-                case 1:
-
-                    if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
+                case 0: // jungle mobs
+                    if (junglelMinions != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
-
                     break;
-
-                case 2:
-                    if (jungleMinion != null)
-                    {
-                        if (this.spells[SpellSlot.E].CanCast(jungleMinion))
-                        {
-                            this.spells[SpellSlot.E].Cast();
-                        }
-                    }
-
-                    if (siegeMinion != null && this.spells[SpellSlot.E].CanCast(siegeMinion))
+                case 1: // siege and super
+                    if (bigMinions != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
-
+                    break;
+                case 2: // both
+                    if (junglelMinions != null || bigMinions != null)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
                     break;
             }
         }
@@ -595,7 +560,7 @@ namespace IKalista
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
                 this.ProcessLink(
                     "jungStealMode", 
-                    misc.AddLinkedStringList("Steal Mode", new[] { "Baron - Dragon", "Big Minions", "Both" }));
+                    misc.AddLinkedStringList("Steal Mode", new[] { "Jungle Mobs", "Siege Minions | Super Minions", "Both" }));
                 this.ProcessLink("eDamageType", misc.AddLinkedStringList("E Calc Method", new[] { "Common", "Custom" }));
                 this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
                 this.ProcessLink(

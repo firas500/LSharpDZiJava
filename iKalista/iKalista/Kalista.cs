@@ -561,6 +561,9 @@ namespace IKalista
                 this.ProcessLink("eLeaving", comboMenu.AddLinkedBool("Auto E Leaving"));
                 this.ProcessLink("minStacks", comboMenu.AddLinkedSlider("Min Stacks E", 10, 5, 20));
                 this.ProcessLink("eDamageReduction", comboMenu.AddLinkedSlider("Damage Reduction", 20, 100, 0));
+                this.ProcessLink("eDeath", comboMenu.AddLinkedBool("E Before Death"));
+                this.ProcessLink("eDeathC", comboMenu.AddLinkedSlider("E Death Stacks", 5, 3, 10));
+                this.ProcessLink("eHealth", comboMenu.AddLinkedSlider("Health To E Death %", 15, 5, 50));
                 this.ProcessLink("saveAllyR", comboMenu.AddLinkedBool("Save Ally with R"));
                 this.ProcessLink("allyPercent", comboMenu.AddLinkedSlider("Save Ally Percentage", 20));
             }
@@ -725,25 +728,26 @@ namespace IKalista
                 }
             }
 
-            if (this.spells[SpellSlot.E].IsReady() && target.HasBuff("KalistaExpungeMarker") && this.spells[SpellSlot.E].IsInRange(target))
+            if (this.spells[SpellSlot.E].IsReady() && target.HasBuff("KalistaExpungeMarker")
+                && this.spells[SpellSlot.E].IsInRange(target))
             {
                 var rendBuff =
                     target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
 
                 if (boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
-                   && target.HealthPercent > 20
-                   && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
-                   > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
+                    && target.HealthPercent > 20
+                    && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
+                    > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if ((this.GetRealDamage(target) >= target.Health && !this.HasUndyingBuff(target)) || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                if ((this.GetRealDamage(target) >= target.Health && !this.HasUndyingBuff(target))
+                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
             }
-
         }
 
         /// <summary>
@@ -961,6 +965,37 @@ namespace IKalista
             this.orbwalkingModesDictionary[this.menu.Orbwalker.ActiveMode]();
             this.HandleSentinels();
             this.KillstealQ();
+
+            /*
+             *  this.ProcessLink("eDeath", comboMenu.AddLinkedBool("E Before Death"));
+                this.ProcessLink("eDeathC", comboMenu.AddLinkedSlider("E Death Stacks", 5, 3, 10));
+                this.ProcessLink("eHealth", comboMenu.AddLinkedSlider("Health To E Death %", 15, 5, 50)); 
+             */
+            var enemies =
+                HeroManager.Enemies.Count(x => ObjectManager.Player.Distance(x) <= this.spells[SpellSlot.E].Range);
+
+            if (boolLinks["eDeath"].Value && enemies > 2
+                && ObjectManager.Player.HealthPercent <= this.sliderLinks["eHealth"].Value.Value
+                && this.spells[SpellSlot.E].IsReady())
+            {
+                var target =
+                    HeroManager.Enemies.Where(
+                        x => this.spells[SpellSlot.E].IsInRange(x) && x.HasBuff("KalistaExpungeMarker"))
+                        .OrderBy(x => this.spells[SpellSlot.E].GetDamage(x))
+                        .FirstOrDefault();
+                if (target != null)
+                {
+                    var buff =
+                        target.Buffs.Find(
+                            b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
+
+                    if (buff.Count >= this.sliderLinks["eDeathC"].Value.Value)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
+                }
+            }
+
             if (boolLinks["useJungleSteal"].Value)
             {
                 this.DoMobSteal();

@@ -866,7 +866,7 @@ namespace IKalista
                                 this.spells[SpellSlot.Q].Range))
                         .Count(
                             collisionMinion =>
-                            collisionMinion.Health <= this.spells[SpellSlot.Q].GetDamage(collisionMinion))
+                            collisionMinion.Health + 5 < this.spells[SpellSlot.Q].GetDamage(collisionMinion))
                     where killcount >= this.sliderLinks["minHitQ"].Value.Value
                     where !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing()
                     select selectedMinion)

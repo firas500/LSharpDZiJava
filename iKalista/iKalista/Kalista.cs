@@ -209,6 +209,23 @@ namespace IKalista
             return false;
         }
 
+        public float GetTargetHealth(Obj_AI_Hero target, bool includeShield = true)
+        {
+            var result = target.Health;
+            if (includeShield)
+            {
+                if (target.AttackShield > 0)
+                {
+                    result += target.AttackShield;
+                }
+                else if (target.MagicShield > 0)
+                {
+                    result += target.MagicShield;
+                }
+            }
+            return result;
+        }
+
         #endregion
 
         #region Methods
@@ -218,8 +235,25 @@ namespace IKalista
         /// </summary>
         private void DoMobSteal()
         {
-            var junglelMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.Neutral, MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
-            var bigMinions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.Enemy, MinionOrderTypes.MaxHealth).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x) && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
+            var junglelMinions =
+                MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.Neutral, 
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+            var bigMinions =
+                MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.Enemy, 
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(
+                        x =>
+                        x.Health <= this.spells[SpellSlot.E].GetDamage(x)
+                        && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
@@ -228,18 +262,21 @@ namespace IKalista
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
+
                     break;
                 case 1: // siege and super
                     if (bigMinions != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
+
                     break;
                 case 2: // both
                     if (junglelMinions != null || bigMinions != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
+
                     break;
             }
         }
@@ -560,7 +597,9 @@ namespace IKalista
                 this.ProcessLink("useJungleSteal", misc.AddLinkedBool("Enabled Jungle Steal"));
                 this.ProcessLink(
                     "jungStealMode", 
-                    misc.AddLinkedStringList("Steal Mode", new[] { "Jungle Mobs", "Siege Minions | Super Minions", "Both" }));
+                    misc.AddLinkedStringList(
+                        "Steal Mode", 
+                        new[] { "Jungle Mobs", "Siege Minions | Super Minions", "Both" }));
                 this.ProcessLink("eDamageType", misc.AddLinkedStringList("E Calc Method", new[] { "Common", "Custom" }));
                 this.ProcessLink("qMana", misc.AddLinkedBool("Save Mana For E"));
                 this.ProcessLink(
@@ -707,7 +746,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].Cast();
                 }
 
-                if ((this.GetRealDamage(target) >= target.Health && !this.HasUndyingBuff(target))
+                if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target))
                     || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -745,7 +784,7 @@ namespace IKalista
                 if (boolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost
-                    && this.spells[SpellSlot.Q].GetDamage(spearTarget) < spearTarget.Health)
+                    && this.spells[SpellSlot.Q].GetDamage(spearTarget) < this.GetTargetHealth(spearTarget))
                 {
                     return;
                 }
@@ -787,7 +826,7 @@ namespace IKalista
                     var stackCount =
                         rendTarget.Buffs.Find(
                             b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
-                    if (this.GetRealDamage(rendTarget) > rendTarget.Health + 10
+                    if (this.GetRealDamage(rendTarget) > this.GetTargetHealth(rendTarget)
                         || stackCount >= this.sliderLinks["minStacks"].Value.Value)
                     {
                         this.spells[SpellSlot.E].Cast();

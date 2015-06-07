@@ -209,6 +209,12 @@ namespace IKalista
             return false;
         }
 
+        /// <summary>
+        ///     Gets the targets current health including shield damage
+        /// </summary>
+        /// <param name="target"> The Target </param>
+        /// <param name="includeShield">Include shield</param>
+        /// <returns><see cref="float"/></returns>
         public float GetTargetHealth(Obj_AI_Hero target, bool includeShield = true)
         {
             var result = target.Health;
@@ -288,7 +294,6 @@ namespace IKalista
         {
             if (!this.spells[SpellSlot.Q].IsReady() || !this.keyLinks["fleeKey"].Value.Active)
             {
-                ////Change !true to a check if the flee key is not pressed
                 return;
             }
 

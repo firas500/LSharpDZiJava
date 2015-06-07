@@ -75,6 +75,22 @@ namespace iSeries.Champions.Kalista
         #region Public Methods and Operators
 
         /// <summary>
+        ///     Gets the targets health including the shield amount
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The targets health
+        /// </returns>
+        public float GetActualHealth(Obj_AI_Base target)
+        {
+            return target.AttackShield > 0
+                       ? target.Health + target.AttackShield
+                       : target.MagicShield > 0 ? target.Health + target.MagicShield : target.Health;
+        }
+
+        /// <summary>
         ///     Gets the Rend Damage
         /// </summary>
         /// <param name="target">
@@ -120,7 +136,7 @@ namespace iSeries.Champions.Kalista
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
-                if (rendTarget != null && this.spells[SpellSlot.E].GetDamage(rendTarget) > rendTarget.Health
+                if (rendTarget != null && this.spells[SpellSlot.E].GetDamage(rendTarget) > this.GetActualHealth(rendTarget)
                     && !rendTarget.IsDead)
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -211,7 +227,11 @@ namespace iSeries.Champions.Kalista
                                   * (baseSpearDamage[this.spells[SpellSlot.E].Level - 1]
                                      + spearMultiplier[this.spells[SpellSlot.E].Level - 1]
                                      * Variables.Player.TotalAttackDamage());
-                return (float) (100 / (100 + (target.Armor * Variables.Player.PercentArmorPenetrationMod) - Variables.Player.FlatArmorPenetrationMod) * totalDamage);
+                return
+                    (float)
+                    (100
+                     / (100 + (target.Armor * Variables.Player.PercentArmorPenetrationMod)
+                        - Variables.Player.FlatArmorPenetrationMod) * totalDamage);
             }
 
             return 0;
@@ -224,7 +244,7 @@ namespace iSeries.Champions.Kalista
         {
             foreach (var hero in
                 HeroManager.Enemies.Where(
-                    x => this.spells[SpellSlot.E].IsInRange(x) && x.Health < this.spells[SpellSlot.E].GetDamage(x)))
+                    x => this.spells[SpellSlot.E].IsInRange(x) && this.GetActualHealth(x) < this.spells[SpellSlot.E].GetDamage(x)))
             {
                 if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
                     || hero.HasBuffOfType(BuffType.SpellShield))

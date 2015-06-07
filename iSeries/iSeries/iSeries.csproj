@@ -67,6 +67,8 @@
     <Compile Include="Champions\Champion.cs" />
     <Compile Include="Champions\Kalista\Kalista.cs" />
     <Compile Include="Champions\Kalista\MenuGenerator.cs" />
+    <Compile Include="Champions\Lucian\Lucian.cs" />
+    <Compile Include="Champions\Lucian\MenuGenerator.cs" />
     <Compile Include="Champions\Utilities\DamageIndicator.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Variables.cs" />

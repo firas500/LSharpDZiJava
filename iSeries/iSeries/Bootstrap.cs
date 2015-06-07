@@ -25,6 +25,7 @@ namespace iSeries
     using System.Collections.Generic;
 
     using iSeries.Champions.Kalista;
+    using iSeries.Champions.Lucian;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -51,6 +52,7 @@ namespace iSeries
         static Bootstrap()
         {
             SupportedChampions.Add("Kalista", new Kalista().Invoke);
+            SupportedChampions.Add("Lucian", new Lucian().Invoke);
         }
 
         #endregion

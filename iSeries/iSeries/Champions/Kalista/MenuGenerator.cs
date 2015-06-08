@@ -38,6 +38,12 @@ namespace iSeries.Champions.Kalista
         /// </param>
         public static void Generate(Menu root)
         {
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(targetSelectorMenu);
+            root.AddSubMenu(targetSelectorMenu);
+
+            Variables.Orbwalker = new Orbwalking.Orbwalker(root.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
+
             var comboMenu = new Menu("Combo Options", "com.iseries.kalista.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.kalista.combo.useQ", "Use Q").SetValue(true));
@@ -49,9 +55,26 @@ namespace iSeries.Champions.Kalista
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.useQ", "Use Q").SetValue(false));
                 harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.useE", "Use E").SetValue(false));
-                harassMenu.AddItem(
-                    new MenuItem("com.iseries.kalista.harass.stacks", "E Stacks").SetValue(new Slider(5, 2, 10)));
+                harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.stacks", "E Stacks").SetValue(new Slider(5, 2, 10)));
                 root.AddSubMenu(harassMenu);
+            }
+
+            var laneclearMenu = new Menu("Laneclear Options", "com.iseries.kalista.laneclear");
+            {
+                laneclearMenu.AddItem(new MenuItem("com.iseries.kalista.laneclear.useQ", "Use Q").SetValue(true));
+                laneclearMenu.AddItem(
+                    new MenuItem("com.iseries.kalista.laneclear.useQNum", "Q Number").SetValue(new Slider(4, 2, 10)));
+                laneclearMenu.AddItem(new MenuItem("com.iseries.kalista.laneclear.useE", "Use E").SetValue(true));
+                laneclearMenu.AddItem(
+                    new MenuItem("com.iseries.kalista.laneclear.useENum", "E Number").SetValue(new Slider(4, 2, 10)));
+                root.AddSubMenu(laneclearMenu);
+            }
+
+            var misc = new Menu("Misc Options", "com.iseries.kalista.misc");
+            {
+                misc.AddItem(new MenuItem("com.iseries.kalista.misc.mobsteal", "Jungle Steal").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.kalista.misc.lasthit", "Last Hit Assist").SetValue(true));
+                root.AddSubMenu(misc);
             }
         }
 

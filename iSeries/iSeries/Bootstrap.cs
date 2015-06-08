@@ -78,14 +78,6 @@ namespace iSeries
                         }
 
                         Variables.Menu = new Menu("iSeries: " + Variables.Player.ChampionName, "iSeries", true);
-                        {
-                            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-                            TargetSelector.AddToMenu(targetSelectorMenu);
-                            Variables.Menu.AddSubMenu(targetSelectorMenu);
-                            Variables.Orbwalker =
-                                new Orbwalking.Orbwalker(
-                                    Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
-                        }
 
                         Variables.Menu.AddToMainMenu();
                         SupportedChampions[Variables.Player.ChampionName]();

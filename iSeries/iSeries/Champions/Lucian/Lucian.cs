@@ -23,11 +23,13 @@ namespace iSeries.Champions.Lucian
 {
     using System;
     using System.Collections.Generic;
+    using System.Linq;
 
     using iSeries.Champions.Utilities;
 
     using LeagueSharp;
     using LeagueSharp.Common;
+    using LeagueSharp.Common.Data;
 
     /// <summary>
     ///     The Champion Class
@@ -77,6 +79,7 @@ namespace iSeries.Champions.Lucian
             Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpellCast;
             Orbwalking.AfterAttack += this.OrbwalkingAfterAttack;
             AntiGapcloser.OnEnemyGapcloser += this.OnGapcloser;
+            Spellbook.OnCastSpell += this.OnCastSpell;
         }
 
         #endregion
@@ -93,11 +96,21 @@ namespace iSeries.Champions.Lucian
         /// </returns>
         public float GetComboDamage(Obj_AI_Base target)
         {
-            var aaDamage = Variables.Player.GetAutoAttackDamage(target, true) * 2;
+            var damage = 0f;
             var qDamage = this.spells[SpellSlot.Q].GetDamage(target);
             var wDamage = this.spells[SpellSlot.W].GetDamage(target);
 
-            return (float)(aaDamage + qDamage + wDamage);
+            if (this.spells[SpellSlot.Q].IsReady())
+            {
+                damage += qDamage;
+            }
+
+            if (this.spells[SpellSlot.W].IsReady())
+            {
+                damage += wDamage;
+            }
+
+            return damage;
         }
 
         /// <summary>
@@ -105,6 +118,15 @@ namespace iSeries.Champions.Lucian
         /// </summary>
         public override void OnCombo()
         {
+            var target = TargetSelector.GetTarget(this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
+            if (target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
+            {
+                if (this.spells[SpellSlot.W].IsReady())
+                {
+                    this.spells[SpellSlot.W].Cast(target.ServerPosition);
+                    this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
+                }
+            }
         }
 
         /// <summary>
@@ -153,6 +175,8 @@ namespace iSeries.Champions.Lucian
                     this.OnLaneclear();
                     break;
             }
+
+            this.OnUpdateFunctions();
         }
 
         #endregion
@@ -171,6 +195,30 @@ namespace iSeries.Champions.Lucian
                    || (Environment.TickCount - this.spells[SpellSlot.Q].LastCastAttemptT < 500
                        || Environment.TickCount - this.spells[SpellSlot.W].LastCastAttemptT < 500
                        || Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500);
+        }
+
+        /// <summary>
+        ///     TODO The on cast spell.
+        /// </summary>
+        /// <param name="sender">
+        ///     TODO The sender.
+        /// </param>
+        /// <param name="args">
+        ///     TODO The args.
+        /// </param>
+        private void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E)
+            {
+                shouldHavePassive = true;
+            }
+            else if (args.Slot == SpellSlot.R)
+            {
+                if (ItemData.Youmuus_Ghostblade.GetItem().IsReady())
+                {
+                    ItemData.Youmuus_Ghostblade.GetItem().Cast();
+                }
+            }
         }
 
         /// <summary>
@@ -217,8 +265,26 @@ namespace iSeries.Champions.Lucian
                         this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                         break;
                 }
+            }
+        }
 
-                // Console.WriteLine(args.SData.Name);
+        /// <summary>
+        ///     The Functions to always process
+        /// </summary>
+        private void OnUpdateFunctions()
+        {
+            foreach (var hero in
+                HeroManager.Enemies.Where(
+                    x => this.spells[SpellSlot.Q].IsInRange(x) && x.Health + 5 < this.spells[SpellSlot.Q].GetDamage(x)))
+            {
+                this.spells[SpellSlot.Q].CastOnUnit(hero);
+                this.spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
+            }
+
+            foreach (var hero in HeroManager.Enemies.Where(x => this.spells[SpellSlot.W].IsInRange(x) && x.Health + 5 < this.spells[SpellSlot.W].GetDamage(x)).Where(hero => this.spells[SpellSlot.W].GetPrediction(hero).Hitchance >= HitChance.Medium))
+            {
+                this.spells[SpellSlot.W].CastOnUnit(hero);
+                this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
             }
         }
 
@@ -255,8 +321,7 @@ namespace iSeries.Champions.Lucian
 
                     if (target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
                     {
-                        if (this.spells[SpellSlot.W].IsReady()
-                            && Variables.Player.Distance(target) <= Orbwalking.GetRealAutoAttackRange(target))
+                        if (this.spells[SpellSlot.W].IsReady())
                         {
                             this.spells[SpellSlot.W].Cast(target.ServerPosition);
                             this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;

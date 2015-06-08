@@ -162,8 +162,7 @@ namespace iSeries.Champions.Utilities
                         (int)(unit.HPBarPosition.Y + BarOffset.Y) - 5);
 
                 // Draw the line
-                Drawing.DrawLine(startPoint, endPoint, LineThickness, Color.Green);
-                Drawing.DrawLine(startPoint, endPoint, LineThickness, Color.FromArgb(50, Color.Green));
+                Drawing.DrawLine(startPoint, endPoint, LineThickness, Color.LawnGreen);
             }
         }
 

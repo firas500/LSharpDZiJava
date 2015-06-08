@@ -121,6 +121,7 @@ namespace iDzLucian
             Orbwalking.AfterAttack += OrbwalkingAfterAttack;
             AntiGapcloser.OnEnemyGapcloser += OnGapcloser;
             Drawing.OnDraw += OnDraw;
+            Spellbook.OnCastSpell += SpellBook_OnCastSpell;
         }
 
         #endregion
@@ -200,7 +201,15 @@ namespace iDzLucian
                     new MenuItem("com.idzlucian.misc.antigpe", "Use E Against enemy gapclosers").SetValue(false));
                 miscMenu.AddItem(new MenuItem("com.idzlucian.misc.debug", "Debug").SetValue(false));
             }
-
+            var noExtQOnMenu = new Menu("Misc - Don't Use Extended Q Harass On", "com.idzlucian.misc.noextq");
+            {
+                foreach (var Hero in HeroManager.Enemies)
+                {
+                    noExtQOnMenu.AddItem(
+                        new MenuItem(
+                            "com.idzlucian.misc.noextq." + Hero.ChampionName.ToLowerInvariant(), Hero.ChampionName).SetValue(false));
+                }
+            }
             Menu.AddSubMenu(miscMenu);
             Cleanser.OnLoad();
 
@@ -310,6 +319,11 @@ namespace iDzLucian
                 MinionTeam.NotAlly);
 
             if (!minions.Any() || !targetExtended.IsMoving)
+            {
+                return;
+            }
+
+            if (MenuHelper.IsMenuEnabled("com.idzlucian.misc.noextq." + targetExtended.ChampionName.ToLowerInvariant()) && mode == Mode.Harass)
             {
                 return;
             }
@@ -489,6 +503,23 @@ namespace iDzLucian
                 // Console.WriteLine(args.SData.Name);
             }
         }
+
+        /// <summary>
+        /// Called when a spell is about to get casted.
+        /// </summary>
+        /// <param name="sender">The sender</param>
+        /// <param name="args">The args</param>
+        private static void SpellBook_OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.R)
+            {
+                if (Items.HasItem(3142) && Items.CanUseItem(3142))
+                {
+                    Items.UseItem(3142);
+                }
+            }
+        }
+
 
         /// <summary>
         ///     TODO The on draw.

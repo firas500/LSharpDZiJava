@@ -335,7 +335,7 @@ namespace iSeries.Champions.Kalista
 
             return
                 Collision.GetCollision(new List<Vector3> { targetPosition }, input)
-                    .OrderBy(obj => obj.Distance(source, false))
+                    .OrderBy(obj => obj.Distance(source))
                     .ToList();
         }
 

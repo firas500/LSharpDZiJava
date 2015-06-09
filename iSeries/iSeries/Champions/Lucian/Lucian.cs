@@ -36,15 +36,6 @@ namespace iSeries.Champions.Lucian
     /// </summary>
     internal class Lucian : Champion
     {
-        #region Static Fields
-
-        /// <summary>
-        ///     The Passive Check
-        /// </summary>
-        private static bool shouldHavePassive;
-
-        #endregion
-
         #region Fields
 
         /// <summary>
@@ -57,6 +48,11 @@ namespace iSeries.Champions.Lucian
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 425) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 1400) }
                                                                    };
+
+        /// <summary>
+        ///     The Passive Check
+        /// </summary>
+        private bool shouldHavePassive;
 
         #endregion
 
@@ -80,6 +76,8 @@ namespace iSeries.Champions.Lucian
             Orbwalking.AfterAttack += this.OrbwalkingAfterAttack;
             AntiGapcloser.OnEnemyGapcloser += this.OnGapcloser;
             Spellbook.OnCastSpell += this.OnCastSpell;
+            Obj_AI_Base.OnBuffAdd += this.OnAddBuff;
+            Obj_AI_Base.OnBuffRemove += this.OnRemoveBuff;
         }
 
         #endregion
@@ -191,10 +189,25 @@ namespace iSeries.Champions.Lucian
         /// </returns>
         private bool HasPassive()
         {
-            return shouldHavePassive || Variables.Player.HasBuff("LucianPassiveBuff")
-                   || (Environment.TickCount - this.spells[SpellSlot.Q].LastCastAttemptT < 500
-                       || Environment.TickCount - this.spells[SpellSlot.W].LastCastAttemptT < 500
-                       || Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500);
+            return this.shouldHavePassive || Variables.Player.HasBuff("LucianPassiveBuff");
+        }
+
+        /// <summary>
+        ///     TODO The on add buff.
+        /// </summary>
+        /// <param name="sender">
+        ///     TODO The sender.
+        /// </param>
+        /// <param name="args">
+        ///     TODO The args.
+        /// </param>
+        private void OnAddBuff(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
+        {
+            if (sender.IsMe && args.Buff.Name == "lucianpassivebuff")
+            {
+                this.shouldHavePassive = true;
+                Console.WriteLine("Has Passive buff");
+            }
         }
 
         /// <summary>
@@ -210,7 +223,7 @@ namespace iSeries.Champions.Lucian
         {
             if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E)
             {
-                shouldHavePassive = true;
+                this.shouldHavePassive = true;
             }
             else if (args.Slot == SpellSlot.R)
             {
@@ -269,6 +282,24 @@ namespace iSeries.Champions.Lucian
         }
 
         /// <summary>
+        ///     TODO The on remove buff.
+        /// </summary>
+        /// <param name="sender">
+        ///     TODO The sender.
+        /// </param>
+        /// <param name="args">
+        ///     TODO The args.
+        /// </param>
+        private void OnRemoveBuff(Obj_AI_Base sender, Obj_AI_BaseBuffRemoveEventArgs args)
+        {
+            if (sender.IsMe && args.Buff.Name == "lucianpassivebuff")
+            {
+                this.shouldHavePassive = false;
+                Console.WriteLine("No Passive Buff");
+            }
+        }
+
+        /// <summary>
         ///     The Functions to always process
         /// </summary>
         private void OnUpdateFunctions()
@@ -281,7 +312,10 @@ namespace iSeries.Champions.Lucian
                 this.spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
             }
 
-            foreach (var hero in HeroManager.Enemies.Where(x => this.spells[SpellSlot.W].IsInRange(x) && x.Health + 5 < this.spells[SpellSlot.W].GetDamage(x)).Where(hero => this.spells[SpellSlot.W].GetPrediction(hero).Hitchance >= HitChance.Medium))
+            foreach (var hero in
+                HeroManager.Enemies.Where(
+                    x => this.spells[SpellSlot.W].IsInRange(x) && x.Health + 5 < this.spells[SpellSlot.W].GetDamage(x))
+                    .Where(hero => this.spells[SpellSlot.W].GetPrediction(hero).Hitchance >= HitChance.Medium))
             {
                 this.spells[SpellSlot.W].CastOnUnit(hero);
                 this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
@@ -304,7 +338,7 @@ namespace iSeries.Champions.Lucian
                 return;
             }
 
-            shouldHavePassive = false;
+            this.shouldHavePassive = false;
             var target = attackableTarget as Obj_AI_Hero;
             switch (Variables.Orbwalker.ActiveMode)
             {
@@ -323,7 +357,7 @@ namespace iSeries.Champions.Lucian
                     {
                         if (this.spells[SpellSlot.W].IsReady())
                         {
-                            this.spells[SpellSlot.W].Cast(target.ServerPosition);
+                            this.spells[SpellSlot.W].Cast(this.spells[SpellSlot.W].GetPrediction(target).CastPosition);
                             this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
                         }
                     }

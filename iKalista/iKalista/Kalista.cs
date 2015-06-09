@@ -44,7 +44,7 @@ namespace IKalista
         /// <summary>
         ///     The Boolean link values
         /// </summary>
-        public static readonly Dictionary<string, MenuWrapper.BoolLink> boolLinks =
+        public static readonly Dictionary<string, MenuWrapper.BoolLink> BoolLinks =
             new Dictionary<string, MenuWrapper.BoolLink>();
 
         #endregion
@@ -416,8 +416,8 @@ namespace IKalista
                     ObjectManager.Get<Obj_AI_Hero>()
                         .Where(enem => enem.IsValid && enem.IsEnemy && enem.Distance(ObjectManager.Player) <= 2450f))
                 {
-                    if (boolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
-                        || !boolLinks["useBalista"].Value)
+                    if (BoolLinks["disable" + target.ChampionName].Value || !this.spells[SpellSlot.R].IsReady()
+                        || !BoolLinks["useBalista"].Value)
                     {
                         return;
                     }
@@ -493,14 +493,14 @@ namespace IKalista
                         return;
                     }
 
-                    if (boolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
+                    if (BoolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
                         && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion)
                         && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].Cast(killableMinion);
                     }
 
-                    if (boolLinks["eUnkillable"].Value
+                    if (BoolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
                         && this.spells[SpellSlot.E].CanCast(killableMinion)
                         && killableMinion.HasBuff("KalistaExpungeMarker"))
@@ -713,13 +713,13 @@ namespace IKalista
         {
             var target =
                 TargetSelector.GetTarget(
-                    boolLinks["useQ"].Value ? this.spells[SpellSlot.Q].Range : this.spells[SpellSlot.E].Range, 
+                    BoolLinks["useQ"].Value ? this.spells[SpellSlot.Q].Range : this.spells[SpellSlot.E].Range, 
                     TargetSelector.DamageType.Physical);
 
-            if (this.spells[SpellSlot.Q].IsReady() && boolLinks["useQ"].Value && !ObjectManager.Player.IsDashing()
+            if (this.spells[SpellSlot.Q].IsReady() && BoolLinks["useQ"].Value && !ObjectManager.Player.IsDashing()
                 && !ObjectManager.Player.IsWindingUp)
             {
-                if (boolLinks["qMana"].Value && !this.spells[SpellSlot.Q].IsKillable(target)
+                if (BoolLinks["qMana"].Value && !this.spells[SpellSlot.Q].IsKillable(target)
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
                 {
@@ -743,7 +743,7 @@ namespace IKalista
                 var rendBuff =
                     target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
 
-                if (boolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
+                if (BoolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
                     && target.HealthPercent > 20
                     && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
@@ -783,10 +783,10 @@ namespace IKalista
             var spearTarget = TargetSelector.GetTarget(
                 this.spells[SpellSlot.Q].Range, 
                 TargetSelector.DamageType.Physical);
-            if (boolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp
+            if (BoolLinks["useQH"].Value && this.spells[SpellSlot.Q].IsReady() && !ObjectManager.Player.IsWindingUp
                 && !ObjectManager.Player.IsDashing())
             {
-                if (boolLinks["qMana"].Value
+                if (BoolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost
                     && this.spells[SpellSlot.Q].GetDamage(spearTarget) < this.GetTargetHealth(spearTarget))
@@ -816,7 +816,7 @@ namespace IKalista
                 }
             }
 
-            if (boolLinks["useEH"].Value)
+            if (BoolLinks["useEH"].Value)
             {
                 var rendTarget =
                     HeroManager.Enemies.Where(
@@ -839,7 +839,7 @@ namespace IKalista
                 }
             }
 
-            if (boolLinks["useEMin"].Value)
+            if (BoolLinks["useEMin"].Value)
             {
                 var minion =
                     MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
@@ -869,7 +869,7 @@ namespace IKalista
         {
             var minions = MinionManager.GetMinions(this.spells[SpellSlot.E].Range);
 
-            if (boolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
+            if (BoolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
             {
                 foreach (var selectedMinion in
                     from selectedMinion in minions
@@ -881,7 +881,7 @@ namespace IKalista
                                 this.spells[SpellSlot.Q].Range))
                         .Count(
                             collisionMinion =>
-                            collisionMinion.Health + 5 < this.spells[SpellSlot.Q].GetDamage(collisionMinion))
+                            collisionMinion.Health < this.spells[SpellSlot.Q].GetDamage(collisionMinion))
                     where killcount >= this.sliderLinks["minHitQ"].Value.Value
                     where !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing()
                     select selectedMinion)
@@ -904,13 +904,13 @@ namespace IKalista
                     .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                     .FirstOrDefault();
 
-            if (boolLinks["minLC"].Value && harassableMinion != null && rendTarget != null
+            if (BoolLinks["minLC"].Value && harassableMinion != null && rendTarget != null
                 && this.spells[SpellSlot.E].CanCast(harassableMinion) && this.spells[SpellSlot.E].CanCast(rendTarget))
             {
                 this.spells[SpellSlot.E].Cast();
             }
 
-            if (this.spells[SpellSlot.E].IsReady() && boolLinks["useELC"].Value)
+            if (this.spells[SpellSlot.E].IsReady() && BoolLinks["useELC"].Value)
             {
                 var count =
                     minions.Count(
@@ -946,7 +946,7 @@ namespace IKalista
                 Orbwalking.ResetAutoAttackTimer();
             }
 
-            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && boolLinks["saveAllyR"].Value)
+            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && BoolLinks["saveAllyR"].Value)
             {
                 var soulboundhero =
                     HeroManager.Allies.FirstOrDefault(
@@ -981,7 +981,7 @@ namespace IKalista
             var enemies =
                 HeroManager.Enemies.Count(x => ObjectManager.Player.Distance(x) <= this.spells[SpellSlot.E].Range);
 
-            if (boolLinks["eDeath"].Value && enemies > 2
+            if (BoolLinks["eDeath"].Value && enemies > 2
                 && ObjectManager.Player.HealthPercent <= this.sliderLinks["eHealth"].Value.Value
                 && this.spells[SpellSlot.E].IsReady())
             {
@@ -1003,7 +1003,7 @@ namespace IKalista
                 }
             }
 
-            if (boolLinks["useJungleSteal"].Value)
+            if (BoolLinks["useJungleSteal"].Value)
             {
                 this.DoMobSteal();
             }
@@ -1013,7 +1013,7 @@ namespace IKalista
                 this.OnFlee();
             }
 
-            if (boolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop()
+            if (BoolLinks["autoTrinket"].Value && ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop()
                 && !(Items.HasItem(3342) || Items.HasItem(3363)))
             {
                 ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
@@ -1036,7 +1036,7 @@ namespace IKalista
             var boolLink = value as MenuWrapper.BoolLink;
             if (boolLink != null)
             {
-                boolLinks.Add(key, boolLink);
+                BoolLinks.Add(key, boolLink);
             }
 
             var sliderLink = value as MenuWrapper.SliderLink;
@@ -1074,7 +1074,7 @@ namespace IKalista
         {
             var minions = MinionManager.GetMinions(ObjectManager.Player.Position, this.spells[SpellSlot.Q].Range);
 
-            if (minions.Count < 1 || !boolLinks["useQMin"].Value || ObjectManager.Player.IsWindingUp
+            if (minions.Count < 1 || !BoolLinks["useQMin"].Value || ObjectManager.Player.IsWindingUp
                 || ObjectManager.Player.IsDashing())
             {
                 return;

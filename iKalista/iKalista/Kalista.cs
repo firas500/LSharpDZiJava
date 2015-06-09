@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Kalista.cs" company="LeagueSharp">
 //   Copyright (C) 2015 LeagueSharp
 //   
@@ -241,25 +241,34 @@ namespace IKalista
         /// </summary>
         private void DoMobSteal()
         {
+            if (ObjectManager.Player.HasBuff("summonerexhaust"))
+            {
+                return;
+            }
+            
             var junglelMinions =
                 MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
-                    MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+                    MinionOrderTypes.MaxHealth
+                    
+                ).FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x))
+            ;
+
             var bigMinions =
                 MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
                     MinionTeam.Enemy, 
-                    MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(
-                        x =>
-                        x.Health <= this.spells[SpellSlot.E].GetDamage(x)
-                        && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
+                    MinionOrderTypes.MaxHealth
+                    
+                ).FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x)    
+                    && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super"))
+                )
+            ;
 
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
@@ -268,22 +277,22 @@ namespace IKalista
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
-
                     break;
+                    
                 case 1: // siege and super
                     if (bigMinions != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
-
                     break;
+                    
                 case 2: // both
                     if (junglelMinions != null || bigMinions != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
-
-                    break;
+                    break
+                ;
             }
         }
 
@@ -320,17 +329,19 @@ namespace IKalista
         private IEnumerable<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
         {
             var input = new PredictionInput
-                            {
-                                Unit = source, Radius = this.spells[SpellSlot.Q].Width, 
-                                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed
-                            };
+            {
+                Unit = source, Radius = this.spells[SpellSlot.Q].Width, 
+                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed
+            };
 
             input.CollisionObjects[0] = CollisionableObjects.Minions;
 
             return
-                Collision.GetCollision(new List<Vector3> { targetPosition }, input)
-                    .OrderBy(obj => obj.Distance(source))
-                    .ToList();
+                Collision.GetCollision(
+                    new List<Vector3> { targetPosition }, input
+                    
+                ).OrderBy(obj => obj.Distance(source)).ToList()
+            ;
         }
 
         /// <summary>
@@ -473,56 +484,55 @@ namespace IKalista
 
             Game.OnUpdate += this.OnUpdate;
 
-            /**
-             *      Vi R  // NO
-                    Morgana R
-                    Sejuani R
-                    Maokai W (if HP <15%)
-                    Nautilus R // NOP
-                    Ashe R
-                    Riven R (if HP low)
-                    Leona R
-             */
+            /*
+                Vi R  // NO
+                Morgana R
+                Sejuani R
+                Maokai W (if HP <15%)
+                Nautilus R // NOP
+                Ashe R
+                Riven R (if HP low)
+                Leona R
+            */
+            
             Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpell;
 
             Orbwalking.OnNonKillableMinion += minion =>
+            {
+                var killableMinion = minion as Obj_AI_Base;
+                if (killableMinion == null || !this.spells[SpellSlot.E].IsReady() || ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
-                    var killableMinion = minion as Obj_AI_Base;
-                    if (killableMinion == null || !this.spells[SpellSlot.E].IsReady())
-                    {
-                        return;
-                    }
+                    return;
+                }
 
-                    if (BoolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
-                        && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion)
-                        && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
-                    {
-                        this.spells[SpellSlot.Q].Cast(killableMinion);
-                    }
+                if (BoolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
+                    && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion)
+                    && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
+                {
+                    this.spells[SpellSlot.Q].Cast(killableMinion);
+                }
 
-                    if (BoolLinks["eUnkillable"].Value
-                        && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
-                        && this.spells[SpellSlot.E].CanCast(killableMinion)
-                        && killableMinion.HasBuff("KalistaExpungeMarker"))
-                    {
-                        this.spells[SpellSlot.E].Cast();
-                    }
-                };
+                if (BoolLinks["eUnkillable"].Value
+                    && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
+                    && this.spells[SpellSlot.E].CanCast(killableMinion)
+                    && killableMinion.HasBuff("KalistaExpungeMarker"))
+                {
+                    this.spells[SpellSlot.E].Cast();
+                }
+            };
+
             Drawing.OnDraw += args =>
+            {
+                foreach (var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                 {
-                    foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
-                        )
-                    {
-                        Render.Circle.DrawCircle(
-                            ObjectManager.Player.Position, 
-                            link.Value.Value.Radius, 
-                            link.Value.Value.Color);
-                    }
+                    Render.Circle.DrawCircle(
+                    ObjectManager.Player.Position, 
+                    link.Value.Value.Radius, 
+                    link.Value.Value.Color);
+                }
 
-                    CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
-                    CustomDamageIndicator.Enabled = this.circleLinks["drawEDamage"].Value.Active;
-                };
+                CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
+            };
         }
 
         /// <summary>
@@ -684,7 +694,7 @@ namespace IKalista
                 HeroManager.Enemies.Where(
                     x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
             {
-                if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source))
+                if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source) && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -738,7 +748,7 @@ namespace IKalista
             }
 
             if (this.spells[SpellSlot.E].IsReady() && target.HasBuff("KalistaExpungeMarker")
-                && this.spells[SpellSlot.E].IsInRange(target))
+                && this.spells[SpellSlot.E].IsInRange(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
             {
                 var rendBuff =
                     target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
@@ -826,7 +836,7 @@ namespace IKalista
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
-                if (rendTarget != null)
+                if (rendTarget != null && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     var stackCount =
                         rendTarget.Buffs.Find(
@@ -855,7 +865,7 @@ namespace IKalista
                         .FirstOrDefault();
 
                 if (minion != null && target != null && this.spells[SpellSlot.E].CanCast(minion)
-                    && this.spells[SpellSlot.E].CanCast(target))
+                    && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -905,7 +915,8 @@ namespace IKalista
                     .FirstOrDefault();
 
             if (BoolLinks["minLC"].Value && harassableMinion != null && rendTarget != null
-                && this.spells[SpellSlot.E].CanCast(harassableMinion) && this.spells[SpellSlot.E].CanCast(rendTarget))
+                && this.spells[SpellSlot.E].CanCast(harassableMinion) && this.spells[SpellSlot.E].CanCast(rendTarget)
+                && !ObjectManager.Player.HasBuff("summonerexhaust"))
             {
                 this.spells[SpellSlot.E].Cast();
             }
@@ -916,7 +927,7 @@ namespace IKalista
                     minions.Count(
                         x => this.spells[SpellSlot.E].CanCast(x) && x.Health < this.spells[SpellSlot.E].GetDamage(x));
 
-                if (count >= this.sliderLinks["eHit"].Value.Value)
+                if (count >= this.sliderLinks["eHit"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -996,7 +1007,7 @@ namespace IKalista
                         target.Buffs.Find(
                             b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
 
-                    if (buff.Count >= this.sliderLinks["eDeathC"].Value.Value)
+                    if (buff.Count >= this.sliderLinks["eDeathC"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust"))
                     {
                         this.spells[SpellSlot.E].Cast();
                     }

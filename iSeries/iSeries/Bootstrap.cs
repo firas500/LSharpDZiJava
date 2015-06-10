@@ -77,7 +77,7 @@ namespace iSeries
                             return;
                         }
 
-                        Variables.Menu = new Menu("iSeries: " + Variables.Player.ChampionName, "iSeries", true);
+                        Variables.Menu = new Menu("iSeries: " + Variables.Player.ChampionName, "com.iseries", true);
 
                         Variables.Menu.AddToMainMenu();
                         SupportedChampions[Variables.Player.ChampionName]();

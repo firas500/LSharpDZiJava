@@ -74,6 +74,7 @@ namespace iSeries.Champions.Kalista
             {
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.mobsteal", "Jungle Steal").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.lasthit", "Last Hit Assist").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.kalista.misc.autoHarass", "Auto E Harass").SetValue(true));
                 root.AddSubMenu(misc);
             }
         }

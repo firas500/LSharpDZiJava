@@ -379,6 +379,29 @@ namespace iSeries.Champions.Kalista
         /// </summary>
         private void OnUpdateFunctions()
         {
+
+            if (Variables.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && this.GetItemValue<bool>("com.iseries.kalista.misc.autoHarass"))
+            {
+                var minion =
+                   MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
+                       .Where(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x))
+                       .OrderBy(x => x.Health)
+                       .FirstOrDefault();
+                var target =
+                    HeroManager.Enemies.Where(
+                        x =>
+                        this.spells[SpellSlot.E].CanCast(x) && this.spells[SpellSlot.E].GetDamage(x) >= 1
+                        && !x.HasBuffOfType(BuffType.SpellShield))
+                        .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
+                        .FirstOrDefault();
+
+                if (minion != null && target != null && this.spells[SpellSlot.E].CanCast(minion)
+                    && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                {
+                    this.spells[SpellSlot.E].Cast();
+                }
+            }
+
             foreach (var hero in
                 HeroManager.Enemies.Where(
                     x =>

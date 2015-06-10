@@ -19,6 +19,11 @@
 //   The given champion class
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
+using System.Runtime.Remoting.Channels;
+using System.Xml.Linq;
+using iSeries.General;
+
 namespace iSeries.Champions.Draven
 {
     using System;
@@ -50,6 +55,10 @@ namespace iSeries.Champions.Draven
            { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
         };
 
+        private List<Axe> axesList = new List<Axe>();
+
+        private float LastListCheckTick;
+
         #endregion
 
         #region Constructors and Destructors
@@ -73,6 +82,27 @@ namespace iSeries.Champions.Draven
             Orbwalking.OnNonKillableMinion += minion =>
             {
                 
+            };
+
+            GameObject.OnCreate += (sender, args) =>
+            {
+                if (sender != null && sender.Name.Contains("Q_reticle_self"))
+                {
+                    axesList.Add(new Axe()
+                    {
+                        Position = sender.Position,
+                        CreationTime = Game.Time,
+                        EndTime = Game.Time + 1.20f
+                    });
+                }
+            };
+
+            GameObject.OnDelete += (sender, args) =>
+            {
+                if (sender != null && sender.Name.Contains("Q_reticle_self"))
+                {
+                    axesList.RemoveAll(axe => axe.AxeObject.NetworkId == sender.NetworkId);
+                }
             };
         }
 
@@ -151,9 +181,89 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private void OnUpdateFunctions()
         {
-            
+            CheckList();
         }
 
+        private void CheckList()
+        {
+            if (Environment.TickCount - LastListCheckTick < 1200)
+            {
+                return;
+            }
+            LastListCheckTick = Environment.TickCount;
+            axesList.RemoveAll(axe => !axe.IsValid);
+        }
+
+        private void CatchAxes(Mode mode)
+        {
+            var ModeName = mode.ToString().ToLowerInvariant();
+            if (this.Menu.Item("com.iseries.draven.combo.catch" + ModeName).GetValue<bool>())
+            {
+                //Starting Axe Catching Logic
+
+            }
+        }
         #endregion
+    }
+
+    internal class Axe
+    {
+        public GameObject AxeObject { get; set; }
+
+        public Vector3 Position { get; set; }
+
+        public float EndTime { get; set; }
+
+        public float CreationTime { get; set; }
+
+        public bool IsValid
+        {
+            get { return AxeObject.IsValid && EndTime >= Game.Time; }
+        }
+        public bool CanBeReachedNormal
+        {
+            get
+            {
+                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, Position);
+                var pathLength = 0f;
+                for (var i = 1; i <= path.Count(); i++)
+                {
+                    var previousPoint = path[i - 1];
+                    var currentPoint = path[i];
+                    var currentDistance = Vector3.Distance(previousPoint, currentPoint);
+                    pathLength += currentDistance;
+                }
+                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < EndTime;
+                return CanBeReached;
+            }
+        }
+
+        public bool CanBeReachedWithW
+        {
+            get
+            {
+                var BuffedSpeed = (5 * ObjectManager.Player.GetSpell(SpellSlot.W).Level) + 35 * 0.01f * ObjectManager.Player.MoveSpeed;
+                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, Position);
+                var pathLength = 0f;
+                for (var i = 1; i <= path.Count(); i++)
+                {
+                    var previousPoint = path[i - 1];
+                    var currentPoint = path[i];
+                    var currentDistance = Vector3.Distance(previousPoint, currentPoint);
+                    pathLength += currentDistance;
+                }
+                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + BuffedSpeed + Game.Time) < EndTime;
+                return CanBeReached;
+            }
+        }
+
+        public bool IsBeingCaught
+        {
+            get
+            {
+                return ObjectManager.Player.ServerPosition.Distance(Position) <
+                       49 + (ObjectManager.Player.BoundingRadius / 2) + 50;
+            }
+        }
     }
 }

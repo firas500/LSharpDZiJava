@@ -31,6 +31,8 @@ namespace iSeries.Champions.Lucian
     using LeagueSharp.Common;
     using LeagueSharp.Common.Data;
 
+    using SharpDX;
+
     /// <summary>
     ///     The Champion Class
     /// </summary>
@@ -53,6 +55,8 @@ namespace iSeries.Champions.Lucian
         ///     The Passive Check
         /// </summary>
         private bool shouldHavePassive;
+
+        public Vector3 REndPosition { get; private set; }
 
         #endregion
 
@@ -210,6 +214,23 @@ namespace iSeries.Champions.Lucian
             }
         }
 
+        private void LockR(Obj_AI_Hero target)
+        {
+            var targetPosition = this.spells[SpellSlot.R].GetPrediction(target).CastPosition;
+            var endPosition = this.Player.ServerPosition.To2D()
+                              + Vector2.Normalize(this.Player.ServerPosition.To2D() - this.REndPosition.To2D()).Perpendicular()
+                              * 650;
+            var projection = this.Player.ServerPosition.To2D().ProjectOn(endPosition, targetPosition.To2D());
+            var projection1 = this.Player.ServerPosition.To2D().ProjectOn(endPosition, targetPosition.To2D());
+            var pointSegment1 = new Vector2(projection.SegmentPoint.X, projection.SegmentPoint.Y);
+            var pointSegment2 = new Vector2(projection1.SegmentPoint.X, projection1.SegmentPoint.Y);
+
+            this.Player.IssueOrder(
+                GameObjectOrder.MoveTo,
+                (Vector3)
+                (!pointSegment1.IsWall() ? pointSegment1 : !pointSegment2.IsWall() ? pointSegment2 : pointSegment1));
+        }
+
         /// <summary>
         ///     TODO The on cast spell.
         /// </summary>
@@ -304,6 +325,11 @@ namespace iSeries.Champions.Lucian
         /// </summary>
         private void OnUpdateFunctions()
         {
+            if (this.Player.IsCastingInterruptableSpell(true))
+            {
+                this.LockR(TargetSelector.GetTarget(this.spells[SpellSlot.R].Range, TargetSelector.DamageType.Physical));
+            }
+
             foreach (var hero in
                 HeroManager.Enemies.Where(
                     x => this.spells[SpellSlot.Q].IsInRange(x) && x.Health + 5 < this.spells[SpellSlot.Q].GetDamage(x)))

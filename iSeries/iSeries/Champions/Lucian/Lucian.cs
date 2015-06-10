@@ -31,8 +31,6 @@ namespace iSeries.Champions.Lucian
     using LeagueSharp.Common;
     using LeagueSharp.Common.Data;
 
-    using SharpDX;
-
     /// <summary>
     ///     The Champion Class
     /// </summary>
@@ -55,8 +53,6 @@ namespace iSeries.Champions.Lucian
         ///     The Passive Check
         /// </summary>
         private bool shouldHavePassive;
-
-        public Vector3 REndPosition { get; private set; }
 
         #endregion
 
@@ -95,6 +91,7 @@ namespace iSeries.Champions.Lucian
         ///     TODO The attackableTarget.
         /// </param>
         /// <returns>
+        ///     The combo damage
         /// </returns>
         public float GetComboDamage(Obj_AI_Base target)
         {
@@ -121,14 +118,50 @@ namespace iSeries.Champions.Lucian
         public override void OnCombo()
         {
             var target = TargetSelector.GetTarget(this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
-            if (this.GetItemValue("com.iseries.lucian.combo.useW") && target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
+            switch (Variables.Orbwalker.ActiveMode)
             {
-                if (!this.spells[SpellSlot.W].IsReady())
-                {
-                    return;
-                }
-                this.spells[SpellSlot.W].Cast(target.ServerPosition);
-                this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
+                case Orbwalking.OrbwalkingMode.Combo:
+                    if (this.GetItemValue<bool>("com.iseries.lucian.combo.useQ")
+                        && target.IsValidTarget(this.spells[SpellSlot.Q].Range) && target != null)
+                    {
+                        if (this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].IsInRange(target)
+                            && !this.HasPassive())
+                        {
+                            this.spells[SpellSlot.Q].CastOnUnit(target);
+                            this.spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
+                        }
+                    }
+
+                    if (this.GetItemValue<bool>("com.iseries.lucian.combo.useW")
+                        && target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
+                    {
+                        if (this.spells[SpellSlot.W].IsReady())
+                        {
+                            this.spells[SpellSlot.W].Cast(this.spells[SpellSlot.W].GetPrediction(target).CastPosition);
+                            this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
+                        }
+                    }
+
+                    if (this.GetItemValue<bool>("com.iseries.lucian.misc.peel") && this.spells[SpellSlot.E].IsReady() && this.Player.HealthPercent < 30)
+                    {
+                        var meleeEnemies = ObjectManager.Player.GetEnemiesInRange(400f).FindAll(m => m.IsMelee());
+                        if (meleeEnemies.Any())
+                        {
+                            var mostDangerous = meleeEnemies.OrderByDescending(m => m.GetAutoAttackDamage(ObjectManager.Player)).First();
+                            if (mostDangerous != null)
+                            {
+                                var position = this.Player.Position.To2D().Extend((mostDangerous.Position - this.Player.Position).To2D(), 425);
+                                if (position.To3D().UnderTurret(true) || position.To3D().IsWall())
+                                {
+                                    return;
+                                }
+
+                                this.spells[SpellSlot.E].Cast(position);
+                            }
+                        }
+                    }
+
+                    break;
             }
         }
 
@@ -154,6 +187,17 @@ namespace iSeries.Champions.Lucian
         /// </summary>
         public override void OnLaneclear()
         {
+            if (this.GetItemValue<bool>("com.iseries.lucian.laneclear.useQ"))
+            {
+                var allMinions = MinionManager.GetMinions(this.Player.Position, this.spells[SpellSlot.Q].Range, MinionTypes.All, MinionTeam.NotAlly);
+                var minion = allMinions.FirstOrDefault(minionn => minionn.Distance(this.Player.Position) <= this.spells[SpellSlot.Q].Range && HealthPrediction.LaneClearHealthPrediction(minionn, 500) > 0);
+                if (minion == null)
+                {
+                    return;
+                }
+
+                this.spells[SpellSlot.Q].Cast(minion);
+            }
         }
 
         /// <summary>
@@ -238,6 +282,7 @@ namespace iSeries.Champions.Lucian
                     {
                         ItemData.Youmuus_Ghostblade.GetItem().Cast();
                     }
+
                     break;
             }
         }
@@ -347,29 +392,46 @@ namespace iSeries.Champions.Lucian
             }
 
             this.shouldHavePassive = false;
+
             var target = attackableTarget as Obj_AI_Hero;
             switch (Variables.Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    if (this.GetItemValue<bool>("com.iseries.lucian.combo.useQ") && target.IsValidTarget(this.spells[SpellSlot.Q].Range) && target != null)
+                    if (target != null)
                     {
-                        if (this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].IsInRange(target)
-                            && !this.HasPassive())
+                        if (!this.spells[SpellSlot.E].IsReady() || !this.GetItemValue<bool>("com.iseries.lucian.combo.useE"))
                         {
-                            this.spells[SpellSlot.Q].CastOnUnit(target);
-                            this.spells[SpellSlot.Q].LastCastAttemptT = Environment.TickCount;
+                            return;
+                        }
+
+                        var hypotheticalPosition = ObjectManager.Player.ServerPosition.Extend(
+                            Game.CursorPos,
+                            this.spells[SpellSlot.E].Range);
+                        if (ObjectManager.Player.HealthPercent <= 30
+                            && target.HealthPercent >= ObjectManager.Player.HealthPercent)
+                        {
+                            if (ObjectManager.Player.Position.Distance(ObjectManager.Player.ServerPosition) >= 35
+                                && target.Distance(ObjectManager.Player.ServerPosition)
+                                < target.Distance(ObjectManager.Player.Position)
+                                && PositionHelper.IsSafePosition(hypotheticalPosition))
+                            {
+                                this.spells[SpellSlot.E].Cast(hypotheticalPosition);
+                                this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
+                            }
+                        }
+
+                        if (PositionHelper.IsSafePosition(hypotheticalPosition) && hypotheticalPosition.Distance(target.ServerPosition)
+                            <= Orbwalking.GetRealAutoAttackRange(null)
+                            && (!this.spells[SpellSlot.Q].IsReady()
+                                || !this.spells[SpellSlot.Q].CanCast(target))
+                            && (!this.spells[SpellSlot.W].IsReady()
+                                || !this.spells[SpellSlot.W].CanCast(target)
+                                && (hypotheticalPosition.Distance(target.ServerPosition) > 400) && !HasPassive()))
+                        {
+                            this.spells[SpellSlot.E].Cast(hypotheticalPosition);
+                            this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                         }
                     }
-
-                    if (this.GetItemValue<bool>("com.iseries.lucian.combo.useW") && target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
-                    {
-                        if (this.spells[SpellSlot.W].IsReady())
-                        {
-                            this.spells[SpellSlot.W].Cast(this.spells[SpellSlot.W].GetPrediction(target).CastPosition);
-                            this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
-                        }
-                    }
-
                     break;
             }
         }

@@ -76,7 +76,7 @@ namespace iSeries.Champions.Kalista
             // Useful shit
             Orbwalking.OnNonKillableMinion += minion =>
                 {
-                    if (!this.Menu.Item("com.iseries.kalista.misc.lasthit").GetValue<bool>()
+                    if (!this.GetItemValue<bool>("com.iseries.kalista.misc.lasthit")
                         || !this.spells[SpellSlot.E].IsReady())
                     {
                         return;

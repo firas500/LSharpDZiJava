@@ -24,6 +24,7 @@ namespace iSeries
     using System;
     using System.Collections.Generic;
 
+    using iSeries.Champions.Draven;
     using iSeries.Champions.Kalista;
     using iSeries.Champions.Lucian;
 
@@ -51,8 +52,10 @@ namespace iSeries
         /// </summary>
         static Bootstrap()
         {
+            // Marksman
             SupportedChampions.Add("Kalista", new Kalista().Invoke);
             SupportedChampions.Add("Lucian", new Lucian().Invoke);
+            SupportedChampions.Add("Draven", new Draven().Invoke);
         }
 
         #endregion

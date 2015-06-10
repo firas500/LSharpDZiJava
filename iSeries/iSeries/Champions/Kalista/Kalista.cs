@@ -206,12 +206,9 @@ namespace iSeries.Champions.Kalista
 
                 if (target != null)
                 {
-                    var rendBuff =
-                        target.Buffs.Find(
-                            x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
+                    var stacks = target.GetBuffCount("kalistaexpungemarker");
                     if (this.spells[SpellSlot.E].GetDamage(target) >= this.GetActualHealth(target)
-                        || rendBuff.Count
-                        >= this.Menu.Item("com.iseries.kalista.harass.stacks").GetValue<Slider>().Value)
+                        || stacks >= this.Menu.Item("com.iseries.kalista.harass.stacks").GetValue<Slider>().Value)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }

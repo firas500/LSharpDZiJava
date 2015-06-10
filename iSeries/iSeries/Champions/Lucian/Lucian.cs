@@ -242,16 +242,19 @@ namespace iSeries.Champions.Lucian
         /// </param>
         private void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
-            if (args.Slot == SpellSlot.Q || args.Slot == SpellSlot.W || args.Slot == SpellSlot.E)
+            switch (args.Slot)
             {
-                this.shouldHavePassive = true;
-            }
-            else if (args.Slot == SpellSlot.R)
-            {
-                if (ItemData.Youmuus_Ghostblade.GetItem().IsReady())
-                {
-                    ItemData.Youmuus_Ghostblade.GetItem().Cast();
-                }
+                case SpellSlot.Q:
+                case SpellSlot.W:
+                case SpellSlot.E:
+                    this.shouldHavePassive = true;
+                    break;
+                case SpellSlot.R:
+                    if (ItemData.Youmuus_Ghostblade.GetItem().IsReady())
+                    {
+                        ItemData.Youmuus_Ghostblade.GetItem().Cast();
+                    }
+                    break;
             }
         }
 

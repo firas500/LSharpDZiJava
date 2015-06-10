@@ -19,11 +19,6 @@
 //   The given champion class
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
-using System.Runtime.Remoting.Channels;
-using System.Xml.Linq;
-using iSeries.General;
-
 namespace iSeries.Champions.Draven
 {
     using System;
@@ -31,13 +26,12 @@ namespace iSeries.Champions.Draven
     using System.Linq;
 
     using iSeries.Champions.Utilities;
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;
 
     using SharpDX;
-
-    using Collision = LeagueSharp.Common.Collision;
 
     /// <summary>
     ///     The given champion class
@@ -50,21 +44,27 @@ namespace iSeries.Champions.Draven
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
-        {
-           { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
-           { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
-        };
+                                                                   {
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
+                                                                       { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
+                                                                   };
 
+        /// <summary>
+        /// TODO The axes list.
+        /// </summary>
         private List<Axe> axesList = new List<Axe>();
 
-        private float LastListCheckTick;
+        /// <summary>
+        /// TODO The last list check tick.
+        /// </summary>
+        private float lastListCheckTick;
 
         #endregion
 
         #region Constructors and Destructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Kalista" /> class.
+        ///     Initializes a new instance of the <see cref="Draven"/> class.
         /// </summary>
         public Draven()
         {
@@ -79,31 +79,27 @@ namespace iSeries.Champions.Draven
             this.spells[SpellSlot.E].SetSkillshot(250f, 130f, 1400f, false, SkillshotType.SkillshotLine);
             this.spells[SpellSlot.R].SetSkillshot(400f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
-            Orbwalking.OnNonKillableMinion += minion =>
-            {
-                
-            };
+            Orbwalking.OnNonKillableMinion += minion => { };
 
             GameObject.OnCreate += (sender, args) =>
-            {
-                if (sender != null && sender.Name.Contains("Q_reticle_self"))
                 {
-                    axesList.Add(new Axe()
+                    if (sender != null && sender.Name.Contains("Q_reticle_self"))
                     {
-                        Position = sender.Position,
-                        CreationTime = Game.Time,
-                        EndTime = Game.Time + 1.20f
-                    });
-                }
-            };
+                        this.axesList.Add(
+                            new Axe()
+                                {
+                                   Position = sender.Position, CreationTime = Game.Time, EndTime = Game.Time + 1.20f 
+                                });
+                    }
+                };
 
             GameObject.OnDelete += (sender, args) =>
-            {
-                if (sender != null && sender.Name.Contains("Q_reticle_self"))
                 {
-                    axesList.RemoveAll(axe => axe.AxeObject.NetworkId == sender.NetworkId);
-                }
-            };
+                    if (sender != null && sender.Name.Contains("Q_reticle_self"))
+                    {
+                        this.axesList.RemoveAll(axe => axe.AxeObject.NetworkId == sender.NetworkId);
+                    }
+                };
         }
 
         #endregion
@@ -115,7 +111,6 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnCombo()
         {
-           
         }
 
         /// <summary>
@@ -133,7 +128,6 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnHarass()
         {
-            
         }
 
         /// <summary>
@@ -141,7 +135,6 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnLaneclear()
         {
-            
         }
 
         /// <summary>
@@ -174,57 +167,66 @@ namespace iSeries.Champions.Draven
 
         #region Methods
 
+        /// <summary>
+        /// TODO The catch axes.
+        /// </summary>
+        /// <param name="mode">
+        /// TODO The mode.
+        /// </param>
+        private void CatchAxes(Mode mode)
+        {
+            var modeName = mode.ToString().ToLowerInvariant();
+            if (this.Menu.Item("com.iseries.draven.combo.catch" + modeName).GetValue<bool>())
+            {
+                // Starting Axe Catching Logic
+            }
+        }
 
+        /// <summary>
+        ///     TODO The check list.
+        /// </summary>
+        private void CheckList()
+        {
+            if (Environment.TickCount - this.lastListCheckTick < 1200)
+            {
+                return;
+            }
+
+            this.lastListCheckTick = Environment.TickCount;
+            this.axesList.RemoveAll(axe => !axe.IsValid);
+        }
 
         /// <summary>
         ///     The Functions to always process
         /// </summary>
         private void OnUpdateFunctions()
         {
-            CheckList();
+            this.CheckList();
         }
 
-        private void CheckList()
-        {
-            if (Environment.TickCount - LastListCheckTick < 1200)
-            {
-                return;
-            }
-            LastListCheckTick = Environment.TickCount;
-            axesList.RemoveAll(axe => !axe.IsValid);
-        }
-
-        private void CatchAxes(Mode mode)
-        {
-            var ModeName = mode.ToString().ToLowerInvariant();
-            if (this.Menu.Item("com.iseries.draven.combo.catch" + ModeName).GetValue<bool>())
-            {
-                //Starting Axe Catching Logic
-
-            }
-        }
         #endregion
     }
 
+    /// <summary>
+    ///     TODO The axe.
+    /// </summary>
     internal class Axe
     {
+        #region Public Properties
+
+        /// <summary>
+        ///     Gets or sets the axe object.
+        /// </summary>
         public GameObject AxeObject { get; set; }
 
-        public Vector3 Position { get; set; }
-
-        public float EndTime { get; set; }
-
-        public float CreationTime { get; set; }
-
-        public bool IsValid
-        {
-            get { return AxeObject.IsValid && EndTime >= Game.Time; }
-        }
+        /// <summary>
+        ///     Gets a value indicating whether can be reached normal.
+        /// </summary>
         public bool CanBeReachedNormal
         {
             get
             {
-                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, Position);
+                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, this.Position);
                 var pathLength = 0f;
                 for (var i = 1; i <= path.Count(); i++)
                 {
@@ -233,17 +235,22 @@ namespace iSeries.Champions.Draven
                     var currentDistance = Vector3.Distance(previousPoint, currentPoint);
                     pathLength += currentDistance;
                 }
-                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < EndTime;
-                return CanBeReached;
+
+                var canBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < this.EndTime;
+                return canBeReached;
             }
         }
 
+        /// <summary>
+        ///     Gets a value indicating whether can be reached with w.
+        /// </summary>
         public bool CanBeReachedWithW
         {
             get
             {
-                var BuffedSpeed = (5 * ObjectManager.Player.GetSpell(SpellSlot.W).Level) + 35 * 0.01f * ObjectManager.Player.MoveSpeed;
-                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, Position);
+                var buffedSpeed = (5 * ObjectManager.Player.GetSpell(SpellSlot.W).Level)
+                                  + 35 * 0.01f * ObjectManager.Player.MoveSpeed;
+                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, this.Position);
                 var pathLength = 0f;
                 for (var i = 1; i <= path.Count(); i++)
                 {
@@ -252,18 +259,51 @@ namespace iSeries.Champions.Draven
                     var currentDistance = Vector3.Distance(previousPoint, currentPoint);
                     pathLength += currentDistance;
                 }
-                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + BuffedSpeed + Game.Time) < EndTime;
-                return CanBeReached;
+
+                var canBeReached = pathLength / (ObjectManager.Player.MoveSpeed + buffedSpeed + Game.Time)
+                                   < this.EndTime;
+                return canBeReached;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the creation time.
+        /// </summary>
+        public float CreationTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the end time.
+        /// </summary>
+        public float EndTime { get; set; }
+
+        /// <summary>
+        ///     Gets a value indicating whether is being caught.
+        /// </summary>
         public bool IsBeingCaught
         {
             get
             {
-                return ObjectManager.Player.ServerPosition.Distance(Position) <
-                       49 + (ObjectManager.Player.BoundingRadius / 2) + 50;
+                return ObjectManager.Player.ServerPosition.Distance(this.Position)
+                       < 49 + (ObjectManager.Player.BoundingRadius / 2) + 50;
             }
         }
+
+        /// <summary>
+        ///     Gets a value indicating whether is valid.
+        /// </summary>
+        public bool IsValid
+        {
+            get
+            {
+                return this.AxeObject.IsValid && this.EndTime >= Game.Time;
+            }
+        }
+
+        /// <summary>
+        ///     Gets or sets the position.
+        /// </summary>
+        public Vector3 Position { get; set; }
+
+        #endregion
     }
 }

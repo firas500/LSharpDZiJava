@@ -363,13 +363,12 @@ namespace IKalista
             var spearDamage = new[] { 5, 9, 14, 20, 27 };
             var additionalSpearDamage = new[] { 0.15f, 0.18f, 0.21f, 0.24f, 0.27f };
 
-            var stacks =
-                target.Buffs.Find(b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
+            var stacks = target.GetBuffCount("kalistaexpungemarker");
 
             var totalDamage = baseDamage[this.spells[SpellSlot.E].Level - 1]
                               + additionalBaseDamage[this.spells[SpellSlot.E].Level - 1]
                               * ObjectManager.Player.TotalAttackDamage()
-                              + (stacks.Count - 1)
+                              + (stacks - 1)
                               * (spearDamage[this.spells[SpellSlot.E].Level - 1]
                                  + additionalSpearDamage[this.spells[SpellSlot.E].Level - 1]
                                  * ObjectManager.Player.TotalAttackDamage());
@@ -524,8 +523,7 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
-                        )
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 
@@ -753,10 +751,9 @@ namespace IKalista
             if (this.spells[SpellSlot.E].IsReady() && target.HasBuff("KalistaExpungeMarker")
                 && this.spells[SpellSlot.E].IsInRange(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
             {
-                var rendBuff =
-                    target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
+                var stacks = target.GetBuffCount("kalistaexpungemarker");
 
-                if (BoolLinks["eLeaving"].Value && rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value
+                if (BoolLinks["eLeaving"].Value && stacks >= this.sliderLinks["minStacks"].Value.Value
                     && target.HealthPercent > 20
                     && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
@@ -765,7 +762,7 @@ namespace IKalista
                 }
 
                 if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target))
-                    || (rendBuff.Count >= this.sliderLinks["minStacks"].Value.Value))
+                    || (stacks >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -841,9 +838,7 @@ namespace IKalista
 
                 if (rendTarget != null && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
-                    var stackCount =
-                        rendTarget.Buffs.Find(
-                            b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker").Count;
+                    var stackCount = rendTarget.GetBuffCount("kalistaexpungemarker");
                     if (this.GetRealDamage(rendTarget) > this.GetTargetHealth(rendTarget)
                         || stackCount >= this.sliderLinks["minStacks"].Value.Value)
                     {
@@ -1006,11 +1001,8 @@ namespace IKalista
                         .FirstOrDefault();
                 if (target != null)
                 {
-                    var buff =
-                        target.Buffs.Find(
-                            b => b.Caster.IsMe && b.IsValidBuff() && b.DisplayName == "KalistaExpungeMarker");
-
-                    if (buff.Count >= this.sliderLinks["eDeathC"].Value.Value
+                    var stacks = target.GetBuffCount("kalistaexpungemarker");
+                    if (stacks >= this.sliderLinks["eDeathC"].Value.Value
                         && !ObjectManager.Player.HasBuff("summonerexhaust"))
                     {
                         this.spells[SpellSlot.E].Cast();

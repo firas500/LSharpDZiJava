@@ -76,6 +76,23 @@ namespace iSeries.Champions
         }
 
         /// <summary>
+        ///     Gets a menu items value
+        /// </summary>
+        /// <param name="item">
+        ///     the item name
+        /// </param>
+        /// <typeparam name="T">
+        ///     The type parameter
+        /// </typeparam>
+        /// <returns>
+        ///     The <see cref="T"/>.
+        /// </returns>
+        public T GetItemValue<T>(string item)
+        {
+            return Variables.Menu.Item(item).GetValue<T>();
+        }
+
+        /// <summary>
         ///     <c>OnDraw</c> subscribed event function.
         /// </summary>
         /// <param name="args">

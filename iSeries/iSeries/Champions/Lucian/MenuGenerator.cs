@@ -47,14 +47,14 @@ namespace iSeries.Champions.Lucian
             var comboMenu = new Menu("Combo Options", "com.iseries.lucian.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useQ", "Use Q").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useE", "Use W").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useW", "Use W").SetValue(true));
                 root.AddSubMenu(comboMenu);
             }
 
             var harassMenu = new Menu("Harass Optionos", "com.iseries.lucian.harass");
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.lucian.harass.useQ", "Use Q").SetValue(false));
-                comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useE", "Use W").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useW", "Use W").SetValue(true));
                 root.AddSubMenu(harassMenu);
             }
         }

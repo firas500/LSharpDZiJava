@@ -121,13 +121,14 @@ namespace iSeries.Champions.Lucian
         public override void OnCombo()
         {
             var target = TargetSelector.GetTarget(this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
-            if (target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
+            if (this.GetItemValue("com.iseries.lucian.combo.useW") && target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
             {
-                if (this.spells[SpellSlot.W].IsReady())
+                if (!this.spells[SpellSlot.W].IsReady())
                 {
-                    this.spells[SpellSlot.W].Cast(target.ServerPosition);
-                    this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
+                    return;
                 }
+                this.spells[SpellSlot.W].Cast(target.ServerPosition);
+                this.spells[SpellSlot.W].LastCastAttemptT = Environment.TickCount;
             }
         }
 
@@ -212,23 +213,6 @@ namespace iSeries.Champions.Lucian
                 this.shouldHavePassive = true;
                 Console.WriteLine("Has Passive buff");
             }
-        }
-
-        private void LockR(Obj_AI_Hero target)
-        {
-            var targetPosition = this.spells[SpellSlot.R].GetPrediction(target).CastPosition;
-            var endPosition = this.Player.ServerPosition.To2D()
-                              + Vector2.Normalize(this.Player.ServerPosition.To2D() - this.REndPosition.To2D()).Perpendicular()
-                              * 650;
-            var projection = this.Player.ServerPosition.To2D().ProjectOn(endPosition, targetPosition.To2D());
-            var projection1 = this.Player.ServerPosition.To2D().ProjectOn(endPosition, targetPosition.To2D());
-            var pointSegment1 = new Vector2(projection.SegmentPoint.X, projection.SegmentPoint.Y);
-            var pointSegment2 = new Vector2(projection1.SegmentPoint.X, projection1.SegmentPoint.Y);
-
-            this.Player.IssueOrder(
-                GameObjectOrder.MoveTo,
-                (Vector3)
-                (!pointSegment1.IsWall() ? pointSegment1 : !pointSegment2.IsWall() ? pointSegment2 : pointSegment1));
         }
 
         /// <summary>
@@ -328,11 +312,6 @@ namespace iSeries.Champions.Lucian
         /// </summary>
         private void OnUpdateFunctions()
         {
-            if (this.Player.IsCastingInterruptableSpell(true))
-            {
-                this.LockR(TargetSelector.GetTarget(this.spells[SpellSlot.R].Range, TargetSelector.DamageType.Physical));
-            }
-
             foreach (var hero in
                 HeroManager.Enemies.Where(
                     x => this.spells[SpellSlot.Q].IsInRange(x) && x.Health + 5 < this.spells[SpellSlot.Q].GetDamage(x)))
@@ -372,7 +351,7 @@ namespace iSeries.Champions.Lucian
             switch (Variables.Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    if (target.IsValidTarget(this.spells[SpellSlot.Q].Range) && target != null)
+                    if (this.GetItemValue<bool>("com.iseries.lucian.combo.useQ") && target.IsValidTarget(this.spells[SpellSlot.Q].Range) && target != null)
                     {
                         if (this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].IsInRange(target)
                             && !this.HasPassive())
@@ -382,7 +361,7 @@ namespace iSeries.Champions.Lucian
                         }
                     }
 
-                    if (target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
+                    if (this.GetItemValue<bool>("com.iseries.lucian.combo.useW") && target.IsValidTarget(this.spells[SpellSlot.W].Range) && target != null && !this.HasPassive())
                     {
                         if (this.spells[SpellSlot.W].IsReady())
                         {

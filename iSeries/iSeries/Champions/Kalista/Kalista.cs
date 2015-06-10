@@ -129,7 +129,7 @@ namespace iSeries.Champions.Kalista
         /// </summary>
         public override void OnCombo()
         {
-            if (Variables.Menu.Item("com.iseries.kalista.combo.useQ").GetValue<bool>()
+            if (this.GetItemValue<bool>("com.iseries.kalista.combo.useQ")
                 && this.spells[SpellSlot.Q].IsReady())
             {
                 var spearTarget = TargetSelector.GetTarget(
@@ -145,7 +145,7 @@ namespace iSeries.Champions.Kalista
                 }
             }
 
-            if (this.Menu.Item("com.iseries.kalista.combo.useE").GetValue<bool>() && this.spells[SpellSlot.E].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.combo.useE") && this.spells[SpellSlot.E].IsReady())
             {
                 var rendTarget =
                     HeroManager.Enemies.Where(
@@ -179,7 +179,7 @@ namespace iSeries.Champions.Kalista
         /// </summary>
         public override void OnHarass()
         {
-            if (this.Menu.Item("com.iseries.kalista.harass.useQ").GetValue<bool>() && this.spells[SpellSlot.Q].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.harass.useQ") && this.spells[SpellSlot.Q].IsReady())
             {
                 var spearTarget = TargetSelector.GetTarget(
                     this.spells[SpellSlot.Q].Range, 
@@ -194,7 +194,7 @@ namespace iSeries.Champions.Kalista
                 }
             }
 
-            if (this.Menu.Item("com.iseries.kalista.combo.useE").GetValue<bool>() && this.spells[SpellSlot.E].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.combo.useE") && this.spells[SpellSlot.E].IsReady())
             {
                 var target =
                     HeroManager.Enemies.Where(
@@ -208,7 +208,7 @@ namespace iSeries.Champions.Kalista
                 {
                     var stacks = target.GetBuffCount("kalistaexpungemarker");
                     if (this.spells[SpellSlot.E].GetDamage(target) >= this.GetActualHealth(target)
-                        || stacks >= this.Menu.Item("com.iseries.kalista.harass.stacks").GetValue<Slider>().Value)
+                        || stacks >= this.GetItemValue<Slider>("com.iseries.kalista.harass.stacks").Value)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -221,7 +221,7 @@ namespace iSeries.Champions.Kalista
         /// </summary>
         public override void OnLaneclear()
         {
-            if (this.Menu.Item("com.iseries.kalista.laneclear.useQ").GetValue<bool>()
+            if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useQ")
                 && this.spells[SpellSlot.Q].IsReady())
             {
                 var qMinions = MinionManager.GetMinions(
@@ -254,7 +254,7 @@ namespace iSeries.Champions.Kalista
                         }
                     }
 
-                    if (killable >= this.Menu.Item("com.iseries.kalista.laneclear.useQNum").GetValue<Slider>().Value
+                    if (killable >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useQNum").Value
                         && !this.Player.IsWindingUp && !this.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].CastOnUnit(source);
@@ -262,7 +262,7 @@ namespace iSeries.Champions.Kalista
                 }
             }
 
-            if (this.Menu.Item("com.iseries.kalista.laneclear.useE").GetValue<bool>()
+            if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useE")
                 && this.spells[SpellSlot.E].IsReady())
             {
                 var minionkillcount =
@@ -271,7 +271,7 @@ namespace iSeries.Champions.Kalista
                             x =>
                             this.spells[SpellSlot.E].CanCast(x) && x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
-                if (minionkillcount >= this.Menu.Item("com.iseries.kalista.laneclear.useENum").GetValue<Slider>().Value)
+                if (minionkillcount >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useENum").Value)
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -394,7 +394,7 @@ namespace iSeries.Champions.Kalista
                 this.spells[SpellSlot.E].Cast();
             }
 
-            if (this.Menu.Item("com.iseries.kalista.misc.mobsteal").GetValue<bool>()
+            if (this.GetItemValue<bool>("com.iseries.kalista.misc.mobsteal")
                 && this.spells[SpellSlot.E].IsReady())
             {
                 var mob =

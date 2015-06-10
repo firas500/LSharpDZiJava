@@ -176,7 +176,7 @@ namespace iSeries.Champions.Draven
         private void CatchAxes(Mode mode)
         {
             var modeName = mode.ToString().ToLowerInvariant();
-            if (this.Menu.Item("com.iseries.draven.combo.catch" + modeName).GetValue<bool>())
+            if (this.GetItemValue<bool>("com.iseries.draven.combo.catch" + modeName))
             {
                 // Starting Axe Catching Logic
             }

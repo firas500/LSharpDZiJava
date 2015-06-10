@@ -67,6 +67,8 @@
     <Compile Include="Champions\Champion.cs" />
     <Compile Include="Champions\Draven\Draven.cs" />
     <Compile Include="Champions\Draven\MenuGenerator.cs" />
+    <Compile Include="Champions\Ezreal\Ezreal.cs" />
+    <Compile Include="Champions\Ezreal\MenuGenerator.cs" />
     <Compile Include="Champions\Kalista\Kalista.cs" />
     <Compile Include="Champions\Kalista\MenuGenerator.cs" />
     <Compile Include="Champions\Lucian\Lucian.cs" />

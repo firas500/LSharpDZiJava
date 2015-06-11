@@ -432,22 +432,6 @@ namespace iSeries.Champions.Kalista
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
-
-                var minion =
-                    MinionManager.GetMinions(
-                        this.Player.ServerPosition, 
-                        this.spells[SpellSlot.E].Range, 
-                        MinionTypes.All, 
-                        MinionTeam.Enemy, 
-                        MinionOrderTypes.MaxHealth)
-                        .FirstOrDefault(
-                            x =>
-                            x.Health <= this.spells[SpellSlot.E].GetDamage(x)
-                            && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
-                if (minion != null && this.spells[SpellSlot.E].CanCast(minion))
-                {
-                    this.spells[SpellSlot.E].Cast();
-                }
             }
         }
 

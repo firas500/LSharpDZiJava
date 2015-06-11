@@ -63,8 +63,7 @@ namespace iSeries.Champions.Ezreal
             var laneclearMenu = new Menu("Laneclear Options", "com.iseries.ezreal.laneclear");
             {
                 laneclearMenu.AddItem(new MenuItem("com.iseries.ezreal.laneclear.useQ", "Use Q").SetValue(true));
-                laneclearMenu.AddItem(
-                    new MenuItem("com.iseries.ezreal.laneclear.useQKill", "Q Unkillable Minions").SetValue(true));
+                laneclearMenu.AddItem(new MenuItem("com.iseries.ezreal.laneclear.useQKill", "Q Unkillable Minions").SetValue(true));
                 root.AddSubMenu(laneclearMenu);
             }
 

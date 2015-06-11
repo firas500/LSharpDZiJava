@@ -172,6 +172,7 @@ namespace iSeries.Champions.Kalista
         /// </param>
         public override void OnDraw(EventArgs args)
         {
+            Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, System.Drawing.Color.DarkRed);
         }
 
         /// <summary>

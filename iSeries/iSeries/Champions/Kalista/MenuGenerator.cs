@@ -51,7 +51,7 @@ namespace iSeries.Champions.Kalista
                 root.AddSubMenu(comboMenu);
             }
 
-            var harassMenu = new Menu("Harass Optionos", "com.iseries.kalista.harass");
+            var harassMenu = new Menu("Harass Options", "com.iseries.kalista.harass");
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.useQ", "Use Q").SetValue(false));
                 harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.useE", "Use E").SetValue(false));

@@ -53,7 +53,7 @@ namespace iSeries.Champions.Ezreal
                 root.AddSubMenu(comboMenu);
             }
 
-            var harassMenu = new Menu("Harass Optionos", "com.iseries.ezreal.harass");
+            var harassMenu = new Menu("Harass Options", "com.iseries.ezreal.harass");
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.ezreal.harass.useQ", "Use Q").SetValue(false));
                 harassMenu.AddItem(new MenuItem("com.iseries.ezreal.harass.useW", "Use W").SetValue(false));
@@ -70,6 +70,7 @@ namespace iSeries.Champions.Ezreal
 
             var misc = new Menu("Misc Options", "com.iseries.ezreal.misc");
             {
+                misc.AddItem(new MenuItem("com.iseries.ezreal.misc.sheen", "Sheen Weave").SetValue(true));
                 misc.AddItem(
                     new MenuItem("com.iseries.ezreal.misc.hitchance", "Hitchance").SetValue(
                         new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));

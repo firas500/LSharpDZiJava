@@ -123,16 +123,16 @@ namespace iSeries.Champions.Ezreal
             {
                 var target = TargetSelector.GetTargetNoCollision(this.spells[SpellSlot.Q]);
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
-                if (prediction.Hitchance >= this.GetHitchance() && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                if (prediction.Hitchance >= this.GetHitchance() && target.IsValidTarget(this.spells[SpellSlot.Q].Range) && !this.HasSheen())
                 {
-                    this.spells[SpellSlot.Q].Cast(prediction.CastPosition);
+                    this.spells[SpellSlot.Q].Cast(target);
                 }
             }
 
             if (this.GetItemValue<bool>("com.iseries.ezreal.combo.useW") && this.spells[SpellSlot.W].IsReady())
             {
                 var target = TargetSelector.GetTarget(this.spells[SpellSlot.W].Range, TargetSelector.DamageType.Magical);
-                if (target.IsValidTarget(this.spells[SpellSlot.W].Range))
+                if (target.IsValidTarget(this.spells[SpellSlot.W].Range) && !this.HasSheen())
                 {
                     this.spells[SpellSlot.W].Cast(target);
                 }
@@ -178,6 +178,17 @@ namespace iSeries.Champions.Ezreal
 
                 this.spells[SpellSlot.E].Cast(position);
             }
+        }
+
+        /// <summary>
+        ///     Sheen checking
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="bool"/>.
+        /// </returns>
+        public bool HasSheen()
+        {
+            return this.GetItemValue<bool>("com.iseries.ezreal.misc.sheen") && this.Player.HasBuff("sheen");
         }
 
         /// <summary>
@@ -242,6 +253,11 @@ namespace iSeries.Champions.Ezreal
                 case Orbwalking.OrbwalkingMode.LaneClear:
                     this.OnLaneclear();
                     break;
+            }
+
+            foreach (BuffInstance buff in this.Player.Buffs)
+            {
+                Console.WriteLine("Name: " + buff.Name);
             }
 
             this.OnUpdateFunctions();

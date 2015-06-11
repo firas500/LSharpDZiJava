@@ -25,6 +25,7 @@ namespace iSeries
     using System.Collections.Generic;
 
     using iSeries.Champions.Draven;
+    using iSeries.Champions.Ezreal;
     using iSeries.Champions.Kalista;
     using iSeries.Champions.Lucian;
 
@@ -56,6 +57,7 @@ namespace iSeries
             SupportedChampions.Add("Kalista", new Kalista().Invoke);
             SupportedChampions.Add("Lucian", new Lucian().Invoke);
             SupportedChampions.Add("Draven", new Draven().Invoke);
+            SupportedChampions.Add("Ezreal", new Ezreal().Invoke);
         }
 
         #endregion

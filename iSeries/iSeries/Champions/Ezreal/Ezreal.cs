@@ -23,10 +23,12 @@
 namespace iSeries.Champions.Ezreal
 {
     using System;
+    using System.Diagnostics.CodeAnalysis;
 
     /// <summary>
     /// TODO The ezreal.
     /// </summary>
+    [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
     internal class Ezreal : Champion
     {
         #region Public Methods and Operators

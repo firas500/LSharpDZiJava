@@ -80,6 +80,7 @@ namespace iSeries.Champions.Draven
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.epeel", "E Peel").SetValue(true));
                 root.AddSubMenu(misc);
             }
+            root.AddToMainMenu();
         }
 
         #endregion

@@ -77,6 +77,8 @@ namespace iSeries.Champions.Kalista
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.autoHarass", "Auto E Harass").SetValue(true));
                 root.AddSubMenu(misc);
             }
+
+            root.AddToMainMenu();
         }
 
         #endregion

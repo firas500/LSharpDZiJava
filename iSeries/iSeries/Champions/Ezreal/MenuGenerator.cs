@@ -39,6 +39,45 @@ namespace iSeries.Champions.Ezreal
         /// </param>
         public static void Generate(Menu root)
         {
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(targetSelectorMenu);
+            root.AddSubMenu(targetSelectorMenu);
+
+            Variables.Orbwalker = new Orbwalking.Orbwalker(root.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
+
+            var comboMenu = new Menu("Combo Options", "com.iseries.ezreal.combo");
+            {
+                comboMenu.AddItem(new MenuItem("com.iseries.ezreal.combo.useQ", "Use Q").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.ezreal.combo.useW", "Use W").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.ezreal.combo.useR", "Use R").SetValue(true));
+                root.AddSubMenu(comboMenu);
+            }
+
+            var harassMenu = new Menu("Harass Optionos", "com.iseries.ezreal.harass");
+            {
+                harassMenu.AddItem(new MenuItem("com.iseries.ezreal.harass.useQ", "Use Q").SetValue(false));
+                harassMenu.AddItem(new MenuItem("com.iseries.ezreal.harass.useW", "Use W").SetValue(false));
+                root.AddSubMenu(harassMenu);
+            }
+
+            var laneclearMenu = new Menu("Laneclear Options", "com.iseries.ezreal.laneclear");
+            {
+                laneclearMenu.AddItem(new MenuItem("com.iseries.ezreal.laneclear.useQ", "Use Q").SetValue(true));
+                laneclearMenu.AddItem(
+                    new MenuItem("com.iseries.ezreal.laneclear.useQKill", "Q Unkillable Minions").SetValue(true));
+                root.AddSubMenu(laneclearMenu);
+            }
+
+            var misc = new Menu("Misc Options", "com.iseries.ezreal.misc");
+            {
+                misc.AddItem(
+                    new MenuItem("com.iseries.ezreal.misc.hitchance", "Hitchance").SetValue(
+                        new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));
+                misc.AddItem(new MenuItem("com.iseries.ezreal.misc.peel", "Peel With E").SetValue(true));
+                root.AddSubMenu(misc);
+            }
+
+            root.AddToMainMenu();
         }
 
         #endregion

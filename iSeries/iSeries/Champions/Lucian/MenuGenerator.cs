@@ -71,6 +71,8 @@ namespace iSeries.Champions.Lucian
                 miscMenu.AddItem(new MenuItem("com.iseries.lucian.misc.peel", "Peel With E").SetValue(true));
                 root.AddSubMenu(miscMenu);
             }
+
+            root.AddToMainMenu();
         }
 
         #endregion

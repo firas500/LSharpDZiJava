@@ -418,6 +418,21 @@ namespace iSeries.Champions.Kalista
                 this.spells[SpellSlot.E].Cast();
             }
 
+            foreach (var hero in
+               HeroManager.Enemies.Where(
+                   x =>
+                   this.spells[SpellSlot.Q].IsInRange(x)
+                   && this.GetActualHealth(x) < this.spells[SpellSlot.Q].GetDamage(x)))
+            {
+                if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
+                    || hero.HasBuffOfType(BuffType.SpellShield))
+                {
+                    return;
+                }
+
+                this.spells[SpellSlot.Q].Cast(hero);
+            }
+
             if (this.GetItemValue<bool>("com.iseries.kalista.misc.mobsteal")
                 && this.spells[SpellSlot.E].IsReady())
             {

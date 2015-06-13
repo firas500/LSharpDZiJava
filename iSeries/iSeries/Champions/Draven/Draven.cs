@@ -61,6 +61,16 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private float lastListCheckTick;
 
+        /// <summary>
+        /// The number of axes the player has on him.
+        /// </summary>
+        private int QStacks
+        {
+            get
+            {
+                return ObjectManager.Player.GetBuff("dravenspinningattack").Count;
+            }
+        }
         #endregion
 
         #region Constructors and Destructors
@@ -103,7 +113,6 @@ namespace iSeries.Champions.Draven
                     }
                 };
 
-            Drawing.OnDraw += this.Drawing_OnDraw;
         }
 
         #endregion
@@ -115,6 +124,30 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnCombo()
         {
+            CatchAxes(Mode.Combo);
+            if (Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>() && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget()) && spells[SpellSlot.Q].IsReady())
+            {
+                var maxQ = Menu.Item("com.iseries.draven.misc.maxQ").GetValue<Slider>().Value;
+                var onPlayer = QStacks;
+                var onGround = axesList.Count;
+                if (onGround + onPlayer + 1 <= maxQ)
+                {
+                    spells[SpellSlot.Q].Cast();
+                }
+            }
+            var eTarget = TargetSelector.GetTarget(spells[SpellSlot.E].Range-175f, TargetSelector.DamageType.Physical);
+            if (Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>() && eTarget.IsValidTarget() && spells[SpellSlot.E].IsReady())
+            {
+                spells[SpellSlot.E].CastIfHitchanceEquals(eTarget, HitChance.VeryHigh); 
+            }
+
+            /**TODO
+             * 
+             * R logic here, with:
+             * Collision
+             * Distance Checking
+             * Return logic(?)
+             */
         }
 
         /// <summary>
@@ -125,6 +158,15 @@ namespace iSeries.Champions.Draven
         /// </param>
         public override void OnDraw(EventArgs args)
         {
+            Render.Circle.DrawCircle(
+                Game.CursorPos,
+                this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value,
+                Color.Gold);
+
+            foreach (var reticle in this.axesList)
+            {
+                Render.Circle.DrawCircle(reticle.Position, 100f, Color.Blue);
+            }
         }
 
         /// <summary>
@@ -132,6 +174,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnHarass()
         {
+            CatchAxes(Mode.Harass);
         }
 
         /// <summary>
@@ -139,6 +182,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnLaneclear()
         {
+            CatchAxes(Mode.Farm);
         }
 
         /// <summary>
@@ -237,26 +281,7 @@ namespace iSeries.Champions.Draven
 
             this.lastListCheckTick = Environment.TickCount;
             this.axesList.RemoveAll(axe => !axe.IsValid);
-        }
-
-        /// <summary>
-        ///     The Drawing Method
-        /// </summary>
-        /// <param name="args">
-        ///     The args
-        /// </param>
-        private void Drawing_OnDraw(EventArgs args)
-        {
-            Render.Circle.DrawCircle(
-                Game.CursorPos, 
-                this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value, 
-                Color.Gold);
-
-            foreach (var reticle in this.axesList)
-            {
-                Render.Circle.DrawCircle(reticle.Position, 100f, Color.Blue);
-            }
-        }
+        }   
 
         /// <summary>
         ///     The Functions to always process

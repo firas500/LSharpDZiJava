@@ -47,7 +47,8 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
-                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000f) },
+                                                                       { SpellSlot.W, new Spell(SpellSlot.W) },
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
                                                                    };
 
@@ -329,17 +330,17 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        /// Gets or sets the creation time.
+        ///     Gets or sets the creation time.
         /// </summary>
         public float CreationTime { get; set; }
 
         /// <summary>
-        /// Gets or sets the end time.
+        ///     Gets or sets the end time.
         /// </summary>
         public float EndTime { get; set; }
 
         /// <summary>
-        /// Gets a value indicating whether is being caught.
+        ///     Gets a value indicating whether is being caught.
         /// </summary>
         public bool IsBeingCaught
         {
@@ -351,7 +352,7 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        /// Gets a value indicating whether is valid.
+        ///     Gets a value indicating whether is valid.
         /// </summary>
         public bool IsValid
         {
@@ -362,7 +363,7 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        /// Gets or sets the position.
+        ///     Gets or sets the position.
         /// </summary>
         public Vector3 Position { get; set; }
 

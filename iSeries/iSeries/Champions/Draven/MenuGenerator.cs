@@ -65,7 +65,6 @@ namespace iSeries.Champions.Draven
             var farmMenu = new Menu("Farm Options", "com.iseries.draven.farm");
             {
                 farmMenu.AddItem(new MenuItem("com.iseries.draven.farm.catchfarm", "Catch Axes in Farm").SetValue(true));
-
             }
 
             var misc = new Menu("Misc Options", "com.iseries.draven.misc");

@@ -52,14 +52,14 @@ namespace iSeries.Champions.Draven
                                                                    };
 
         /// <summary>
-        /// TODO The axes list.
+        ///     The Axe List
         /// </summary>
-        private List<Axe> axesList = new List<Axe>();
+        private readonly List<Axe> axesList = new List<Axe>();
 
         /// <summary>
-        /// TODO The last list check tick.
+        ///     The checking tick?
         /// </summary>
-        private float LastListCheckTick;
+        private float lastListCheckTick;
 
         #endregion
 
@@ -231,20 +231,20 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private void CheckList()
         {
-            if (Environment.TickCount - this.LastListCheckTick < 1200)
+            if (Environment.TickCount - this.lastListCheckTick < 1200)
             {
                 return;
             }
 
-            this.LastListCheckTick = Environment.TickCount;
+            this.lastListCheckTick = Environment.TickCount;
             this.axesList.RemoveAll(axe => !axe.IsValid);
         }
 
         /// <summary>
-        /// TODO The drawing_ on draw.
+        ///     The Drawing Method
         /// </summary>
         /// <param name="args">
-        /// TODO The args.
+        ///     The args
         /// </param>
         private void Drawing_OnDraw(EventArgs args)
         {
@@ -299,8 +299,8 @@ namespace iSeries.Champions.Draven
                     pathLength += currentDistance;
                 }
 
-                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < this.EndTime;
-                return CanBeReached;
+                var canBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < this.EndTime;
+                return canBeReached;
             }
         }
 

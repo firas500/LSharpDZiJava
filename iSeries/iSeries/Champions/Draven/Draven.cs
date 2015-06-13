@@ -66,8 +66,7 @@ namespace iSeries.Champions.Draven
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Draven"/> class. 
-        ///     Initializes a new instance of the <see cref="Kalista"/> class.
+        ///     Initializes a new instance of the <see cref="Draven"/> class. 
         /// </summary>
         public Draven()
         {

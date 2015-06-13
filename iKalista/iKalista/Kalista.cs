@@ -256,7 +256,7 @@ namespace IKalista
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
+                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
             var bigMinions =
                 MinionManager.GetMinions(

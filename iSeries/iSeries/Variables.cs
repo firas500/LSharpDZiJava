@@ -39,15 +39,22 @@ namespace iSeries
         public static Menu Menu { get; set; }
 
         /// <summary>
-        ///     Gets or sets the player.
-        /// </summary>
-        public static Obj_AI_Hero Player { get; set; }
-
-        /// <summary>
         ///     Gets or sets the orbwalker.
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", 
+            Justification = "Reviewed. Suppression is OK here.")]
         public static Orbwalking.Orbwalker Orbwalker { get; set; }
+
+        /// <summary>
+        ///     Gets the player.
+        /// </summary>
+        public static Obj_AI_Hero Player
+        {
+            get
+            {
+                return ObjectManager.Player;
+            }
+        }
 
         #endregion
     }

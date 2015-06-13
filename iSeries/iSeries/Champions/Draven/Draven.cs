@@ -23,6 +23,7 @@ namespace iSeries.Champions.Draven
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using iSeries.Champions.Utilities;
@@ -43,41 +44,31 @@ namespace iSeries.Champions.Draven
         #region Fields
 
         /// <summary>
+        ///     The Axe List
+        /// </summary>
+        private readonly List<Axe> axesList = new List<Axe>();
+
+        /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
-                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000f) },
-                                                                       { SpellSlot.W, new Spell(SpellSlot.W) },
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
+                                                                       { SpellSlot.W, new Spell(SpellSlot.W) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
                                                                    };
-
-        /// <summary>
-        ///     The Axe List
-        /// </summary>
-        private readonly List<Axe> axesList = new List<Axe>();
 
         /// <summary>
         ///     The checking tick?
         /// </summary>
         private float lastListCheckTick;
 
-        /// <summary>
-        /// The number of axes the player has on him.
-        /// </summary>
-        private int QStacks
-        {
-            get
-            {
-                return ObjectManager.Player.GetBuff("dravenspinningattack").Count;
-            }
-        }
         #endregion
 
         #region Constructors and Destructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Draven"/> class. 
+        ///     Initializes a new instance of the <see cref="Draven" /> class.
         /// </summary>
         public Draven()
         {
@@ -91,8 +82,6 @@ namespace iSeries.Champions.Draven
             // Spell initialization
             this.spells[SpellSlot.E].SetSkillshot(250f, 130f, 1400f, false, SkillshotType.SkillshotLine);
             this.spells[SpellSlot.R].SetSkillshot(400f, 160f, 2000f, false, SkillshotType.SkillshotLine);
-
-            Orbwalking.OnNonKillableMinion += minion => { };
 
             GameObject.OnCreate += (sender, args) =>
                 {
@@ -114,6 +103,23 @@ namespace iSeries.Champions.Draven
                     }
                 };
 
+            AntiGapcloser.OnEnemyGapcloser += this.OnIncomingGapcloser;
+            Interrupter2.OnInterruptableTarget += this.OnInterruptableTarget;
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        ///     The number of axes the player has on him.
+        /// </summary>
+        private int QStacks
+        {
+            get
+            {
+                return ObjectManager.Player.GetBuff("dravenspinningattack").Count;
+            }
         }
 
         #endregion
@@ -123,23 +129,31 @@ namespace iSeries.Champions.Draven
         /// <summary>
         ///     <c>OnCombo</c> subscribed orbwalker function.
         /// </summary>
+        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", 
+            Justification = "Reviewed. Suppression is OK here.")]
         public override void OnCombo()
         {
-            CatchAxes(Mode.Combo);
-            if (Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>() && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget()) && spells[SpellSlot.Q].IsReady())
+            this.CatchAxes(Mode.Combo);
+            if (this.Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>()
+                && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget())
+                && this.spells[SpellSlot.Q].IsReady())
             {
-                var maxQ = Menu.Item("com.iseries.draven.misc.maxQ").GetValue<Slider>().Value;
-                var onPlayer = QStacks;
-                var onGround = axesList.Count;
+                var maxQ = this.Menu.Item("com.iseries.draven.misc.maxQ").GetValue<Slider>().Value;
+                var onPlayer = this.QStacks;
+                var onGround = this.axesList.Count;
                 if (onGround + onPlayer + 1 <= maxQ)
                 {
-                    spells[SpellSlot.Q].Cast();
+                    this.spells[SpellSlot.Q].Cast();
                 }
             }
-            var eTarget = TargetSelector.GetTarget(spells[SpellSlot.E].Range-175f, TargetSelector.DamageType.Physical);
-            if (Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>() && eTarget.IsValidTarget() && spells[SpellSlot.E].IsReady())
+
+            var eTarget = TargetSelector.GetTarget(
+                this.spells[SpellSlot.E].Range - 175f, 
+                TargetSelector.DamageType.Physical);
+            if (this.Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>() && eTarget.IsValidTarget()
+                && this.spells[SpellSlot.E].IsReady())
             {
-                spells[SpellSlot.E].CastIfHitchanceEquals(eTarget, HitChance.VeryHigh); 
+                this.spells[SpellSlot.E].CastIfHitchanceEquals(eTarget, HitChance.VeryHigh);
             }
 
             /**TODO
@@ -160,8 +174,8 @@ namespace iSeries.Champions.Draven
         public override void OnDraw(EventArgs args)
         {
             Render.Circle.DrawCircle(
-                Game.CursorPos,
-                this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value,
+                Game.CursorPos, 
+                this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value, 
                 Color.Gold);
 
             foreach (var reticle in this.axesList)
@@ -175,7 +189,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnHarass()
         {
-            CatchAxes(Mode.Harass);
+            this.CatchAxes(Mode.Harass);
         }
 
         /// <summary>
@@ -183,7 +197,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnLaneclear()
         {
-            CatchAxes(Mode.Farm);
+            this.CatchAxes(Mode.Farm);
         }
 
         /// <summary>
@@ -282,7 +296,32 @@ namespace iSeries.Champions.Draven
 
             this.lastListCheckTick = Environment.TickCount;
             this.axesList.RemoveAll(axe => !axe.IsValid);
-        }   
+        }
+
+        /// <summary>
+        ///     On incoming gap closer
+        /// </summary>
+        /// <param name="gapcloser">
+        ///     The Gap closer
+        /// </param>
+        private void OnIncomingGapcloser(ActiveGapcloser gapcloser)
+        {
+            
+        }
+
+        /// <summary>
+        ///     The possible interrupted target
+        /// </summary>
+        /// <param name="sender">
+        ///     The Sender
+        /// </param>
+        /// <param name="args">
+        ///     The args
+        /// </param>
+        private void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
+        {
+
+        }
 
         /// <summary>
         ///     The Functions to always process

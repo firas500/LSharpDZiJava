@@ -80,7 +80,6 @@ namespace iSeries
             {
                 CustomEvents.Game.OnGameLoad += eventArgs =>
                     {
-                        Variables.Player = ObjectManager.Player;
                         if (!SupportedChampions.ContainsKey(Variables.Player.ChampionName))
                         {
                             return;

@@ -19,11 +19,6 @@
 //   The given champion class
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
-using System.Runtime.Remoting.Channels;
-using System.Xml.Linq;
-using iSeries.General;
-
 namespace iSeries.Champions.Draven
 {
     using System;
@@ -31,13 +26,14 @@ namespace iSeries.Champions.Draven
     using System.Linq;
 
     using iSeries.Champions.Utilities;
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;
 
     using SharpDX;
 
-    using Collision = LeagueSharp.Common.Collision;
+    using Color = System.Drawing.Color;
 
     /// <summary>
     ///     The given champion class
@@ -50,13 +46,19 @@ namespace iSeries.Champions.Draven
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
-        {
-           { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
-           { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
-        };
+                                                                   {
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
+                                                                       { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
+                                                                   };
 
+        /// <summary>
+        /// TODO The axes list.
+        /// </summary>
         private List<Axe> axesList = new List<Axe>();
 
+        /// <summary>
+        /// TODO The last list check tick.
+        /// </summary>
         private float LastListCheckTick;
 
         #endregion
@@ -64,7 +66,8 @@ namespace iSeries.Champions.Draven
         #region Constructors and Destructors
 
         /// <summary>
-        ///     Initializes a new instance of the <see cref="Kalista" /> class.
+        /// Initializes a new instance of the <see cref="Draven"/> class. 
+        ///     Initializes a new instance of the <see cref="Kalista"/> class.
         /// </summary>
         public Draven()
         {
@@ -79,35 +82,30 @@ namespace iSeries.Champions.Draven
             this.spells[SpellSlot.E].SetSkillshot(250f, 130f, 1400f, false, SkillshotType.SkillshotLine);
             this.spells[SpellSlot.R].SetSkillshot(400f, 160f, 2000f, false, SkillshotType.SkillshotLine);
 
-            Orbwalking.OnNonKillableMinion += minion =>
-            {
-
-            };
+            Orbwalking.OnNonKillableMinion += minion => { };
 
             GameObject.OnCreate += (sender, args) =>
-            {
-                if (sender != null && sender.Name.Contains("Q_reticle_self"))
                 {
-                    axesList.Add(new Axe()
+                    if (sender != null && sender.Name.Contains("Q_reticle_self"))
                     {
-                        Position = sender.Position,
-                        CreationTime = Game.Time,
-                        EndTime = Game.Time + 1.20f
-                    });
-                }
-            };
+                        this.axesList.Add(
+                            new Axe()
+                                {
+                                   Position = sender.Position, CreationTime = Game.Time, EndTime = Game.Time + 1.20f 
+                                });
+                    }
+                };
 
             GameObject.OnDelete += (sender, args) =>
-            {
-                if (sender != null && sender.Name.Contains("Q_reticle_self"))
                 {
-                    axesList.RemoveAll(axe => axe.AxeObject.NetworkId == sender.NetworkId);
-                }
-            };
+                    if (sender != null && sender.Name.Contains("Q_reticle_self"))
+                    {
+                        this.axesList.RemoveAll(axe => axe.AxeObject.NetworkId == sender.NetworkId);
+                    }
+                };
 
-            Drawing.OnDraw += Drawing_OnDraw;
+            Drawing.OnDraw += this.Drawing_OnDraw;
         }
-
 
         #endregion
 
@@ -118,7 +116,6 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnCombo()
         {
-
         }
 
         /// <summary>
@@ -136,7 +133,6 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnHarass()
         {
-
         }
 
         /// <summary>
@@ -144,7 +140,6 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnLaneclear()
         {
-
         }
 
         /// <summary>
@@ -176,58 +171,48 @@ namespace iSeries.Champions.Draven
         #endregion
 
         #region Methods
-        private void Drawing_OnDraw(EventArgs args)
-        {
-                Render.Circle.DrawCircle(Game.CursorPos, Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value,System.Drawing.Color.Gold);
-
-            foreach (var reticle in axesList)
-            {
-                Render.Circle.DrawCircle(reticle.Position, 100f, System.Drawing.Color.Blue);
-            }
-        }
 
         /// <summary>
-        ///     The Functions to always process
+        ///     The Axe Catching Logic
         /// </summary>
-        private void OnUpdateFunctions()
-        {
-            CheckList();
-        }
-
-        private void CheckList()
-        {
-            if (Environment.TickCount - LastListCheckTick < 1200)
-            {
-                return;
-            }
-            LastListCheckTick = Environment.TickCount;
-            axesList.RemoveAll(axe => !axe.IsValid);
-        }
-
+        /// <param name="mode">
+        ///     The Mode
+        /// </param>
         private void CatchAxes(Mode mode)
         {
-            var ModeName = mode.ToString().ToLowerInvariant();
-            if (this.Menu.Item("com.iseries.draven.combo.catch" + ModeName).GetValue<bool>() && axesList.Any())
+            var modeName = mode.ToString().ToLowerInvariant();
+            if (this.Menu.Item("com.iseries.draven.combo.catch" + modeName).GetValue<bool>() && this.axesList.Any())
             {
-                //Starting Axe Catching Logic
+                // Starting Axe Catching Logic
                 var closestAxe =
-                    axesList
-                    .FindAll(axe => axe.IsValid && (axe.CanBeReachedNormal || (Menu.Item("com.iseries.draven.misc.wcatch").GetValue<bool>() && axe.CanBeReachedWithW && mode == Mode.Combo))
-                        && (axe.Position.Distance(Game.CursorPos) <= Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
-                    .OrderBy(axe => axe.Position.Distance(Game.CursorPos))
-                        .ThenBy(axe => axe.Position.Distance(ObjectManager.Player.ServerPosition)).FirstOrDefault();
+                    this.axesList.FindAll(
+                        axe =>
+                        axe.IsValid
+                        && (axe.CanBeReachedNormal
+                            || (this.Menu.Item("com.iseries.draven.misc.wcatch").GetValue<bool>()
+                                && axe.CanBeReachedWithW && mode == Mode.Combo))
+                        && (axe.Position.Distance(Game.CursorPos)
+                            <= this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
+                        .OrderBy(axe => axe.Position.Distance(Game.CursorPos))
+                        .ThenBy(axe => axe.Position.Distance(ObjectManager.Player.ServerPosition))
+                        .FirstOrDefault();
                 if (closestAxe != null)
                 {
-                    if ((closestAxe.Position.CountAlliesInRange(Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value) >= closestAxe.Position.CountEnemiesInRange(Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value)))
+                    if (
+                        closestAxe.Position.CountAlliesInRange(
+                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value)
+                        >= closestAxe.Position.CountEnemiesInRange(
+                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value))
                     {
                         if (!closestAxe.CanBeReachedNormal && closestAxe.CanBeReachedWithW)
                         {
-                            if (Menu.Item("com.iseries.draven.misc.wcatch").GetValue<bool>())
+                            if (this.Menu.Item("com.iseries.draven.misc.wcatch").GetValue<bool>())
                             {
-                                spells[SpellSlot.W].Cast();
+                                this.spells[SpellSlot.W].Cast();
                             }
                         }
-                        //Allies >= Enemies. Catching axe.
+
+                        // Allies >= Enemies. Catching axe.
                         if (Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.None)
                         {
                             ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, closestAxe.Position);
@@ -240,28 +225,71 @@ namespace iSeries.Champions.Draven
                 }
             }
         }
+
+        /// <summary>
+        ///     The Axe Checking List
+        /// </summary>
+        private void CheckList()
+        {
+            if (Environment.TickCount - this.LastListCheckTick < 1200)
+            {
+                return;
+            }
+
+            this.LastListCheckTick = Environment.TickCount;
+            this.axesList.RemoveAll(axe => !axe.IsValid);
+        }
+
+        /// <summary>
+        /// TODO The drawing_ on draw.
+        /// </summary>
+        /// <param name="args">
+        /// TODO The args.
+        /// </param>
+        private void Drawing_OnDraw(EventArgs args)
+        {
+            Render.Circle.DrawCircle(
+                Game.CursorPos, 
+                this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value, 
+                Color.Gold);
+
+            foreach (var reticle in this.axesList)
+            {
+                Render.Circle.DrawCircle(reticle.Position, 100f, Color.Blue);
+            }
+        }
+
+        /// <summary>
+        ///     The Functions to always process
+        /// </summary>
+        private void OnUpdateFunctions()
+        {
+            this.CheckList();
+        }
+
         #endregion
     }
 
+    /// <summary>
+    ///     The Axe Class
+    /// </summary>
     internal class Axe
     {
+        #region Public Properties
+
+        /// <summary>
+        ///     Gets or sets the axe object.
+        /// </summary>
         public GameObject AxeObject { get; set; }
 
-        public Vector3 Position { get; set; }
-
-        public float EndTime { get; set; }
-
-        public float CreationTime { get; set; }
-
-        public bool IsValid
-        {
-            get { return AxeObject.IsValid && EndTime >= Game.Time; }
-        }
+        /// <summary>
+        ///     Gets a value indicating whether can be reached normal.
+        /// </summary>
         public bool CanBeReachedNormal
         {
             get
             {
-                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, Position);
+                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, this.Position);
                 var pathLength = 0f;
                 for (var i = 1; i <= path.Count(); i++)
                 {
@@ -270,17 +298,22 @@ namespace iSeries.Champions.Draven
                     var currentDistance = Vector3.Distance(previousPoint, currentPoint);
                     pathLength += currentDistance;
                 }
-                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < EndTime;
+
+                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < this.EndTime;
                 return CanBeReached;
             }
         }
 
+        /// <summary>
+        ///     Gets a value indicating whether can be reached with w.
+        /// </summary>
         public bool CanBeReachedWithW
         {
             get
             {
-                var BuffedSpeed = (5 * ObjectManager.Player.GetSpell(SpellSlot.W).Level) + 0.35f * ObjectManager.Player.MoveSpeed;
-                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, Position);
+                var buffedSpeed = (5 * ObjectManager.Player.GetSpell(SpellSlot.W).Level)
+                                  + 0.35f * ObjectManager.Player.MoveSpeed;
+                var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, this.Position);
                 var pathLength = 0f;
                 for (var i = 1; i <= path.Count(); i++)
                 {
@@ -289,18 +322,51 @@ namespace iSeries.Champions.Draven
                     var currentDistance = Vector3.Distance(previousPoint, currentPoint);
                     pathLength += currentDistance;
                 }
-                var CanBeReached = pathLength / (ObjectManager.Player.MoveSpeed + BuffedSpeed + Game.Time) < EndTime;
-                return CanBeReached;
+
+                var canBeReached = pathLength / (ObjectManager.Player.MoveSpeed + buffedSpeed + Game.Time)
+                                   < this.EndTime;
+                return canBeReached;
             }
         }
 
+        /// <summary>
+        /// Gets or sets the creation time.
+        /// </summary>
+        public float CreationTime { get; set; }
+
+        /// <summary>
+        /// Gets or sets the end time.
+        /// </summary>
+        public float EndTime { get; set; }
+
+        /// <summary>
+        /// Gets a value indicating whether is being caught.
+        /// </summary>
         public bool IsBeingCaught
         {
             get
             {
-                return ObjectManager.Player.ServerPosition.Distance(Position) <
-                       49 + (ObjectManager.Player.BoundingRadius / 2) + 50;
+                return ObjectManager.Player.ServerPosition.Distance(this.Position)
+                       < 49 + (ObjectManager.Player.BoundingRadius / 2) + 50;
             }
         }
+
+        /// <summary>
+        /// Gets a value indicating whether is valid.
+        /// </summary>
+        public bool IsValid
+        {
+            get
+            {
+                return this.AxeObject.IsValid && this.EndTime >= Game.Time;
+            }
+        }
+
+        /// <summary>
+        /// Gets or sets the position.
+        /// </summary>
+        public Vector3 Position { get; set; }
+
+        #endregion
     }
 }

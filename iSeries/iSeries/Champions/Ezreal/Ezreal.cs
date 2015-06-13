@@ -255,11 +255,6 @@ namespace iSeries.Champions.Ezreal
                     break;
             }
 
-            foreach (BuffInstance buff in this.Player.Buffs)
-            {
-                Console.WriteLine("Name: " + buff.Name);
-            }
-
             this.OnUpdateFunctions();
         }
 

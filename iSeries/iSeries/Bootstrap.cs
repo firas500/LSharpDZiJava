@@ -26,8 +26,10 @@ namespace iSeries
 
     using iSeries.Champions.Draven;
     using iSeries.Champions.Ezreal;
+    using iSeries.Champions.Graves;
     using iSeries.Champions.Kalista;
     using iSeries.Champions.Lucian;
+    using iSeries.Champions.Twitch;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -58,6 +60,8 @@ namespace iSeries
             SupportedChampions.Add("Lucian", new Lucian().Invoke);
             SupportedChampions.Add("Draven", new Draven().Invoke);
             SupportedChampions.Add("Ezreal", new Ezreal().Invoke);
+            SupportedChampions.Add("Graves", new Graves().Invoke);
+            SupportedChampions.Add("Twitch", new Twitch().Invoke);
         }
 
         #endregion

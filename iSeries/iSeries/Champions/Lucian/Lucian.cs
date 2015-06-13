@@ -38,13 +38,13 @@ namespace iSeries.Champions.Lucian
     /// </summary>
     internal class Lucian : Champion
     {
-        #region Static Fields
+        #region Fields
 
         /// <summary>
         ///     Distance check
         ///     Credits Pastel!
         /// </summary>
-        private static readonly Func<Obj_AI_Hero, Obj_AI_Base, bool> CheckDistance =
+        private readonly Func<Obj_AI_Hero, Obj_AI_Base, bool> checkDistance =
             (champ, minion) =>
             Math.Abs(
                 champ.Distance(ObjectManager.Player) - (minion.Distance(ObjectManager.Player) + minion.Distance(champ)))
@@ -53,14 +53,10 @@ namespace iSeries.Champions.Lucian
         /// <summary>
         ///     Line check, credits pastel!
         /// </summary>
-        private static readonly Func<Vector3, Vector3, Vector3, bool> CheckLine =
+        private readonly Func<Vector3, Vector3, Vector3, bool> checkLine =
             (v1, v2, v3) =>
             Math.Abs((v1.X * v2.Y) + (v1.Y * v3.X) + (v2.X * v3.Y) - (v1.Y * v2.X) - (v1.X * v3.Y) - (v2.Y * v3.X))
             <= 20000;
-
-        #endregion
-
-        #region Fields
 
         /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
@@ -111,32 +107,32 @@ namespace iSeries.Champions.Lucian
         #region Enums
 
         /// <summary>
-        ///     TODO The spells.
+        ///     The Spells
         /// </summary>
         private enum Spells
         {
             /// <summary>
-            ///     TODO The q.
+            ///     The Q Spell
             /// </summary>
             Q, 
 
             /// <summary>
-            ///     TODO The q 1.
+            ///     The Extended Q Spell
             /// </summary>
             Q1, 
 
             /// <summary>
-            ///     TODO The w.
+            ///     The W Spell
             /// </summary>
             W, 
 
             /// <summary>
-            ///     TODO The e.
+            ///     The E Spell
             /// </summary>
             E, 
 
             /// <summary>
-            ///     TODO The r.
+            ///     The R  Spell
             /// </summary>
             R
         }
@@ -146,10 +142,10 @@ namespace iSeries.Champions.Lucian
         #region Public Methods and Operators
 
         /// <summary>
-        ///     TODO The get combo damage.
+        ///     Gets the combo damage
         /// </summary>
         /// <param name="target">
-        ///     TODO The attackableTarget.
+        ///     The target
         /// </param>
         /// <returns>
         ///     The combo damage
@@ -324,10 +320,10 @@ namespace iSeries.Champions.Lucian
                                                     minion =>
                                                     this.spells[Spells.Q].CanCast(minion)
                                                     && this.spells[Spells.Q].IsInRange(minion)
-                                                    && CheckLine(
+                                                    && this.checkLine(
                                                         this.Player.Position, 
                                                         minion.Position, 
-                                                        target.ServerPosition) && CheckDistance(target, minion)
+                                                        target.ServerPosition) && this.checkDistance(target, minion)
                                                     && target.Distance(this.Player) > minion.Distance(this.Player)
                                                     && this.Player.Distance(minion) + minion.Distance(target)
                                                     <= this.Player.Distance(target) + 10f)
@@ -351,13 +347,13 @@ namespace iSeries.Champions.Lucian
         }
 
         /// <summary>
-        ///     TODO The on add buff.
+        ///     The On Add Buff
         /// </summary>
         /// <param name="sender">
-        ///     TODO The sender.
+        ///     The Sender
         /// </param>
         /// <param name="args">
-        ///     TODO The args.
+        ///     The Args
         /// </param>
         private void OnAddBuff(Obj_AI_Base sender, Obj_AI_BaseBuffAddEventArgs args)
         {
@@ -369,13 +365,13 @@ namespace iSeries.Champions.Lucian
         }
 
         /// <summary>
-        ///     TODO The on cast spell.
+        ///     The On Cast Spell Method
         /// </summary>
         /// <param name="sender">
-        ///     TODO The sender.
+        ///     The Sender
         /// </param>
         /// <param name="args">
-        ///     TODO The args.
+        ///     The Args
         /// </param>
         private void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
         {
@@ -397,23 +393,23 @@ namespace iSeries.Champions.Lucian
         }
 
         /// <summary>
-        ///     TODO The on gapcloser.
+        ///     The Gap closer method
         /// </summary>
         /// <param name="gapcloser">
-        ///     TODO The gapcloser.
+        ///     The Gap closer
         /// </param>
         private void OnGapcloser(ActiveGapcloser gapcloser)
         {
         }
 
         /// <summary>
-        ///     TODO The obj_ a i_ base_ on process spell cast.
+        ///     The Process Spell Casting
         /// </summary>
         /// <param name="sender">
-        ///     TODO The sender.
+        ///     The Sender
         /// </param>
         /// <param name="args">
-        ///     TODO The args.
+        ///     The Args
         /// </param>
         private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
@@ -444,13 +440,13 @@ namespace iSeries.Champions.Lucian
         }
 
         /// <summary>
-        ///     TODO The on remove buff.
+        ///     On Remove Buff
         /// </summary>
         /// <param name="sender">
-        ///     TODO The sender.
+        ///     The Sender
         /// </param>
         /// <param name="args">
-        ///     TODO The args.
+        ///     The Args
         /// </param>
         private void OnRemoveBuff(Obj_AI_Base sender, Obj_AI_BaseBuffRemoveEventArgs args)
         {
@@ -485,7 +481,7 @@ namespace iSeries.Champions.Lucian
                     x => this.spells[Spells.W].IsInRange(x) && x.Health + 5 < this.spells[Spells.W].GetDamage(x))
                     .Where(hero => this.spells[Spells.W].GetPrediction(hero).Hitchance != HitChance.Collision))
             {
-                this.spells[Spells.W].CastOnUnit(hero);
+                this.spells[Spells.W].Cast(hero.Position);
                 this.spells[Spells.W].LastCastAttemptT = Environment.TickCount;
             }
         }

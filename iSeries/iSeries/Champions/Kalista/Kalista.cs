@@ -119,7 +119,7 @@ namespace iSeries.Champions.Kalista
         /// <returns>
         ///     The <see cref="float" />.
         /// </returns>
-        public float GetDamage(Obj_AI_Base target)
+        public float GetDamage(Obj_AI_Hero target)
         {
             return this.spells[SpellSlot.E].GetDamage(target);
         }

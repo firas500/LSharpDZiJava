@@ -72,7 +72,7 @@ namespace iSeries.Champions.Utilities
         /// <param name="target">
         ///     The Target to draw
         /// </param>
-        public delegate float DamageToUnitDelegate(Obj_AI_Base target);
+        public delegate float DamageToUnitDelegate(Obj_AI_Hero target);
 
         #endregion
 

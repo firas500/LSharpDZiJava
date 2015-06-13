@@ -75,6 +75,7 @@ namespace iSeries.Champions.Draven
                 misc.AddItem(
                     new MenuItem("com.iseries.draven.misc.catchrange", "Catch Range").SetValue(new Slider(500,65,850)));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.wcatch", "W To Catch Axes in Combo").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.draven.misc.safedistance", "Axes Safe Distance").SetValue(new Slider(360, 0, 550)));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.eagp", "E Antigapcloser").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.eint", "E Interrupter").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.epeel", "E Peel").SetValue(true));

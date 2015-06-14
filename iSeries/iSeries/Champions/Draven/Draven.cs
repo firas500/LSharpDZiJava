@@ -156,7 +156,6 @@ namespace iSeries.Champions.Draven
         public override void OnCombo()
         {
             this.CatchAxes(Mode.Combo);
-            return;
             if (this.Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>()
                 && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget())
                 && this.spells[SpellSlot.Q].IsReady())
@@ -173,12 +172,12 @@ namespace iSeries.Champions.Draven
             }
 
             var eTarget = TargetSelector.GetTarget(
-                this.spells[SpellSlot.E].Range - 175f, 
+                this.spells[SpellSlot.E].Range, 
                 TargetSelector.DamageType.Physical);
-            if (this.Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>() && eTarget.IsValidTarget()
+            if (this.Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>() && eTarget.IsValidTarget(this.spells[SpellSlot.E].Range)
                 && this.spells[SpellSlot.E].IsReady() )
             {
-                this.spells[SpellSlot.E].CastIfHitchanceEquals(eTarget, HitChance.VeryHigh);
+                this.spells[SpellSlot.E].Cast(eTarget);
             }
 
             if (this.GetItemValue<bool>("com.iseries.draven.combo.useR"))
@@ -329,7 +328,9 @@ namespace iSeries.Champions.Draven
                 {
                     return;
                 }
+
                 // Starting Axe Catching Logic
+
                 var closestAxe =
                     this.axesList.FindAll(
                         axe =>

@@ -41,27 +41,28 @@ namespace iSeries.Champions.Twitch
         {
             var comboMenu = new Menu("Combo Options", "com.iseries.twitch.combo");
             {
-                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useQ", "Use Q").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useW", "Use W").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useR", "Use R").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useE", "Use E").SetValue(true));
                 root.AddSubMenu(comboMenu);
             }
 
             var harassMenu = new Menu("Harass Options", "com.iseries.twitch.harass");
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.twitch.harass.useQ", "Use Q").SetValue(false));
-                harassMenu.AddItem(new MenuItem("com.iseries.twitch.harass.useW", "Use W").SetValue(false));
+                harassMenu.AddItem(new MenuItem("com.iseries.twitch.harass.useE", "Use E").SetValue(false));
                 root.AddSubMenu(harassMenu);
             }
 
             var laneclearMenu = new Menu("Laneclear Options", "com.iseries.twitch.laneclear");
             {
-                laneclearMenu.AddItem(new MenuItem("com.iseries.twitch.laneclear.useQ", "Use Q").SetValue(true));
+                laneclearMenu.AddItem(new MenuItem("com.iseries.twitch.laneclear.useE", "Use E").SetValue(true));
                 root.AddSubMenu(laneclearMenu);
             }
 
             var misc = new Menu("Misc Options", "com.iseries.twitch.misc");
             {
+                misc.AddItem(new MenuItem("com.iseries.twitch.misc.killsteal", "Always Killsteal").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.twitch.misc.mobsteal", "Mobsteal").SetValue(true));
                 root.AddSubMenu(misc);
             }
 

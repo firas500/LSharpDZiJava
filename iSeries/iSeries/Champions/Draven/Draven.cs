@@ -156,7 +156,7 @@ namespace iSeries.Champions.Draven
         public override void OnCombo()
         {
             this.CatchAxes(Mode.Combo);
-
+            return;
             if (this.Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>()
                 && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget())
                 && this.spells[SpellSlot.Q].IsReady())
@@ -333,10 +333,10 @@ namespace iSeries.Champions.Draven
                 var closestAxe =
                     this.axesList.FindAll(
                         axe =>
-                            axe.IsValid && IsSafe(axe.Position) &&
-                            (axe.CanBeReachedNormal || (this.CanCastW() && axe.CanBeReachedWithW && mode == Mode.Combo)) &&
-                            (axe.Position.Distance(Game.CursorPos) <=
-                             this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
+                        axe.IsValid && IsSafe(axe.Position)
+                        && (axe.CanBeReachedNormal || (this.CanCastW() && axe.CanBeReachedWithW && mode == Mode.Combo))
+                        && (axe.Position.Distance(Game.CursorPos)
+                            <= this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
                         .OrderBy(axe => axe.Position.Distance(Game.CursorPos))
                         .ThenBy(axe => axe.Position.Distance(ObjectManager.Player.ServerPosition))
                         .FirstOrDefault();
@@ -365,8 +365,8 @@ namespace iSeries.Champions.Draven
                         {
                             Variables.Orbwalker.SetOrbwalkingPoint(closestAxe.Position.Extend(Game.CursorPos, 45f));
                         }
+                        }
                     }
-                }
                 else
                 {
                     Variables.Orbwalker.SetOrbwalkingPoint(Game.CursorPos);

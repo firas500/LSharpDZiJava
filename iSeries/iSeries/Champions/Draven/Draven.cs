@@ -52,6 +52,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
+                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q) },
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
                                                                        { SpellSlot.W, new Spell(SpellSlot.W) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
@@ -89,9 +90,12 @@ namespace iSeries.Champions.Draven
                                           EndTime = Game.Time + 1.20f
                                       };
                         this.axesList.Add(axe);
-                        Utility.DelayAction.Add(1800, () => { 
-                            if(this.axesList.Contains(axe))
-                            {
+                        Utility.DelayAction.Add(
+                            1800,
+                            () =>
+                                {
+                                    if (this.axesList.Contains(axe))
+                                    {
                                 this.axesList.Remove(axe);
                             } 
                         });

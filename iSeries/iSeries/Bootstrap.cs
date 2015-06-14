@@ -42,6 +42,11 @@ namespace iSeries
         #region Static Fields
 
         /// <summary>
+        /// TODO The orb walking.
+        /// </summary>
+        public static Menu OrbWalking;
+
+        /// <summary>
         ///     TODO The champ list.
         /// </summary>
         private static readonly Dictionary<string, Action> ChampList = new Dictionary<string, Action>
@@ -57,6 +62,35 @@ namespace iSeries
         #endregion
 
         #region Methods
+
+        /// <summary>
+        /// TODO The check auto wind up.
+        /// </summary>
+        private static void CheckAutoWindUp()
+        {
+            var additional = 0;
+
+            if (Game.Ping >= 100)
+            {
+                additional = Game.Ping / 100 * 10;
+            }
+            else if (Game.Ping > 40 && Game.Ping < 100)
+            {
+                additional = Game.Ping / 100 * 20;
+            }
+            else if (Game.Ping <= 40)
+            {
+                additional = +20;
+            }
+
+            var windUp = Game.Ping + additional;
+            if (windUp < 40)
+            {
+                windUp = 40;
+            }
+
+            OrbWalking.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
+        }
 
         /// <summary>
         ///     The main method.
@@ -84,8 +118,17 @@ namespace iSeries
                 var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
                 TargetSelector.AddToMenu(targetSelectorMenu);
                 Variables.Menu.AddSubMenu(targetSelectorMenu);
-                Variables.Orbwalker =
-                    new Orbwalking.Orbwalker(Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
+                OrbWalking = Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+                Variables.Orbwalker = new Orbwalking.Orbwalker(OrbWalking);
+
+                OrbWalking.AddItem(new MenuItem("AutoWindup", "iSeries - Auto Windup").SetValue(false)).ValueChanged +=
+                    (sender, argsEvent) =>
+                        {
+                            if (argsEvent.GetNewValue<bool>())
+                            {
+                                CheckAutoWindUp();
+                            }
+                        };
 
                 ChampList[ObjectManager.Player.ChampionName]();
 

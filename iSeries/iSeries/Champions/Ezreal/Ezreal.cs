@@ -78,8 +78,8 @@ namespace iSeries.Champions.Ezreal
                         return;
                     }
 
-                    if (this.spells[SpellSlot.Q].CanCast((Obj_AI_Base)minion)
-                        && minion.Health <= this.spells[SpellSlot.Q].GetDamage((Obj_AI_Base)minion))
+                    var pred = this.spells[SpellSlot.Q].GetPrediction((Obj_AI_Base)minion);
+                    if (pred.Hitchance >= HitChance.Medium && this.spells[SpellSlot.Q].GetDamage((Obj_AI_Base)minion) > minion.Health)
                     {
                         this.spells[SpellSlot.Q].Cast((Obj_AI_Base)minion);
                     }

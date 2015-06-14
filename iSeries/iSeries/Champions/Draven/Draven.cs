@@ -26,7 +26,6 @@ namespace iSeries.Champions.Draven
     using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
-    using iSeries.Champions.Utilities;
     using iSeries.General;
 
     using LeagueSharp;
@@ -84,15 +83,12 @@ namespace iSeries.Champions.Draven
                     if (sender != null && sender.Name.Contains("Q_reticle_self"))
                     {
                         var axe = new Axe()
-                        {
-                            Position = sender.Position,
-                            CreationTime = Game.Time,
-                            EndTime = Game.Time + 1.20f
-                        };
+                                      {
+                                          Position = sender.Position, CreationTime = Game.Time, 
+                                          EndTime = Game.Time + 1.20f
+                                      };
                         this.axesList.Add(axe);
-                        Utility.DelayAction.Add(1250, () =>
-                        { axesList.Remove(axe); });
-
+                        Utility.DelayAction.Add(1250, () => { this.axesList.Remove(axe); });
                     }
                 };
 
@@ -113,7 +109,7 @@ namespace iSeries.Champions.Draven
         #region Properties
 
         /// <summary>
-        ///     The number of axes the player has on him.
+        ///     Gets the Q Stacks
         /// </summary>
         private int QStacks
         {
@@ -126,6 +122,39 @@ namespace iSeries.Champions.Draven
         #endregion
 
         #region Public Methods and Operators
+
+        /// <summary>
+        ///     Gets Enemies near a position
+        /// </summary>
+        /// <param name="position">
+        ///     The Position
+        /// </param>
+        /// <param name="range">
+        ///     The Range
+        /// </param>
+        /// <returns>
+        ///     a list of enemies
+        /// </returns>
+        public static List<Obj_AI_Hero> GetLhEnemiesNearPosition(Vector3 position, float range)
+        {
+            return
+                HeroManager.Enemies.Where(
+                    hero => hero.IsValidTarget(range, true, position) && hero.HealthPercentage() <= 15).ToList();
+        }
+
+        /// <summary>
+        ///     Checks if the position is under an ally turret
+        /// </summary>
+        /// <param name="position">
+        ///     The Position
+        /// </param>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        public bool UnderAllyTurret(Vector3 position)
+        {
+            return ObjectManager.Get<Obj_AI_Turret>().Any(t => t.IsAlly && !t.IsDead);
+        }
 
         /// <summary>
         ///     <c>OnCombo</c> subscribed orbwalker function.
@@ -141,7 +170,7 @@ namespace iSeries.Champions.Draven
                 && this.spells[SpellSlot.Q].IsReady())
             {
                 var maxQ = this.Menu.Item("com.iseries.draven.misc.maxQ").GetValue<Slider>().Value;
-                var onPlayer = this.QStacks;
+                var onPlayer = QStacks;
                 var onGround = this.axesList.Count;
                 if (onGround + onPlayer + 1 <= maxQ)
                 {
@@ -160,18 +189,23 @@ namespace iSeries.Champions.Draven
 
             if (this.GetItemValue<bool>("com.iseries.draven.combo.useR"))
             {
-                var rTarget = TargetSelector.GetTarget(spells[SpellSlot.R].Range, TargetSelector.DamageType.Physical);
-                var rPrediction = spells[SpellSlot.R].GetPrediction(rTarget);
-                var rCollision = spells[SpellSlot.R].GetCollision(
-                    ObjectManager.Player.ServerPosition.To2D(), new List<Vector2>() { rPrediction.CastPosition.To2D() });
+                var rTarget = TargetSelector.GetTarget(
+                    this.spells[SpellSlot.R].Range, 
+                    TargetSelector.DamageType.Physical);
+                var rPrediction = this.spells[SpellSlot.R].GetPrediction(rTarget);
+                var rCollision = this.spells[SpellSlot.R].GetCollision(
+                    ObjectManager.Player.ServerPosition.To2D(), 
+                    new List<Vector2>() { rPrediction.CastPosition.To2D() });
                 var rDamageMultiplier = 1.0;
                 if (rCollision.Any())
                 {
-                    rDamageMultiplier = ((rCollision.Count() > 7)) ? 0.4 : (1 - ((rCollision.Count()) / 12.5));
+                    rDamageMultiplier = (rCollision.Count() > 7) ? 0.4 : (1 - (rCollision.Count() / 12.5));
                 }
-                if (rTarget.Health + 20 < spells[SpellSlot.R].GetDamage(rTarget) * rDamageMultiplier && rPrediction.Hitchance >= HitChance.VeryHigh)
+
+                if (rTarget.Health + 20 < this.spells[SpellSlot.R].GetDamage(rTarget) * rDamageMultiplier
+                    && rPrediction.Hitchance >= HitChance.VeryHigh)
                 {
-                    spells[SpellSlot.R].Cast(rTarget);
+                    this.spells[SpellSlot.R].Cast(rTarget);
                 }
             }
         }
@@ -201,8 +235,8 @@ namespace iSeries.Champions.Draven
         public override void OnHarass()
         {
             var eTarget = TargetSelector.GetTarget(
-               this.spells[SpellSlot.E].Range - 175f,
-               TargetSelector.DamageType.Physical);
+                this.spells[SpellSlot.E].Range - 175f, 
+                TargetSelector.DamageType.Physical);
             if (this.Menu.Item("com.iseries.draven.harass.useE").GetValue<bool>() && eTarget.IsValidTarget()
                 && this.spells[SpellSlot.E].IsReady())
             {
@@ -251,6 +285,19 @@ namespace iSeries.Champions.Draven
         #region Methods
 
         /// <summary>
+        ///     Checks if you can cast your spell W
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        private bool CanCastW()
+        {
+            return this.spells[SpellSlot.W].IsReady() && this.GetItemValue<bool>("com.iseries.draven.combo.useW")
+                   && this.GetItemValue<Slider>("com.iseries.draven.combo.wmana").Value
+                   > ObjectManager.Player.ManaPercent;
+        }
+
+        /// <summary>
         ///     The Axe Catching Logic
         /// </summary>
         /// <param name="mode">
@@ -265,11 +312,8 @@ namespace iSeries.Champions.Draven
                 var closestAxe =
                     this.axesList.FindAll(
                         axe =>
-                        axe.IsValid
-                        && IsSafe(axe.Position)
-                        && (axe.CanBeReachedNormal
-                            || (CanCastW()
-                                && axe.CanBeReachedWithW && mode == Mode.Combo))
+                        axe.IsValid && this.IsSafe(axe.Position)
+                        && (axe.CanBeReachedNormal || (this.CanCastW() && axe.CanBeReachedWithW && mode == Mode.Combo))
                         && (axe.Position.Distance(Game.CursorPos)
                             <= this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
                         .OrderBy(axe => axe.Position.Distance(Game.CursorPos))
@@ -285,7 +329,7 @@ namespace iSeries.Champions.Draven
                     {
                         if (!closestAxe.CanBeReachedNormal && closestAxe.CanBeReachedWithW)
                         {
-                            if (CanCastW() && !HasWBuff())
+                            if (this.CanCastW() && !this.HasWBuff())
                             {
                                 this.spells[SpellSlot.W].Cast();
                             }
@@ -319,43 +363,45 @@ namespace iSeries.Champions.Draven
             this.axesList.RemoveAll(axe => !axe.IsValid);
         }
 
+        /// <summary>
+        ///     Checks if the player has the speed buff
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        private bool HasWBuff()
+        {
+            return ObjectManager.Player.HasBuff("dravenfurybuff") || ObjectManager.Player.HasBuff("DravenFury");
+        }
+
+        /// <summary>
+        ///     Checks if a position is safe
+        /// </summary>
+        /// <param name="position">
+        ///     The Position
+        /// </param>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
         private bool IsSafe(Vector3 position)
         {
             if (position.UnderTurret(true) && !ObjectManager.Player.UnderTurret(true))
             {
                 return false;
             }
+
             var allies = position.CountAlliesInRange(ObjectManager.Player.AttackRange);
             var enemies = position.CountEnemiesInRange(ObjectManager.Player.AttackRange);
             var lhEnemies = GetLhEnemiesNearPosition(position, ObjectManager.Player.AttackRange).Count();
 
-            if (enemies == 1) //It's a 1v1, safe to assume I can E
+            if (enemies == 1)
             {
+                // It's a 1v1, safe to assume I can E
                 return true;
             }
 
-            //Adding 1 for the Player
-            return (allies + 1 > enemies - lhEnemies);
-        }
-
-        private bool CanCastW()
-        {
-            return (spells[SpellSlot.W].IsReady() && this.GetItemValue<bool>("com.iseries.draven.combo.useW") &&
-                this.GetItemValue<Slider>("com.iseries.draven.combo.wmana").Value > ObjectManager.Player.ManaPercent);
-        }
-        public static List<Obj_AI_Hero> GetLhEnemiesNearPosition(Vector3 position, float range)
-        {
-            return HeroManager.Enemies.Where(hero => hero.IsValidTarget(range, true, position) && hero.HealthPercentage() <= 15).ToList();
-        }
-
-        public static bool UnderAllyTurret(Vector3 Position)
-        {
-            return ObjectManager.Get<Obj_AI_Turret>().Any(t => t.IsAlly && !t.IsDead);
-        }
-
-        private bool HasWBuff()
-        {
-            return ObjectManager.Player.HasBuff("dravenfurybuff") || ObjectManager.Player.HasBuff("DravenFury");
+            // Adding 1 for the Player
+            return allies + 1 > enemies - lhEnemies;
         }
 
         /// <summary>
@@ -366,9 +412,10 @@ namespace iSeries.Champions.Draven
         /// </param>
         private void OnIncomingGapcloser(ActiveGapcloser gapcloser)
         {
-            if (this.GetItemValue<bool>("com.iseries.draven.misc.eagp") && spells[SpellSlot.E].IsReady() && gapcloser.Sender.IsValidTarget(450f))
+            if (this.GetItemValue<bool>("com.iseries.draven.misc.eagp") && this.spells[SpellSlot.E].IsReady()
+                && gapcloser.Sender.IsValidTarget(450f))
             {
-                spells[SpellSlot.E].Cast(gapcloser.Sender);
+                this.spells[SpellSlot.E].Cast(gapcloser.Sender);
             }
         }
 
@@ -383,9 +430,10 @@ namespace iSeries.Champions.Draven
         /// </param>
         private void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
-            if (this.GetItemValue<bool>("com.iseries.draven.misc.eint") && spells[SpellSlot.E].IsReady() && args.DangerLevel > Interrupter2.DangerLevel.Medium && sender.IsValidTarget(450f))
+            if (this.GetItemValue<bool>("com.iseries.draven.misc.eint") && this.spells[SpellSlot.E].IsReady()
+                && args.DangerLevel > Interrupter2.DangerLevel.Medium && sender.IsValidTarget(450f))
             {
-                spells[SpellSlot.E].Cast(sender);
+                this.spells[SpellSlot.E].Cast(sender);
             }
         }
 

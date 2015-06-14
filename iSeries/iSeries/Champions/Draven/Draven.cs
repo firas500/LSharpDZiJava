@@ -84,11 +84,17 @@ namespace iSeries.Champions.Draven
                     {
                         var axe = new Axe()
                                       {
+                                          AxeObject = sender,
                                           Position = sender.Position, CreationTime = Game.Time, 
                                           EndTime = Game.Time + 1.20f
                                       };
                         this.axesList.Add(axe);
-                        Utility.DelayAction.Add(1250, () => { this.axesList.Remove(axe); });
+                        Utility.DelayAction.Add(1800, () => { 
+                            if(this.axesList.Contains(axe))
+                            {
+                                this.axesList.Remove(axe);
+                            } 
+                        });
                     }
                 };
 
@@ -150,7 +156,7 @@ namespace iSeries.Champions.Draven
         public override void OnCombo()
         {
             this.CatchAxes(Mode.Combo);
-
+            return;
             if (this.Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>()
                 && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget())
                 && this.spells[SpellSlot.Q].IsReady())
@@ -239,7 +245,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnLaneclear()
         {
-            this.CatchAxes(Mode.Farm);
+            //this.CatchAxes(Mode.Farm);
         }
 
         /// <summary>
@@ -308,13 +314,14 @@ namespace iSeries.Champions.Draven
         private void CatchAxes(Mode mode)
         {
             var modeName = mode.ToString().ToLowerInvariant();
-            if (this.Menu.Item("com.iseries.draven.combo.catch" + modeName).GetValue<bool>() && this.axesList.Any())
+            if (this.Menu.Item("com.iseries.draven." + modeName + ".catch" + modeName).GetValue<bool>() && this.axesList.Any())
             {
+
                 // Starting Axe Catching Logic
                 var closestAxe =
                     this.axesList.FindAll(
                         axe =>
-                        axe.IsValid && this.IsSafe(axe.Position)
+                        axe.IsValid && IsSafe(axe.Position)
                         && (axe.CanBeReachedNormal || (this.CanCastW() && axe.CanBeReachedWithW && mode == Mode.Combo))
                         && (axe.Position.Distance(Game.CursorPos)
                             <= this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
@@ -323,9 +330,10 @@ namespace iSeries.Champions.Draven
                         .FirstOrDefault();
                 if (closestAxe != null)
                 {
+
                     if (
                         closestAxe.Position.CountAlliesInRange(
-                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value)
+                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value) + 1
                         >= closestAxe.Position.CountEnemiesInRange(
                             this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value))
                     {
@@ -356,7 +364,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private void CheckList()
         {
-            if (Environment.TickCount - this.lastListCheckTick < 1200)
+            if (Environment.TickCount - this.lastListCheckTick < 1000)
             {
                 return;
             }
@@ -471,14 +479,13 @@ namespace iSeries.Champions.Draven
             {
                 var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, this.Position);
                 var pathLength = 0f;
-                for (var i = 1; i <= path.Count(); i++)
+                for (var i = 1; i < path.Count(); i++)
                 {
                     var previousPoint = path[i - 1];
                     var currentPoint = path[i];
                     var currentDistance = Vector3.Distance(previousPoint, currentPoint);
                     pathLength += currentDistance;
                 }
-
                 var canBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < this.EndTime;
                 return canBeReached;
             }
@@ -495,7 +502,7 @@ namespace iSeries.Champions.Draven
                                   + 0.35f * ObjectManager.Player.MoveSpeed;
                 var path = ObjectManager.Player.GetPath(ObjectManager.Player.ServerPosition, this.Position);
                 var pathLength = 0f;
-                for (var i = 1; i <= path.Count(); i++)
+                for (var i = 1; i < path.Count(); i++)
                 {
                     var previousPoint = path[i - 1];
                     var currentPoint = path[i];
@@ -538,7 +545,7 @@ namespace iSeries.Champions.Draven
         {
             get
             {
-                return this.AxeObject.IsValid && this.EndTime >= Game.Time;
+                return AxeObject != null && AxeObject.IsValid && this.EndTime >= Game.Time;
             }
         }
 

@@ -73,6 +73,12 @@ namespace iSeries.Champions.Kalista
                 root.AddSubMenu(misc);
             }
 
+            var drawing = new Menu("Drawing Options", "com.iseries.kalista.drawing");
+            {
+                drawing.AddItem(new MenuItem("com.iseries.kalista.drawing.drawE", "Draw E Range").SetValue(true));
+                root.AddSubMenu(drawing);
+            }
+
             root.AddToMainMenu();
         }
 

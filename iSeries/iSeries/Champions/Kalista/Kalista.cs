@@ -85,12 +85,30 @@ namespace iSeries.Champions.Kalista
                         this.spells[SpellSlot.E].Cast();
                     }
                 };
+            Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpellCast;
 
             // Damage Indicator
             DamageIndicator.DamageToUnit = this.GetComboDamage;
             DamageIndicator.Enabled = true;
 
             Console.WriteLine("Kalista Loaded no menu :S");
+        }
+
+        /// <summary>
+        ///     The on process spell function
+        /// </summary>
+        /// <param name="sender">
+        ///     The Spell Sender
+        /// </param>
+        /// <param name="args">
+        ///     The Arguments
+        /// </param>
+        private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
+            {
+                Orbwalking.ResetAutoAttackTimer();
+            }
         }
 
         #endregion
@@ -186,7 +204,10 @@ namespace iSeries.Champions.Kalista
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
+            if (this.GetItemValue<bool>("com.iseries.kalista.drawing.drawE"))
+            {
+                Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
+            }
         }
 
         /// <summary>

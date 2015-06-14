@@ -139,7 +139,7 @@ namespace iSeries.Champions.Draven
         {
             return
                 HeroManager.Enemies.Where(
-                    hero => hero.IsValidTarget(range, true, position) && hero.HealthPercentage() <= 15).ToList();
+                    hero => hero.IsValidTarget(range, true, position) && hero.HealthPercent <= 15).ToList();
         }
 
         /// <summary>
@@ -170,7 +170,7 @@ namespace iSeries.Champions.Draven
                 && this.spells[SpellSlot.Q].IsReady())
             {
                 var maxQ = this.Menu.Item("com.iseries.draven.misc.maxQ").GetValue<Slider>().Value;
-                var onPlayer = QStacks;
+                var onPlayer = this.QStacks;
                 var onGround = this.axesList.Count;
                 if (onGround + onPlayer + 1 <= maxQ)
                 {

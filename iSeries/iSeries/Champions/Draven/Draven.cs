@@ -138,22 +138,8 @@ namespace iSeries.Champions.Draven
         public static List<Obj_AI_Hero> GetLhEnemiesNearPosition(Vector3 position, float range)
         {
             return
-                HeroManager.Enemies.Where(
-                    hero => hero.IsValidTarget(range, true, position) && hero.HealthPercent <= 15).ToList();
-        }
-
-        /// <summary>
-        ///     Checks if the position is under an ally turret
-        /// </summary>
-        /// <param name="position">
-        ///     The Position
-        /// </param>
-        /// <returns>
-        ///     The <see cref="bool" />.
-        /// </returns>
-        public bool UnderAllyTurret(Vector3 position)
-        {
-            return ObjectManager.Get<Obj_AI_Turret>().Any(t => t.IsAlly && !t.IsDead);
+                HeroManager.Enemies.Where(hero => hero.IsValidTarget(range, true, position) && hero.HealthPercent <= 15)
+                    .ToList();
         }
 
         /// <summary>
@@ -176,6 +162,8 @@ namespace iSeries.Champions.Draven
                 {
                     this.spells[SpellSlot.Q].Cast();
                 }
+
+                Console.WriteLine("OnPlayer: " + onPlayer + " OnGround: " + onGround + " Max Q:" + maxQ);
             }
 
             var eTarget = TargetSelector.GetTarget(
@@ -278,6 +266,20 @@ namespace iSeries.Champions.Draven
             }
 
             this.OnUpdateFunctions();
+        }
+
+        /// <summary>
+        ///     Checks if the position is under an ally turret
+        /// </summary>
+        /// <param name="position">
+        ///     The Position
+        /// </param>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        public bool UnderAllyTurret(Vector3 position)
+        {
+            return ObjectManager.Get<Obj_AI_Turret>().Any(t => t.IsAlly && !t.IsDead);
         }
 
         #endregion

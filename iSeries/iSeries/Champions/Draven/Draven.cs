@@ -52,6 +52,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
+                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q, 0f) }, 
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
                                                                        { SpellSlot.W, new Spell(SpellSlot.W) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
@@ -156,20 +157,21 @@ namespace iSeries.Champions.Draven
         public override void OnCombo()
         {
             this.CatchAxes(Mode.Combo);
-            return;
             if (this.Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>()
                 && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget())
                 && this.spells[SpellSlot.Q].IsReady())
             {
+
                 var maxQ = this.Menu.Item("com.iseries.draven.misc.maxQ").GetValue<Slider>().Value;
                 var onPlayer = this.QStacks;
                 var onGround = this.axesList.Count;
+                Console.WriteLine("OnPlayer: " + onPlayer + " OnGround: " + onGround + " Max Q:" + maxQ);
+
                 if (onGround + onPlayer + 1 <= maxQ)
                 {
                     this.spells[SpellSlot.Q].Cast();
                 }
 
-                Console.WriteLine("OnPlayer: " + onPlayer + " OnGround: " + onGround + " Max Q:" + maxQ);
             }
 
             var eTarget = TargetSelector.GetTarget(
@@ -181,7 +183,7 @@ namespace iSeries.Champions.Draven
                 this.spells[SpellSlot.E].CastIfHitchanceEquals(eTarget, HitChance.VeryHigh);
             }
 
-            if (this.GetItemValue<bool>("com.iseries.draven.combo.useR"))
+            if (this.GetItemValue<bool>("com.iseries.draven.combo.useR") && ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(null) + 120f) < 3)
             {
                 var rTarget = TargetSelector.GetTarget(
                     this.spells[SpellSlot.R].Range, 
@@ -200,7 +202,7 @@ namespace iSeries.Champions.Draven
                     rDamageMultiplier = (rCollision.Count() > 7) ? 0.4 : (1 - (rCollision.Count() / 12.5));
                 }
 
-                if (rTarget.Health + 20 < this.spells[SpellSlot.R].GetDamage(rTarget) * rDamageMultiplier
+                if (rTarget.Health + 30 < this.spells[SpellSlot.R].GetDamage(rTarget) * rDamageMultiplier
                     && rPrediction.Hitchance >= HitChance.VeryHigh)
                 {
                     this.spells[SpellSlot.R].Cast(rTarget);
@@ -363,9 +365,19 @@ namespace iSeries.Champions.Draven
                         }
                         else
                         {
-                            Variables.Orbwalker.SetOrbwalkingPoint(closestAxe.Position.Extend(Game.CursorPos, 45f));
+                            if (closestAxe.Position.Distance(Game.CursorPos) > 15f)
+                            {
+                                Variables.Orbwalker.SetOrbwalkingPoint(
+                                    mode != Mode.Farm
+                                        ? closestAxe.Position.Extend(Game.CursorPos, 15f)
+                                        : closestAxe.Position);
+                            }
+                            else
+                            {
+                                Variables.Orbwalker.SetOrbwalkingPoint(closestAxe.Position);
+                            }
                         }
-                        }
+                      }
                     }
                 else
                 {
@@ -385,6 +397,10 @@ namespace iSeries.Champions.Draven
             }
 
             this.lastListCheckTick = Environment.TickCount;
+            if (!axesList.Any())
+            {
+                return;
+            }
             this.axesList.RemoveAll(axe => !axe.IsValid);
         }
 

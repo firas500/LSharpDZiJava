@@ -45,6 +45,7 @@ namespace iSeries.Champions.Draven
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.useE", "Use E").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.useR", "Use R").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.catchcombo", "Catch Axes in Combo").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.wmana", "W Mana").SetValue(new Slider(35)));
                 root.AddSubMenu(comboMenu);
             }
 
@@ -59,6 +60,7 @@ namespace iSeries.Champions.Draven
             var farmMenu = new Menu("Farm Options", "com.iseries.draven.farm");
             {
                 farmMenu.AddItem(new MenuItem("com.iseries.draven.farm.catchfarm", "Catch Axes in Farm").SetValue(true));
+                root.AddSubMenu(farmMenu);
             }
 
             var misc = new Menu("Misc Options", "com.iseries.draven.misc");
@@ -66,8 +68,7 @@ namespace iSeries.Champions.Draven
                 misc.AddItem(
                     new MenuItem("com.iseries.draven.misc.maxQ", "Max Axes").SetValue(new Slider(2, 1, 4)));
                 misc.AddItem(
-                    new MenuItem("com.iseries.draven.misc.catchrange", "Catch Range").SetValue(new Slider(500,65,850)));
-                misc.AddItem(new MenuItem("com.iseries.draven.misc.wcatch", "W To Catch Axes in Combo").SetValue(true));
+                    new MenuItem("com.iseries.draven.misc.catchrange", "Catch Range").SetValue(new Slider(395,65,850)));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.safedistance", "Axes Safe Distance").SetValue(new Slider(360, 0, 550)));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.eagp", "E Antigapcloser").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.eint", "E Interrupter").SetValue(true));

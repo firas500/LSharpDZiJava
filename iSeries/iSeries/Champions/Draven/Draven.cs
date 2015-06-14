@@ -156,6 +156,7 @@ namespace iSeries.Champions.Draven
         public override void OnCombo()
         {
             this.CatchAxes(Mode.Combo);
+            return;
             if (this.Menu.Item("com.iseries.draven.combo.useQ").GetValue<bool>()
                 && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget())
                 && this.spells[SpellSlot.Q].IsReady())
@@ -175,7 +176,7 @@ namespace iSeries.Champions.Draven
                 this.spells[SpellSlot.E].Range - 175f, 
                 TargetSelector.DamageType.Physical);
             if (this.Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>() && eTarget.IsValidTarget()
-                && this.spells[SpellSlot.E].IsReady())
+                && this.spells[SpellSlot.E].IsReady() )
             {
                 this.spells[SpellSlot.E].CastIfHitchanceEquals(eTarget, HitChance.VeryHigh);
             }
@@ -185,6 +186,10 @@ namespace iSeries.Champions.Draven
                 var rTarget = TargetSelector.GetTarget(
                     this.spells[SpellSlot.R].Range, 
                     TargetSelector.DamageType.Physical);
+                if (!rTarget.IsValidTarget())
+                {
+                    return;
+                }
                 var rPrediction = this.spells[SpellSlot.R].GetPrediction(rTarget);
                 var rCollision = this.spells[SpellSlot.R].GetCollision(
                     ObjectManager.Player.ServerPosition.To2D(), 
@@ -244,7 +249,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         public override void OnLaneclear()
         {
-            //this.CatchAxes(Mode.Farm);
+            this.CatchAxes(Mode.Farm);
         }
 
         /// <summary>
@@ -255,6 +260,11 @@ namespace iSeries.Champions.Draven
         /// </param>
         public override void OnUpdate(EventArgs args)
         {
+            if (!axesList.Any())
+            {
+                Variables.Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
+            }
+
             switch (Variables.Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
@@ -313,14 +323,17 @@ namespace iSeries.Champions.Draven
         private void CatchAxes(Mode mode)
         {
             var modeName = mode.ToString().ToLowerInvariant();
-            if (this.Menu.Item("com.iseries.draven." + modeName + ".catch" + modeName).GetValue<bool>() && this.axesList.Any())
+            if (this.axesList.Any())
             {
-
+                if (!this.Menu.Item("com.iseries.draven." + modeName + ".catch" + modeName).GetValue<bool>())
+                {
+                    return;
+                }
                 // Starting Axe Catching Logic
                 var closestAxe =
                     this.axesList.FindAll(
                         axe =>
-                        axe.IsValid && this.IsSafe(axe.Position)
+                        axe.IsValid && IsSafe(axe.Position)
                         && (axe.CanBeReachedNormal || (this.CanCastW() && axe.CanBeReachedWithW && mode == Mode.Combo))
                         && (axe.Position.Distance(Game.CursorPos)
                             <= this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
@@ -329,11 +342,10 @@ namespace iSeries.Champions.Draven
                         .FirstOrDefault();
                 if (closestAxe != null)
                 {
-
                     if (
                         closestAxe.Position.CountAlliesInRange(
-                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value) + 1
-                        >= closestAxe.Position.CountEnemiesInRange(
+                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value) + 1 >=
+                        closestAxe.Position.CountEnemiesInRange(
                             this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value))
                     {
                         if (!closestAxe.CanBeReachedNormal && closestAxe.CanBeReachedWithW)
@@ -351,9 +363,13 @@ namespace iSeries.Champions.Draven
                         }
                         else
                         {
-                            Variables.Orbwalker.SetOrbwalkingPoint(closestAxe.Position);
+                            Variables.Orbwalker.SetOrbwalkingPoint(closestAxe.Position.Extend(Game.CursorPos, 45f));
+                        }
                         }
                     }
+                else
+                {
+                    Variables.Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
                 }
             }
         }

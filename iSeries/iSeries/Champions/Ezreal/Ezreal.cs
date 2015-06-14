@@ -23,6 +23,7 @@ namespace iSeries.Champions.Ezreal
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Linq;
 
     using iSeries.Champions.Utilities;
@@ -198,6 +199,7 @@ namespace iSeries.Champions.Ezreal
         /// </param>
         public override void OnDraw(EventArgs args)
         {
+            Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.Q].Range, Color.DarkRed);
         }
 
         /// <summary>

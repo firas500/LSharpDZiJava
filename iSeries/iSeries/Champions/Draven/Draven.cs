@@ -341,7 +341,7 @@ namespace iSeries.Champions.Draven
                         .OrderBy(axe => axe.Position.Distance(Game.CursorPos))
                         .ThenBy(axe => axe.Position.Distance(ObjectManager.Player.ServerPosition))
                         .FirstOrDefault();
-                if (closestAxe != null)
+                if (closestAxe != null && !closestAxe.IsBeingCaught)
                 {
                     if (
                         closestAxe.Position.CountAlliesInRange(

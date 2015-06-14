@@ -42,27 +42,17 @@ namespace iSeries
         #region Static Fields
 
         /// <summary>
-        ///     Supports Champions List.
+        ///     TODO The champ list.
         /// </summary>
-        private static readonly IDictionary<string, Action> SupportedChampions = new Dictionary<string, Action>();
-
-        #endregion
-
-        #region Constructors and Destructors
-
-        /// <summary>
-        ///     Initializes static members of the <see cref="Bootstrap" /> class.
-        /// </summary>
-        static Bootstrap()
-        {
-            // Marksman
-            SupportedChampions.Add("Kalista", new Kalista().Invoke);
-            SupportedChampions.Add("Lucian", new Lucian().Invoke);
-            SupportedChampions.Add("Draven", new Draven().Invoke);
-            SupportedChampions.Add("Ezreal", new Ezreal().Invoke);
-            SupportedChampions.Add("Graves", new Graves().Invoke);
-            SupportedChampions.Add("Twitch", new Twitch().Invoke);
-        }
+        private static readonly Dictionary<string, Action> ChampList = new Dictionary<string, Action>
+                                                                           {
+                                                                               { "Kalista", () => new Kalista().Invoke() }, 
+                                                                               { "Ezreal", () => new Ezreal().Invoke() }, 
+                                                                               { "Lucian", () => new Lucian().Invoke() }, 
+                                                                               { "Graves", () => new Graves().Invoke() }, 
+                                                                               { "Draven", () => new Draven().Invoke() }, 
+                                                                               { "Twitch", () => new Twitch().Invoke() }
+                                                                           };
 
         #endregion
 
@@ -76,18 +66,30 @@ namespace iSeries
         /// </param>
         private static void Main(string[] args)
         {
-            if (args != null)
-            {
-                CustomEvents.Game.OnGameLoad += eventArgs =>
-                    {
-                        if (!SupportedChampions.ContainsKey(Variables.Player.ChampionName))
-                        {
-                            return;
-                        }
+            CustomEvents.Game.OnGameLoad += OnLoad;
+        }
 
-                        Variables.Menu = new Menu("iSeries: " + Variables.Player.ChampionName, "com.iseries", true);
-                        SupportedChampions[Variables.Player.ChampionName]();
-                    };
+        /// <summary>
+        ///     TODO The on load.
+        /// </summary>
+        /// <param name="args">
+        ///     TODO The args.
+        /// </param>
+        private static void OnLoad(EventArgs args)
+        {
+            if (ChampList.ContainsKey(ObjectManager.Player.ChampionName))
+            {
+                Variables.Menu = new Menu("iSeries: " + ObjectManager.Player.ChampionName, "com.iseries", true);
+
+                var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+                TargetSelector.AddToMenu(targetSelectorMenu);
+                Variables.Menu.AddSubMenu(targetSelectorMenu);
+                Variables.Orbwalker =
+                    new Orbwalking.Orbwalker(Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
+
+                ChampList[ObjectManager.Player.ChampionName]();
+
+                Console.WriteLine("Loaded: " + ObjectManager.Player.ChampionName);
             }
         }
 

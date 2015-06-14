@@ -16,20 +16,17 @@
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
 // <summary>
-//   TODO The damage indicator.
+//   The Damage Inidicator
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 namespace iSeries.Champions.Utilities
 {
     using System;
+    using System.Drawing;
     using System.Linq;
 
     using LeagueSharp;
     using LeagueSharp.Common;
-
-    using SharpDX;
-
-    using Color = System.Drawing.Color;
 
     /// <summary>
     ///     The Damage Inidicator
@@ -39,40 +36,70 @@ namespace iSeries.Champions.Utilities
         #region Constants
 
         /// <summary>
-        ///     TODO The bar width.
+        ///     TODO The height.
         /// </summary>
-        private const int BarWidth = 104;
+        private const int Height = 8;
 
         /// <summary>
-        ///     TODO The line thickness.
+        ///     TODO The width.
         /// </summary>
-        private const int LineThickness = 9;
+        private const int Width = 103;
+
+        /// <summary>
+        ///     TODO The x offset.
+        /// </summary>
+        private const int XOffset = 10;
+
+        /// <summary>
+        ///     TODO The y offset.
+        /// </summary>
+        private const int YOffset = 20;
 
         #endregion
 
         #region Static Fields
 
         /// <summary>
-        ///     TODO The bar offset.
+        ///     TODO The color.
         /// </summary>
-        private static readonly Vector2 BarOffset = new Vector2(10, 25);
+        public static Color Color = Color.Cyan;
 
         /// <summary>
-        ///     TODO The damage to unit.
+        ///     TODO The enabled.
         /// </summary>
-        private static DamageToUnitDelegate damageToUnit;
+        public static bool Enabled = true;
+
+        /// <summary>
+        ///     TODO The fill.
+        /// </summary>
+        public static bool Fill = true;
+
+        /// <summary>
+        ///     TODO The fill color.
+        /// </summary>
+        public static Color FillColor = Color.Cyan;
+
+        /// <summary>
+        ///     TODO The text.
+        /// </summary>
+        private static readonly Render.Text Text = new Render.Text(0, 0, string.Empty, 14, SharpDX.Color.Red, "monospace");
+
+        /// <summary>
+        ///     TODO The _damage to unit.
+        /// </summary>
+        private static DamageToUnitDelegate _damageToUnit;
 
         #endregion
 
         #region Delegates
 
         /// <summary>
-        ///     The Damage to unit delegate
+        ///     TODO The damage to unit delegate.
         /// </summary>
-        /// <param name="target">
-        ///     The Target to draw
+        /// <param name="hero">
+        ///     TODO The hero.
         /// </param>
-        public delegate float DamageToUnitDelegate(Obj_AI_Hero target);
+        public delegate float DamageToUnitDelegate(Obj_AI_Hero hero);
 
         #endregion
 
@@ -85,39 +112,18 @@ namespace iSeries.Champions.Utilities
         {
             get
             {
-                return damageToUnit;
+                return _damageToUnit;
             }
 
             set
             {
-                if (damageToUnit == null)
+                if (_damageToUnit == null)
                 {
                     Drawing.OnDraw += Drawing_OnDraw;
                 }
 
-                damageToUnit = value;
+                _damageToUnit = value;
             }
-        }
-
-        /// <summary>
-        ///     Gets or sets a value indicating whether enabled.
-        /// </summary>
-        public static bool Enabled { get; set; }
-
-        #endregion
-
-        #region Public Methods and Operators
-
-        /// <summary>
-        ///     Initialize the Damage Indicator
-        /// </summary>
-        public static void Initialize()
-        {
-            // Apply needed field delegate for damage calculation
-            Enabled = true;
-
-            // Register event handlers
-            Drawing.OnDraw += Drawing_OnDraw;
         }
 
         #endregion
@@ -125,44 +131,47 @@ namespace iSeries.Champions.Utilities
         #region Methods
 
         /// <summary>
-        ///     The Drawing Method
+        ///     TODO The drawing_ on draw.
         /// </summary>
         /// <param name="args">
-        ///     The Event Arguments
+        ///     TODO The args.
         /// </param>
         private static void Drawing_OnDraw(EventArgs args)
         {
-            if (!Enabled)
+            if (!Enabled || _damageToUnit == null)
             {
                 return;
             }
 
-            foreach (var unit in HeroManager.Enemies.Where(u => u.IsValidTarget() && u.IsHPBarRendered))
+            foreach (var unit in HeroManager.Enemies.Where(h => h.IsValid && h.IsHPBarRendered))
             {
-                // Get damage to unit
-                var damage = damageToUnit(unit);
+                var barPos = unit.HPBarPosition;
+                var damage = _damageToUnit(unit);
+                var percentHealthAfterDamage = Math.Max(0, unit.Health - damage) / unit.MaxHealth;
+                var yPos = barPos.Y + YOffset;
+                var xPosDamage = barPos.X + XOffset + Width * percentHealthAfterDamage;
+                var xPosCurrentHp = barPos.X + XOffset + Width * unit.Health / unit.MaxHealth;
 
-                // Continue on 0 damage
-                if (damage <= 0)
+                if (damage > unit.Health)
                 {
-                    continue;
+                    Text.X = (int)barPos.X + XOffset;
+                    Text.Y = (int)barPos.Y + YOffset - 13;
+                    Text.text = "Killable: " + (unit.Health - damage);
+                    Text.OnEndScene();
                 }
 
-                // Get remaining HP after damage applied in percent and the current percent of health
-                var damagePercentage = ((unit.Health - damage) > 0 ? (unit.Health - damage) : 0) / unit.MaxHealth;
-                var currentHealthPercentage = unit.Health / unit.MaxHealth;
+                Drawing.DrawLine(xPosDamage, yPos, xPosDamage, yPos + Height, 1, Color);
 
-                // Calculate start and end point of the bar indicator
-                var startPoint = new Vector2(
-                    (int)(unit.HPBarPosition.X + BarOffset.X + (damagePercentage * BarWidth)), 
-                    (int)(unit.HPBarPosition.Y + BarOffset.Y) - 5);
-                var endPoint =
-                    new Vector2(
-                        (int)(unit.HPBarPosition.X + BarOffset.X + (currentHealthPercentage * BarWidth) + 1), 
-                        (int)(unit.HPBarPosition.Y + BarOffset.Y) - 5);
+                if (Fill)
+                {
+                    var differenceInHp = xPosCurrentHp - xPosDamage;
+                    var pos1 = barPos.X + 9 + (107 * percentHealthAfterDamage);
 
-                // Draw the line
-                Drawing.DrawLine(startPoint, endPoint, LineThickness, Color.LawnGreen);
+                    for (var i = 0; i < differenceInHp; i++)
+                    {
+                        Drawing.DrawLine(pos1 + i, yPos, pos1 + i, yPos + Height, 1, FillColor);
+                    }
+                }
             }
         }
 

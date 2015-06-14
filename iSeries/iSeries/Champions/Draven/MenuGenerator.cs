@@ -38,12 +38,6 @@ namespace iSeries.Champions.Draven
         /// </param>
         public static void Generate(Menu root)
         {
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            root.AddSubMenu(targetSelectorMenu);
-
-            Variables.Orbwalker = new Orbwalking.Orbwalker(root.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
-
             var comboMenu = new Menu("Combo Options", "com.iseries.draven.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.useQ", "Use Q").SetValue(true));

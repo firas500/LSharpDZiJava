@@ -62,7 +62,6 @@ namespace iSeries.Champions.Ezreal
             // Damage Indicator
             DamageIndicator.DamageToUnit = this.GetDamage;
             DamageIndicator.Enabled = true;
-            DamageIndicator.Initialize();
 
             // Spell initialization
             this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 2000f, true, SkillshotType.SkillshotLine);

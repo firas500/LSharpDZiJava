@@ -57,7 +57,7 @@ namespace iSeries.Champions
         {
             get
             {
-                return Variables.Player;
+                return ObjectManager.Player;
             }
         }
 

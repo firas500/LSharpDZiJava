@@ -38,15 +38,10 @@ namespace iSeries.Champions.Kalista
         /// </param>
         public static void Generate(Menu root)
         {
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            root.AddSubMenu(targetSelectorMenu);
-
-            Variables.Orbwalker = new Orbwalking.Orbwalker(root.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
-
             var comboMenu = new Menu("Combo Options", "com.iseries.kalista.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.kalista.combo.useQ", "Use Q").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.kalista.combo.qMana", "Min Mana for Q %").SetValue(new Slider(40, 10, 80)));
                 comboMenu.AddItem(new MenuItem("com.iseries.kalista.combo.useE", "Use E").SetValue(true));
                 root.AddSubMenu(comboMenu);
             }

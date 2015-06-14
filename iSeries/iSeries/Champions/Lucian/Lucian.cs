@@ -88,7 +88,6 @@ namespace iSeries.Champions.Lucian
 
             DamageIndicator.DamageToUnit = this.GetComboDamage;
             DamageIndicator.Enabled = true;
-            DamageIndicator.Initialize();
 
             this.spells[Spells.Q].SetTargetted(0.25f, float.MaxValue);
             this.spells[Spells.Q1].SetSkillshot(0.55f, 75f, float.MaxValue, false, SkillshotType.SkillshotLine);
@@ -343,7 +342,7 @@ namespace iSeries.Champions.Lucian
         /// </returns>
         private bool HasPassive()
         {
-            return this.shouldHavePassive || Variables.Player.HasBuff("LucianPassiveBuff");
+            return this.shouldHavePassive || this.Player.HasBuff("LucianPassiveBuff");
         }
 
         /// <summary>

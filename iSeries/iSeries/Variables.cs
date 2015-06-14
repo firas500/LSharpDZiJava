@@ -45,17 +45,6 @@ namespace iSeries
             Justification = "Reviewed. Suppression is OK here.")]
         public static Orbwalking.Orbwalker Orbwalker { get; set; }
 
-        /// <summary>
-        ///     Gets the player.
-        /// </summary>
-        public static Obj_AI_Hero Player
-        {
-            get
-            {
-                return ObjectManager.Player;
-            }
-        }
-
         #endregion
     }
 }

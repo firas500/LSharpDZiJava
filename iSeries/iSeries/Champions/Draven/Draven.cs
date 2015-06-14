@@ -75,10 +75,6 @@ namespace iSeries.Champions.Draven
             // Menu Generation
             this.CreateMenu = MenuGenerator.Generate;
 
-            // Damage Indicator
-            DamageIndicator.Enabled = false;
-            DamageIndicator.Initialize();
-
             // Spell initialization
             this.spells[SpellSlot.E].SetSkillshot(250f, 130f, 1400f, false, SkillshotType.SkillshotLine);
             this.spells[SpellSlot.R].SetSkillshot(400f, 160f, 2000f, false, SkillshotType.SkillshotLine);

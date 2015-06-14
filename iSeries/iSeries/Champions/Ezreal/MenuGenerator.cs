@@ -39,12 +39,6 @@ namespace iSeries.Champions.Ezreal
         /// </param>
         public static void Generate(Menu root)
         {
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            root.AddSubMenu(targetSelectorMenu);
-
-            Variables.Orbwalker = new Orbwalking.Orbwalker(root.AddSubMenu(new Menu("Orbwalking", "Orbwalking")));
-
             var comboMenu = new Menu("Combo Options", "com.iseries.ezreal.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.ezreal.combo.useQ", "Use Q").SetValue(true));

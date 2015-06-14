@@ -33,12 +33,14 @@ namespace iSeries.Champions.Kalista
     using SharpDX;
 
     using Collision = LeagueSharp.Common.Collision;
+    using Color = System.Drawing.Color;
 
     /// <summary>
     ///     The given champion class
     /// </summary>
     internal class Kalista : Champion
     {
+
         #region Fields
 
         /// <summary>
@@ -64,11 +66,6 @@ namespace iSeries.Champions.Kalista
             // Menu Generation
             this.CreateMenu = MenuGenerator.Generate;
 
-            // Damage Indicator
-            DamageIndicator.DamageToUnit = this.GetDamage;
-            DamageIndicator.Enabled = true;
-            DamageIndicator.Initialize();
-
             // Spell initialization
             this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
             this.spells[SpellSlot.R].SetSkillshot(0.50f, 1500, float.MaxValue, false, SkillshotType.SkillshotCircle);
@@ -88,6 +85,12 @@ namespace iSeries.Champions.Kalista
                         this.spells[SpellSlot.E].Cast();
                     }
                 };
+
+            // Damage Indicator
+            DamageIndicator.DamageToUnit = this.GetComboDamage;
+            DamageIndicator.Enabled = true;
+
+            Console.WriteLine("Kalista Loaded no menu :S");
         }
 
         #endregion
@@ -119,9 +122,16 @@ namespace iSeries.Champions.Kalista
         /// <returns>
         ///     The <see cref="float" />.
         /// </returns>
-        public float GetDamage(Obj_AI_Hero target)
+        public float GetComboDamage(Obj_AI_Base target)
         {
-            return this.spells[SpellSlot.E].GetDamage(target);
+            float damage = 0;
+
+            if (this.spells[SpellSlot.E].IsReady())
+            {
+                damage += this.spells[SpellSlot.E].GetDamage(target);
+            }
+
+            return damage;
         }
 
         /// <summary>
@@ -129,9 +139,13 @@ namespace iSeries.Champions.Kalista
         /// </summary>
         public override void OnCombo()
         {
-            if (this.GetItemValue<bool>("com.iseries.kalista.combo.useQ")
-                && this.spells[SpellSlot.Q].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.combo.useQ") && this.spells[SpellSlot.Q].IsReady())
             {
+                if (this.Player.ManaPercent < this.GetItemValue<Slider>("com.iseries.kalista.combo.qMana").Value)
+                {
+                    return;
+                }
+
                 var spearTarget = TargetSelector.GetTarget(
                     this.spells[SpellSlot.Q].Range, 
                     TargetSelector.DamageType.Physical);
@@ -172,7 +186,7 @@ namespace iSeries.Champions.Kalista
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, System.Drawing.Color.DarkRed);
+            Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
         }
 
         /// <summary>
@@ -222,8 +236,7 @@ namespace iSeries.Champions.Kalista
         /// </summary>
         public override void OnLaneclear()
         {
-            if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useQ")
-                && this.spells[SpellSlot.Q].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useQ") && this.spells[SpellSlot.Q].IsReady())
             {
                 var qMinions = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, 
@@ -263,8 +276,7 @@ namespace iSeries.Champions.Kalista
                 }
             }
 
-            if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useE")
-                && this.spells[SpellSlot.E].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useE") && this.spells[SpellSlot.E].IsReady())
             {
                 var minionkillcount =
                     MinionManager.GetMinions(this.spells[SpellSlot.E].Range)
@@ -380,14 +392,14 @@ namespace iSeries.Champions.Kalista
         /// </summary>
         private void OnUpdateFunctions()
         {
-
-            if (Variables.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo && this.GetItemValue<bool>("com.iseries.kalista.misc.autoHarass"))
+            if (Variables.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo
+                && this.GetItemValue<bool>("com.iseries.kalista.misc.autoHarass"))
             {
                 var minion =
-                   MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
-                       .Where(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x))
-                       .OrderBy(x => x.Health)
-                       .FirstOrDefault();
+                    MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
+                        .Where(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x))
+                        .OrderBy(x => x.Health)
+                        .FirstOrDefault();
                 var target =
                     HeroManager.Enemies.Where(
                         x =>
@@ -419,10 +431,10 @@ namespace iSeries.Champions.Kalista
             }
 
             foreach (var hero in
-               HeroManager.Enemies.Where(
-                   x =>
-                   this.spells[SpellSlot.Q].IsInRange(x)
-                   && this.GetActualHealth(x) < this.spells[SpellSlot.Q].GetDamage(x)))
+                HeroManager.Enemies.Where(
+                    x =>
+                    this.spells[SpellSlot.Q].IsInRange(x)
+                    && this.GetActualHealth(x) < this.spells[SpellSlot.Q].GetDamage(x)))
             {
                 if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
                     || hero.HasBuffOfType(BuffType.SpellShield))
@@ -433,21 +445,21 @@ namespace iSeries.Champions.Kalista
                 this.spells[SpellSlot.Q].Cast(hero);
             }
 
-            if (this.GetItemValue<bool>("com.iseries.kalista.misc.mobsteal")
-                && this.spells[SpellSlot.E].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.misc.mobsteal") && this.spells[SpellSlot.E].IsReady())
             {
-                var mob =
+                var bigMinion =
                     MinionManager.GetMinions(
                         this.Player.ServerPosition, 
                         this.spells[SpellSlot.E].Range, 
                         MinionTypes.All, 
-                        MinionTeam.Neutral, 
+                        MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
-                        .FirstOrDefault(x => x.Health + (x.HPRegenRate / 2) <= this.spells[SpellSlot.E].GetDamage(x));
-                if (mob != null && this.spells[SpellSlot.E].CanCast(mob))
+                        .FirstOrDefault(x => x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("Mini"));
+                if (bigMinion != null && this.spells[SpellSlot.E].CanCast(bigMinion))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
+                
             }
         }
 

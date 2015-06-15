@@ -50,6 +50,7 @@ namespace iSeries.Champions.Graves
                 comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.useQ", "Use Q").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.useW", "Use W").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.useR", "Use R").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.minW", "Min. Enemies for W").SetValue(new Slider(2,1,5)));
                 root.AddSubMenu(comboMenu);
             }
 

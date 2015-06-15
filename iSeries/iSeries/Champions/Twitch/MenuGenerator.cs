@@ -66,6 +66,13 @@ namespace iSeries.Champions.Twitch
                 root.AddSubMenu(misc);
             }
 
+            var drawing = new Menu("Drawing Options", "com.iseries.twitch.drawing");
+            {
+                drawing.AddItem(new MenuItem("com.iseries.twitch.drawing.drawE", "Draw E Range").SetValue(true));
+                drawing.AddItem(new MenuItem("com.iseries.twitch.drawing.drawStacks", "Draw Stacks").SetValue(true));
+                root.AddSubMenu(drawing);
+            }
+
             root.AddToMainMenu();
         }
 

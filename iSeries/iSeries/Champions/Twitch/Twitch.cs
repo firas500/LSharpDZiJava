@@ -52,8 +52,8 @@ namespace iSeries.Champions.Twitch
         #region Constructors and Destructors
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="Twitch"/> class. 
-        ///     Initializes a new instance of the <see cref="Kalista"/> class.
+        ///     Initializes a new instance of the <see cref="Twitch" /> class.
+        ///     Initializes a new instance of the <see cref="Kalista" /> class.
         /// </summary>
         public Twitch()
         {
@@ -92,6 +92,11 @@ namespace iSeries.Champions.Twitch
 
             if (this.GetItemValue<bool>("com.iseries.twitch.combo.useW") && this.spells[SpellSlot.W].IsReady())
             {
+                if (this.Player.Mana
+                    < this.spells[SpellSlot.W].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
+                {
+                    return;
+                }
                 var wTarget = TargetSelector.GetTarget(
                     this.spells[SpellSlot.W].Range, 
                     TargetSelector.DamageType.Physical);
@@ -110,7 +115,27 @@ namespace iSeries.Champions.Twitch
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
+            if (this.GetItemValue<bool>("com.iseries.twitch.drawing.drawE"))
+            {
+                Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.twitch.drawing.drawStacks"))
+            {
+                foreach (var source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.E].IsInRange(x)))
+                {
+                    var stacks = source.GetBuffCount("twitchdeadlyvenom");
+
+                    if (stacks > 0)
+                    {
+                        Drawing.DrawText(
+                            Drawing.WorldToScreen(source.Position)[0] - 20,
+                            Drawing.WorldToScreen(source.Position)[1], 
+                            Color.White, 
+                            "Stacks: " + stacks);
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -185,10 +210,9 @@ namespace iSeries.Champions.Twitch
         {
             if (this.GetItemValue<bool>("com.iseries.twitch.misc.killsteal") && this.spells[SpellSlot.E].IsReady())
             {
-                foreach (
-                    var hero in
-                        HeroManager.Enemies.Where(
-                            x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.GetDamage(x) > x.Health))
+                foreach (var hero in
+                    HeroManager.Enemies.Where(
+                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.GetDamage(x) > x.Health))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -197,20 +221,22 @@ namespace iSeries.Champions.Twitch
             if (this.GetItemValue<bool>("com.iseries.twitch.misc.mobsteal") && this.spells[SpellSlot.E].IsReady())
             {
                 var bigMinion =
-                      MinionManager.GetMinions(
-                          this.Player.ServerPosition,
-                          this.spells[SpellSlot.E].Range,
-                          MinionTypes.All,
-                          MinionTeam.NotAlly,
-                          MinionOrderTypes.MaxHealth)
-                          .FirstOrDefault(x => x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("Mini"));
+                    MinionManager.GetMinions(
+                        this.Player.ServerPosition, 
+                        this.spells[SpellSlot.E].Range, 
+                        MinionTypes.All, 
+                        MinionTeam.Neutral, 
+                        MinionOrderTypes.MaxHealth)
+                        .FirstOrDefault(
+                            x =>
+                            x.IsValid && x.Health + 5 <= this.spells[SpellSlot.E].GetDamage(x)
+                            && !x.Name.Contains("Mini") && (x.Name.Contains("Dragon") || x.Name.Contains("Baron")));
 
                 if (bigMinion != null && this.spells[SpellSlot.E].CanCast(bigMinion))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
             }
-
         }
 
         #endregion

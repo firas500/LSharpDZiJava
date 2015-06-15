@@ -52,6 +52,7 @@ namespace iSeries.Champions.Draven
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
+                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q, 0f) }, 
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 1000f) }, 
                                                                        { SpellSlot.W, new Spell(SpellSlot.W) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 2000f) }
@@ -188,7 +189,7 @@ namespace iSeries.Champions.Draven
             if (this.GetItemValue<bool>("com.iseries.draven.combo.useR") && ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(null) + 120f) < 3)
             {
                 var rTarget = TargetSelector.GetTarget(
-                    this.spells[SpellSlot.R].Range, 
+                    this.spells[SpellSlot.R].Range,
                     TargetSelector.DamageType.Physical);
                 if (!rTarget.IsValidTarget())
                 {
@@ -196,7 +197,7 @@ namespace iSeries.Champions.Draven
                 }
                 var rPrediction = this.spells[SpellSlot.R].GetPrediction(rTarget);
                 var rCollision = this.spells[SpellSlot.R].GetCollision(
-                    ObjectManager.Player.ServerPosition.To2D(), 
+                    ObjectManager.Player.ServerPosition.To2D(),
                     new List<Vector2>() { rPrediction.CastPosition.To2D() });
                 var rDamageMultiplier = 1.0;
                 if (rCollision.Any())
@@ -264,7 +265,7 @@ namespace iSeries.Champions.Draven
         /// </param>
         public override void OnUpdate(EventArgs args)
         {
-            if (!axesList.Any())
+            if (!this.axesList.Any())
             {
                 Variables.Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
             }

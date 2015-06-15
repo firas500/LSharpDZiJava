@@ -92,8 +92,7 @@ namespace iSeries.Champions.Twitch
 
             if (this.GetItemValue<bool>("com.iseries.twitch.combo.useW") && this.spells[SpellSlot.W].IsReady())
             {
-                if (this.Player.Mana
-                    < this.spells[SpellSlot.W].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
+                if (this.Player.ManaPercent < this.GetItemValue<Slider>("com.iseries.twitch.combo.wMana").Value)
                 {
                     return;
                 }

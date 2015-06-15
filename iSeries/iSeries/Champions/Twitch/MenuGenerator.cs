@@ -43,6 +43,8 @@ namespace iSeries.Champions.Twitch
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useW", "Use W").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useE", "Use E").SetValue(true));
+                comboMenu.AddItem(
+                    new MenuItem("com.iseries.twitch.combo.wMana", "Min Mana W %").SetValue(new Slider(40, 10)));
                 root.AddSubMenu(comboMenu);
             }
 

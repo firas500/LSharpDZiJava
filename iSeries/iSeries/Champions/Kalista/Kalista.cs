@@ -542,6 +542,29 @@ namespace iSeries.Champions.Kalista
                     this.spells[SpellSlot.E].Cast();
                 }
             }
+            this.HandleSentinels();
+        }
+
+        /// <summary>
+        ///     Handles the Sentinel trick
+        /// </summary>
+        private void HandleSentinels()
+        {
+            if (!this.spells[SpellSlot.W].IsReady())
+            {
+                return;
+            }
+
+            if (this.GetItemValue<KeyBind>("com.iseries.kalista.misc.baronBug").Active
+                && ObjectManager.Player.Distance(SummonersRift.River.Baron) <= this.spells[SpellSlot.W].Range)
+            {
+                this.spells[SpellSlot.W].Cast(SummonersRift.River.Baron);
+            }
+            else if (this.GetItemValue<KeyBind>("com.iseries.kalista.misc.dragonBug").Active
+                     && ObjectManager.Player.Distance(SummonersRift.River.Dragon) <= this.spells[SpellSlot.W].Range)
+            {
+                this.spells[SpellSlot.W].Cast(SummonersRift.River.Dragon);
+            }
         }
 
         #endregion

@@ -15,10 +15,8 @@
 //             You should have received a copy of the GNU General Public License
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
-// <summary>
-//   The given champion class
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace iSeries.Champions.Draven
 {
     using System;
@@ -133,16 +131,16 @@ namespace iSeries.Champions.Draven
         #region Public Methods and Operators
 
         /// <summary>
-        ///     Gets Enemies near a position
+        /// Gets Enemies near a position
         /// </summary>
         /// <param name="position">
-        ///     The Position
+        /// The Position
         /// </param>
         /// <param name="range">
-        ///     The Range
+        /// The Range
         /// </param>
         /// <returns>
-        ///     a list of enemies
+        /// a list of enemies
         /// </returns>
         public static List<Obj_AI_Hero> GetLhEnemiesNearPosition(Vector3 position, float range)
         {
@@ -151,6 +149,9 @@ namespace iSeries.Champions.Draven
                     .ToList();
         }
 
+        /// <summary>
+        /// TODO The last check tick.
+        /// </summary>
         private float LastCheckTick;
 
         /// <summary>
@@ -224,10 +225,10 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        ///     <c>OnDraw</c> subscribed event function.
+        /// <c>OnDraw</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnDraw(EventArgs args)
         {
@@ -268,10 +269,10 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        ///     <c>OnUpdate</c> subscribed event function.
+        /// <c>OnUpdate</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnUpdate(EventArgs args)
         {
@@ -299,13 +300,13 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        ///     Checks if the position is under an ally turret
+        /// Checks if the position is under an ally turret
         /// </summary>
         /// <param name="position">
-        ///     The Position
+        /// The Position
         /// </param>
         /// <returns>
-        ///     The <see cref="bool" />.
+        /// The <see cref="bool"/>.
         /// </returns>
         public bool UnderAllyTurret(Vector3 position)
         {
@@ -330,10 +331,10 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        ///     The Axe Catching Logic
+        /// The Axe Catching Logic
         /// </summary>
         /// <param name="mode">
-        ///     The Mode
+        /// The Mode
         /// </param>
         private void CatchAxes(Mode mode)
         {
@@ -431,13 +432,13 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        ///     Checks if a position is safe
+        /// Checks if a position is safe
         /// </summary>
         /// <param name="position">
-        ///     The Position
+        /// The Position
         /// </param>
         /// <returns>
-        ///     The <see cref="bool" />.
+        /// The <see cref="bool"/>.
         /// </returns>
         private bool IsSafe(Vector3 position)
         {
@@ -461,10 +462,10 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        ///     On incoming gap closer
+        /// On incoming gap closer
         /// </summary>
         /// <param name="gapcloser">
-        ///     The Gap closer
+        /// The Gap closer
         /// </param>
         private void OnIncomingGapcloser(ActiveGapcloser gapcloser)
         {
@@ -476,13 +477,13 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
-        ///     The possible interrupted target
+        /// The possible interrupted target
         /// </summary>
         /// <param name="sender">
-        ///     The Sender
+        /// The Sender
         /// </param>
         /// <param name="args">
-        ///     The args
+        /// The args
         /// </param>
         private void OnInterruptableTarget(Obj_AI_Hero sender, Interrupter2.InterruptableTargetEventArgs args)
         {
@@ -500,20 +501,21 @@ namespace iSeries.Champions.Draven
         {
             this.CheckList();
 
-            if (Environment.TickCount - LastCheckTick < 120)
+            if (Environment.TickCount - this.LastCheckTick < 120)
             {
                 return;
             }
-            LastCheckTick = Environment.TickCount;
-            if (GetItemValue<bool>("com.iseries.draven.misc.epeel")
-                && spells[SpellSlot.E].IsReady()
+
+            this.LastCheckTick = Environment.TickCount;
+            if (this.GetItemValue<bool>("com.iseries.draven.misc.epeel")
+                && this.spells[SpellSlot.E].IsReady()
                 && ObjectManager.Player.CountEnemiesInRange(380f) > 0
                 && ObjectManager.Player.CountAlliesInRange(380f) == 0
                 && ObjectManager.Player.HealthPercent < 20)
             {
                 var closest =
                     ObjectManager.Player.GetEnemiesInRange(380f).OrderBy(h => h.Distance(ObjectManager.Player)).First();
-                spells[SpellSlot.E].Cast(closest.ServerPosition);
+                this.spells[SpellSlot.E].Cast(closest.ServerPosition);
             }
         }
 

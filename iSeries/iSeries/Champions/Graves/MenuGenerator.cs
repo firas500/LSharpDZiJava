@@ -56,7 +56,6 @@ namespace iSeries.Champions.Graves
             var harassMenu = new Menu("Harass Options", "com.iseries.graves.harass");
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.graves.harass.useQ", "Use Q").SetValue(false));
-                harassMenu.AddItem(new MenuItem("com.iseries.graves.harass.useW", "Use W").SetValue(false));
                 root.AddSubMenu(harassMenu);
             }
 

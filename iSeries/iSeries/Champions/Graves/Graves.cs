@@ -19,6 +19,9 @@
 //   TODO The graves.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
+using SharpDX;
+
 namespace iSeries.Champions.Graves
 {
     using System;
@@ -95,48 +98,140 @@ namespace iSeries.Champions.Graves
         public override void OnCombo()
         {
             var target = TargetSelector.GetTarget(
-                this.spells[SpellSlot.E].Range + this.spells[SpellSlot.Q].Range, 
-                TargetSelector.DamageType.Physical);
+                this.spells[SpellSlot.E].Range + this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
             if (target.IsValidTarget())
             {
                 if (GetComboDamage(this.spells, target) > target.Health + 20)
                 {
-                    ////TODO Burst Combo
-                }
-                else
-                {
-                    var myTarget = TargetSelector.GetTarget(
-                        this.spells[SpellSlot.Q].Range, 
-                        TargetSelector.DamageType.Physical);
-                    var rTarget = TargetSelector.GetTarget(
-                        this.spells[SpellSlot.R].Range, 
-                        TargetSelector.DamageType.Physical);
-
-                    if (this.GetItemValue<bool>("com.iseries.graves.combo.useQ") && this.spells[SpellSlot.Q].IsReady()
-                        && myTarget.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                    if (ObjectManager.Player.Distance(target) > spells[SpellSlot.Q].Range)
                     {
-                        this.spells[SpellSlot.Q].CastIfHitchanceEquals(target, HitChance.VeryHigh);
-                    }
-
-                    if (this.GetItemValue<bool>("com.iseries.graves.combo.useW") && this.spells[SpellSlot.W].IsReady()
-                        && myTarget.IsValidTarget(this.spells[SpellSlot.Q].Range))
-                    {
-                        this.spells[SpellSlot.W].CastIfWillHit(
-                            myTarget, 
-                            this.GetItemValue<Slider>("com.iseries.graves.combo.minW").Value);
-                    }
-
-                    if (rTarget.IsValidTarget(this.spells[SpellSlot.R].Range) && this.spells[SpellSlot.R].IsReady())
-                    {
-                        if (this.GetItemValue<bool>("com.iseries.graves.combo.useR")
-                            && this.spells[SpellSlot.R].GetDamage(rTarget) >= rTarget.Health + 20
-                            && !(ObjectManager.Player.Distance(rTarget) < ObjectManager.Player.AttackRange + 120))
+                        spells[SpellSlot.Q].From = ObjectManager.Player.ServerPosition.Extend(
+                            target.ServerPosition, spells[SpellSlot.E].Range);
+                        spells[SpellSlot.Q].RangeCheckFrom =
+                            ObjectManager.Player.ServerPosition.Extend(target.ServerPosition, spells[SpellSlot.E].Range);
+                        var QPrediction = spells[SpellSlot.Q].GetPrediction(target);
+                        if (QPrediction.Hitchance >= HitChance.High)
                         {
-                            this.spells[SpellSlot.R].CastIfHitchanceEquals(rTarget, HitChance.VeryHigh);
+                            //EQR
+                            if (
+                                IsSafe(
+                                    ObjectManager.Player.ServerPosition.Extend(
+                                        target.ServerPosition, spells[SpellSlot.E].Range)))
+                            {
+                                spells[SpellSlot.E].Cast(
+                                ObjectManager.Player.ServerPosition.Extend(
+                                    target.ServerPosition, spells[SpellSlot.E].Range));
+                                Utility.DelayAction.Add(
+                                    (int)(Game.Ping / 2f + 250 + 220), () =>
+                                    {
+                                        spells[SpellSlot.Q].Cast(QPrediction.CastPosition);
+                                        spells[SpellSlot.R].Cast(QPrediction.CastPosition);
+
+                                    });
+                            }
+                            spells[SpellSlot.Q].RangeCheckFrom = ObjectManager.Player.ServerPosition;
+                            spells[SpellSlot.Q].From = ObjectManager.Player.ServerPosition;
+                        }
+                        else
+                        {
+                            var QPrediction2 = spells[SpellSlot.Q].GetPrediction(target);
+                            if (QPrediction2.Hitchance >= HitChance.High)
+                            {
+                                spells[SpellSlot.Q].Cast(QPrediction2.CastPosition);
+                                Utility.DelayAction.Add(
+                                    (int) (Game.Ping / 2f + 250 + 100), () =>
+                                    {
+                                        if (IsSafe(ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 100)))
+                                        {
+                                            spells[SpellSlot.E].Cast(
+                                            ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 100));
+                                        }
+                                        spells[SpellSlot.R].Cast(QPrediction2.CastPosition);
+                                    });
+                            }
+                        }
+                    }
+                    else
+                    {
+                        var myTarget = TargetSelector.GetTarget(
+                            this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
+                        var rTarget = TargetSelector.GetTarget(
+                            this.spells[SpellSlot.R].Range, TargetSelector.DamageType.Physical);
+
+                        if (this.GetItemValue<bool>("com.iseries.graves.combo.useQ") &&
+                            this.spells[SpellSlot.Q].IsReady() && myTarget.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                        {
+                            this.spells[SpellSlot.Q].CastIfHitchanceEquals(myTarget, HitChance.VeryHigh);
+                        }
+
+                        if (this.GetItemValue<bool>("com.iseries.graves.combo.useW") &&
+                            this.spells[SpellSlot.W].IsReady() && myTarget.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                        {
+                            this.spells[SpellSlot.W].CastIfWillHit(
+                                myTarget, this.GetItemValue<Slider>("com.iseries.graves.combo.minW").Value);
+                        }
+
+                        if (rTarget.IsValidTarget(this.spells[SpellSlot.R].Range) && this.spells[SpellSlot.R].IsReady())
+                        {
+                            if (this.GetItemValue<bool>("com.iseries.graves.combo.useR") &&
+                                this.spells[SpellSlot.R].GetDamage(rTarget) >= rTarget.Health + 20 &&
+                                !(ObjectManager.Player.Distance(rTarget) < ObjectManager.Player.AttackRange + 120))
+                            {
+                                this.spells[SpellSlot.R].CastIfHitchanceEquals(rTarget, HitChance.VeryHigh);
+                            }
                         }
                     }
                 }
             }
+        }
+
+        /// <summary>
+        ///     Checks if a position is safe
+        /// </summary>
+        /// <param name="position">
+        ///     The Position
+        /// </param>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        private bool IsSafe(Vector3 position)
+        {
+            if (position.UnderTurret(true) && !ObjectManager.Player.UnderTurret(true))
+            {
+                return false;
+            }
+
+            var allies = position.CountAlliesInRange(ObjectManager.Player.AttackRange);
+            var enemies = position.CountEnemiesInRange(ObjectManager.Player.AttackRange);
+            var lhEnemies = GetLhEnemiesNearPosition(position, ObjectManager.Player.AttackRange).Count();
+
+            if (enemies == 1)
+            {
+                // It's a 1v1, safe to assume I can E
+                return true;
+            }
+
+            // Adding 1 for the Player
+            return allies + 1 > enemies - lhEnemies;
+        }
+
+        /// <summary>
+        ///     Gets Enemies near a position
+        /// </summary>
+        /// <param name="position">
+        ///     The Position
+        /// </param>
+        /// <param name="range">
+        ///     The Range
+        /// </param>
+        /// <returns>
+        ///     a list of enemies
+        /// </returns>
+        public static List<Obj_AI_Hero> GetLhEnemiesNearPosition(Vector3 position, float range)
+        {
+            return
+                HeroManager.Enemies.Where(hero => hero.IsValidTarget(range, true, position) && hero.HealthPercent <= 15)
+                    .ToList();
         }
 
         /// <summary>
@@ -155,7 +250,14 @@ namespace iSeries.Champions.Graves
         /// </summary>
         public override void OnHarass()
         {
-            throw new NotImplementedException();
+            var myTarget = TargetSelector.GetTarget(
+                             this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
+
+            if (this.GetItemValue<bool>("com.iseries.graves.harass.useQ") &&
+                this.spells[SpellSlot.Q].IsReady() && myTarget.IsValidTarget(this.spells[SpellSlot.Q].Range))
+            {
+                this.spells[SpellSlot.Q].CastIfHitchanceEquals(myTarget, HitChance.VeryHigh);
+            }
         }
 
         /// <summary>
@@ -163,7 +265,13 @@ namespace iSeries.Champions.Graves
         /// </summary>
         public override void OnLaneclear()
         {
-            throw new NotImplementedException();
+            var farmLocation = spells[SpellSlot.Q].GetLineFarmLocation(
+                MinionManager.GetMinions(ObjectManager.Player.ServerPosition, spells[SpellSlot.Q].Range));
+            if (this.GetItemValue<bool>("com.iseries.graves.laneclear.useQ") &&
+                this.spells[SpellSlot.Q].IsReady() && farmLocation.MinionsHit > 2)
+            {
+                spells[SpellSlot.Q].Cast(farmLocation.Position);
+            }
         }
 
         /// <summary>

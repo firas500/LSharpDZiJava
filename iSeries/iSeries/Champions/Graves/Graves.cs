@@ -53,6 +53,8 @@ namespace iSeries.Champions.Graves
                                                                        // TODO Tweak this. It has 1000 range + 800 in cone
                                                                    };
 
+        private float LastCheckTick;
+
         #endregion
 
         #region Public Methods and Operators
@@ -307,6 +309,27 @@ namespace iSeries.Champions.Graves
         /// </summary>
         private void OnUpdateFunctions()
         {
+            if (Environment.TickCount - LastCheckTick < 120)
+            {
+                return;
+            }
+            LastCheckTick = Environment.TickCount;
+            if (GetItemValue<bool>("com.iseries.graves.misc.peel") 
+                && spells[SpellSlot.E].IsReady() 
+                && ObjectManager.Player.CountEnemiesInRange(380f) > 0 
+                && ObjectManager.Player.CountAlliesInRange(380f) == 0
+                && ObjectManager.Player.HealthPercent < 20)
+            {
+                var closest =
+                    ObjectManager.Player.GetEnemiesInRange(380f).OrderBy(h => h.Distance(ObjectManager.Player)).First();
+                var extended = closest.ServerPosition.Extend(
+                    ObjectManager.Player.ServerPosition,
+                    ObjectManager.Player.Distance(closest) + spells[SpellSlot.E].Range);
+                if (IsSafe(extended))
+                {
+                    spells[SpellSlot.E].Cast(extended);
+                }
+            }
         }
 
         #endregion

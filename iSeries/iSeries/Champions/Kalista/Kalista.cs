@@ -123,11 +123,11 @@ namespace iSeries.Champions.Kalista
         /// </returns>
         private float GetActualDamage(Obj_AI_Base target)
         {
-            if (target.HasBuff("Alistarult"))
+            if (target.HasBuff("IDK?"))
             {
                 var originalDamage = this.spells[SpellSlot.E].GetDamage(target);
                 const double DamageReduction = 0.7;
-                var actualDamage = originalDamage / DamageReduction;
+                var actualDamage = originalDamage * DamageReduction;
                 return (float)actualDamage;
             }
 
@@ -471,7 +471,7 @@ namespace iSeries.Champions.Kalista
                 HeroManager.Enemies.Where(
                     x =>
                     this.spells[SpellSlot.E].IsInRange(x)
-                    && this.GetActualHealth(x) < this.spells[SpellSlot.E].GetDamage(x)))
+                    && this.GetActualHealth(x) < this.GetActualDamage(x)))
             {
                 if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
                     || hero.HasBuffOfType(BuffType.SpellShield))

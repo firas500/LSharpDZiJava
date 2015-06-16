@@ -335,11 +335,23 @@ namespace iSeries.Champions.Kalista
                             x =>
                             this.spells[SpellSlot.E].CanCast(x) && x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
-                if (minionkillcount >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useENum").Value)
+                var minionkillcountTurret =
+                    MinionManager.GetMinions(this.spells[SpellSlot.E].Range)
+                        .Count(
+                            x =>
+                            this.spells[SpellSlot.E].CanCast(x) && x.Health <= this.spells[SpellSlot.E].GetDamage(x) && UnderAllyTurret(x.ServerPosition));
+
+                if ((minionkillcount >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useENum").Value) 
+                    || (GetItemValue<bool>("com.iseries.kalista.laneclear.esingle") && minionkillcountTurret > 0) )
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
             }
+        }
+        public static bool UnderAllyTurret(Vector3 position)
+        {
+            return
+                ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950, false, position) && turret.IsAlly);
         }
 
         /// <summary>

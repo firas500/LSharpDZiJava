@@ -65,7 +65,7 @@ namespace iSeries.Champions.Twitch
             this.spells[SpellSlot.W].SetSkillshot(0.25f, 120f, 1400f, false, SkillshotType.SkillshotCircle);
 
             // Damage Indicator
-            DamageIndicator.DamageToUnit = this.GetDamage;
+            DamageIndicator.DamageToUnit = this.GetActualDamage;
             DamageIndicator.Enabled = true;
         }
 
@@ -85,6 +85,46 @@ namespace iSeries.Champions.Twitch
         }
 
         /// <summary>
+        ///     Gets actual damage blah blah
+        /// </summary>
+        /// <param name="target">
+        ///     The target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float"/>.
+        /// </returns>
+        private float GetActualDamage(Obj_AI_Base target)
+        {
+            if (target.HasBuff("ColossalStrength"))
+            {
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
+            }
+
+            if (this.Player.HasBuff("summonerexhaust"))
+            {
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.4);
+            }
+
+            return this.spells[SpellSlot.E].GetDamage(target);
+        }
+
+        /// <summary>
+        ///     Gets the targets health including the shield amount
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The targets health
+        /// </returns>
+        public float GetActualHealth(Obj_AI_Base target)
+        {
+            return target.AttackShield > 0
+                       ? target.Health + target.AttackShield
+                       : target.MagicShield > 0 ? target.Health + target.MagicShield : target.Health;
+        }
+
+        /// <summary>
         ///     <c>OnCombo</c> subscribed orb walker function.
         /// </summary>
         public override void OnCombo()
@@ -95,7 +135,7 @@ namespace iSeries.Champions.Twitch
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
                         x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && this.GetDamage(x) > x.Health);
+                        && this.GetActualDamage(x) > this.GetActualHealth(x));
                 if (killableTarget != null)
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -224,7 +264,7 @@ namespace iSeries.Champions.Twitch
             {
                 foreach (var hero in
                     HeroManager.Enemies.Where(
-                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.GetDamage(x) > x.Health))
+                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.GetActualDamage(x) > this.GetActualHealth(x)))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

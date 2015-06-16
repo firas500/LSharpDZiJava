@@ -394,6 +394,10 @@ namespace IKalista
             switch (this.stringListLinks["eDamageType"].Value.SelectedIndex)
             {
                 case 0:
+                    if (target.HasBuff("ColossalStrength"))
+                    {
+                        return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
+                    }
                     return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
                 case 1:
                     return this.GetCustomDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;

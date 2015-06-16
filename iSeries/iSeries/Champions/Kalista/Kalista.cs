@@ -88,7 +88,7 @@ namespace iSeries.Champions.Kalista
             Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpellCast;
 
             // Damage Indicator
-            DamageIndicator.DamageToUnit = this.GetComboDamage;
+            DamageIndicator.DamageToUnit = this.GetActualDamage;
             DamageIndicator.Enabled = true;
         }
 
@@ -123,12 +123,14 @@ namespace iSeries.Champions.Kalista
         /// </returns>
         private float GetActualDamage(Obj_AI_Base target)
         {
-            if (target.HasBuff("IDK?"))
+            if (target.HasBuff("ColossalStrength"))
             {
-                var originalDamage = this.spells[SpellSlot.E].GetDamage(target);
-                const double DamageReduction = 0.7;
-                var actualDamage = originalDamage * DamageReduction;
-                return (float)actualDamage;
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
+            }
+
+            if (this.Player.HasBuff("summonerexhaust"))
+            {
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.4);
             }
 
             return this.spells[SpellSlot.E].GetDamage(target);

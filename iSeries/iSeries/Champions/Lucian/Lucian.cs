@@ -211,6 +211,20 @@ namespace iSeries.Champions.Lucian
                         }
                     }
 
+                    if (this.GetItemValue<bool>("com.iseries.lucian.combo.useR") && this.spells[Spells.R].IsReady())
+                    {
+                        var ultTarget = TargetSelector.GetTarget(
+                            this.spells[Spells.R].Range, 
+                            TargetSelector.DamageType.Physical);
+
+                        if (ultTarget != null
+                            && this.spells[Spells.R].GetDamage(ultTarget) * this.GetShots() > ultTarget.Health
+                            && !this.HasPassive())
+                        {
+                            this.spells[Spells.R].Cast(ultTarget);
+                        }
+                    }
+
                     if (this.GetItemValue<bool>("com.iseries.lucian.misc.peel") && this.spells[Spells.E].IsReady()
                         && this.Player.HealthPercent < 30)
                     {
@@ -344,6 +358,34 @@ namespace iSeries.Champions.Lucian
             {
                 this.spells[Spells.Q].CastOnUnit(collisionMinion);
             }
+        }
+
+        /// <summary>
+        ///     Gets the Ultimate Shots
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="double" />.
+        /// </returns>
+        private double GetShots()
+        {
+            double shots = 0;
+
+            if (this.spells[Spells.R].Level == 1)
+            {
+                shots = 7.5 + 7.5 * (this.Player.AttackSpeedMod - .6);
+            }
+
+            if (this.spells[Spells.R].Level == 2)
+            {
+                shots = 7.5 + 9 * (this.Player.AttackSpeedMod - .6);
+            }
+
+            if (this.spells[Spells.R].Level == 3)
+            {
+                shots = 7.5 + 10.5 * (this.Player.AttackSpeedMod - .6);
+            }
+
+            return shots / 1.4;
         }
 
         /// <summary>

@@ -44,6 +44,7 @@ namespace iSeries.Champions.Lucian
                 comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.extendedQ", "Extended Q").SetValue(false));
                 comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useW", "Use W").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useE", "Use E").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.lucian.combo.useR", "Use R").SetValue(false));
                 root.AddSubMenu(comboMenu);
             }
 

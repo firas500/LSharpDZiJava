@@ -113,6 +113,28 @@ namespace iSeries.Champions.Kalista
         }
 
         /// <summary>
+        ///     Gets actual damage blah blah
+        /// </summary>
+        /// <param name="target">
+        ///     The target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float"/>.
+        /// </returns>
+        private float GetActualDamage(Obj_AI_Base target)
+        {
+            if (target.HasBuff("Alistarult"))
+            {
+                var originalDamage = this.spells[SpellSlot.E].GetDamage(target);
+                const double DamageReduction = 0.7;
+                var actualDamage = originalDamage / DamageReduction;
+                return (float)actualDamage;
+            }
+
+            return this.spells[SpellSlot.E].GetDamage(target);
+        }
+
+        /// <summary>
         ///     Gets the champion type
         /// </summary>
         /// <returns>
@@ -138,7 +160,7 @@ namespace iSeries.Champions.Kalista
 
             if (this.spells[SpellSlot.E].IsReady())
             {
-                damage += this.spells[SpellSlot.E].GetDamage(target);
+                damage += this.GetActualDamage(target);
             }
 
             return damage;
@@ -180,7 +202,7 @@ namespace iSeries.Champions.Kalista
                         .FirstOrDefault();
 
                 if (rendTarget != null
-                    && this.spells[SpellSlot.E].GetDamage(rendTarget) >= this.GetActualHealth(rendTarget)
+                    && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget)
                     && !rendTarget.IsDead)
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -235,7 +257,7 @@ namespace iSeries.Champions.Kalista
                 if (target != null)
                 {
                     var stacks = target.GetBuffCount("kalistaexpungemarker");
-                    if (this.spells[SpellSlot.E].GetDamage(target) >= this.GetActualHealth(target)
+                    if (this.GetActualDamage(target) >= this.GetActualHealth(target)
                         || stacks >= this.GetItemValue<Slider>("com.iseries.kalista.harass.stacks").Value)
                     {
                         this.spells[SpellSlot.E].Cast();

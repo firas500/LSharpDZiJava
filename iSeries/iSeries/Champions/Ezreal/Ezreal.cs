@@ -27,6 +27,7 @@ namespace iSeries.Champions.Ezreal
     using System.Linq;
 
     using iSeries.Champions.Utilities;
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -80,7 +81,8 @@ namespace iSeries.Champions.Ezreal
                     }
 
                     var pred = this.spells[SpellSlot.Q].GetPrediction((Obj_AI_Base)minion);
-                    if (pred.Hitchance >= HitChance.Medium && this.spells[SpellSlot.Q].GetDamage((Obj_AI_Base)minion) > minion.Health)
+                    if (pred.Hitchance >= HitChance.Medium
+                        && this.spells[SpellSlot.Q].GetDamage((Obj_AI_Base)minion) > minion.Health)
                     {
                         this.spells[SpellSlot.Q].Cast((Obj_AI_Base)minion);
                     }
@@ -90,6 +92,17 @@ namespace iSeries.Champions.Ezreal
         #endregion
 
         #region Public Methods and Operators
+
+        /// <summary>
+        ///     Gets the champion type
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="ChampionType" />.
+        /// </returns>
+        public override ChampionType GetChampionType()
+        {
+            return ChampionType.Marksman;
+        }
 
         /// <summary>
         ///     Gets the currently selected hit chance
@@ -115,6 +128,17 @@ namespace iSeries.Champions.Ezreal
         }
 
         /// <summary>
+        ///     Sheen checking
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        public bool HasSheen()
+        {
+            return this.GetItemValue<bool>("com.iseries.ezreal.misc.sheen") && this.Player.HasBuff("sheen");
+        }
+
+        /// <summary>
         ///     <c>OnCombo</c> subscribed orb walker function.
         /// </summary>
         public override void OnCombo()
@@ -123,7 +147,8 @@ namespace iSeries.Champions.Ezreal
             {
                 var target = TargetSelector.GetTargetNoCollision(this.spells[SpellSlot.Q]);
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
-                if (prediction.Hitchance >= this.GetHitchance() && target.IsValidTarget(this.spells[SpellSlot.Q].Range) && !this.HasSheen())
+                if (prediction.Hitchance >= this.GetHitchance() && target.IsValidTarget(this.spells[SpellSlot.Q].Range)
+                    && !this.HasSheen())
                 {
                     this.spells[SpellSlot.Q].Cast(target);
                 }
@@ -178,17 +203,6 @@ namespace iSeries.Champions.Ezreal
 
                 this.spells[SpellSlot.E].Cast(position);
             }
-        }
-
-        /// <summary>
-        ///     Sheen checking
-        /// </summary>
-        /// <returns>
-        ///     The <see cref="bool"/>.
-        /// </returns>
-        public bool HasSheen()
-        {
-            return this.GetItemValue<bool>("com.iseries.ezreal.misc.sheen") && this.Player.HasBuff("sheen");
         }
 
         /// <summary>

@@ -85,20 +85,19 @@ namespace iSeries.Champions.Draven
                     {
                         var axe = new Axe()
                                       {
-                                          AxeObject = sender,
-                                          Position = sender.Position, CreationTime = Game.Time, 
+                                          AxeObject = sender, Position = sender.Position, CreationTime = Game.Time, 
                                           EndTime = Game.Time + 1.20f
                                       };
                         this.axesList.Add(axe);
                         Utility.DelayAction.Add(
-                            1800,
+                            1800, 
                             () =>
                                 {
                                     if (this.axesList.Contains(axe))
-                            {
-                                this.axesList.Remove(axe);
-                            } 
-                        });
+                                    {
+                                        this.axesList.Remove(axe);
+                                    }
+                                });
                     }
                 };
 
@@ -153,6 +152,17 @@ namespace iSeries.Champions.Draven
         }
 
         /// <summary>
+        ///     Gets the champion type
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="ChampionType" />.
+        /// </returns>
+        public override ChampionType GetChampionType()
+        {
+            return ChampionType.Marksman;
+        }
+
+        /// <summary>
         ///     <c>OnCombo</c> subscribed orbwalker function.
         /// </summary>
         [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", 
@@ -164,7 +174,6 @@ namespace iSeries.Champions.Draven
                 && ObjectManager.Player.GetEnemiesInRange(900f).Any(en => en.IsValidTarget())
                 && this.spells[SpellSlot.Q].IsReady())
             {
-
                 var maxQ = this.Menu.Item("com.iseries.draven.misc.maxQ").GetValue<Slider>().Value;
                 var onPlayer = this.QStacks;
                 var onGround = this.axesList.Count;
@@ -174,30 +183,29 @@ namespace iSeries.Champions.Draven
                 {
                     this.spells[SpellSlot.Q].Cast();
                 }
-
             }
 
-            var eTarget = TargetSelector.GetTarget(
-                this.spells[SpellSlot.E].Range, 
-                TargetSelector.DamageType.Physical);
-            if (this.Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>() && eTarget.IsValidTarget(this.spells[SpellSlot.E].Range)
-                && this.spells[SpellSlot.E].IsReady() )
+            var eTarget = TargetSelector.GetTarget(this.spells[SpellSlot.E].Range, TargetSelector.DamageType.Physical);
+            if (this.Menu.Item("com.iseries.draven.combo.useE").GetValue<bool>()
+                && eTarget.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsReady())
             {
                 this.spells[SpellSlot.E].Cast(eTarget);
             }
 
-            if (this.GetItemValue<bool>("com.iseries.draven.combo.useR") && ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(null) + 120f) < 3)
+            if (this.GetItemValue<bool>("com.iseries.draven.combo.useR")
+                && ObjectManager.Player.CountEnemiesInRange(Orbwalking.GetRealAutoAttackRange(null) + 120f) < 3)
             {
                 var rTarget = TargetSelector.GetTarget(
-                    this.spells[SpellSlot.R].Range,
+                    this.spells[SpellSlot.R].Range, 
                     TargetSelector.DamageType.Physical);
                 if (!rTarget.IsValidTarget())
                 {
                     return;
                 }
+
                 var rPrediction = this.spells[SpellSlot.R].GetPrediction(rTarget);
                 var rCollision = this.spells[SpellSlot.R].GetCollision(
-                    ObjectManager.Player.ServerPosition.To2D(),
+                    ObjectManager.Player.ServerPosition.To2D(), 
                     new List<Vector2>() { rPrediction.CastPosition.To2D() });
                 var rDamageMultiplier = 1.0;
                 if (rCollision.Any())
@@ -336,11 +344,10 @@ namespace iSeries.Champions.Draven
                 }
 
                 // Starting Axe Catching Logic
-
                 var closestAxe =
                     this.axesList.FindAll(
                         axe =>
-                        axe.IsValid && IsSafe(axe.Position)
+                        axe.IsValid && this.IsSafe(axe.Position)
                         && (axe.CanBeReachedNormal || (this.CanCastW() && axe.CanBeReachedWithW && mode == Mode.Combo))
                         && (axe.Position.Distance(Game.CursorPos)
                             <= this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value))
@@ -351,8 +358,8 @@ namespace iSeries.Champions.Draven
                 {
                     if (
                         closestAxe.Position.CountAlliesInRange(
-                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value) + 1 >=
-                        closestAxe.Position.CountEnemiesInRange(
+                            this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value) + 1
+                        >= closestAxe.Position.CountEnemiesInRange(
                             this.Menu.Item("com.iseries.draven.misc.safedistance").GetValue<Slider>().Value))
                     {
                         if (!closestAxe.CanBeReachedNormal && closestAxe.CanBeReachedWithW)
@@ -382,8 +389,8 @@ namespace iSeries.Champions.Draven
                                 Variables.Orbwalker.SetOrbwalkingPoint(closestAxe.Position);
                             }
                         }
-                        }
                     }
+                }
                 else
                 {
                     Variables.Orbwalker.SetOrbwalkingPoint(Game.CursorPos);
@@ -402,10 +409,11 @@ namespace iSeries.Champions.Draven
             }
 
             this.lastListCheckTick = Environment.TickCount;
-            if (!axesList.Any())
+            if (!this.axesList.Any())
             {
                 return;
             }
+
             this.axesList.RemoveAll(axe => !axe.IsValid);
         }
 
@@ -522,6 +530,7 @@ namespace iSeries.Champions.Draven
                     var currentDistance = Vector3.Distance(previousPoint, currentPoint);
                     pathLength += currentDistance;
                 }
+
                 var canBeReached = pathLength / (ObjectManager.Player.MoveSpeed + Game.Time) < this.EndTime;
                 return canBeReached;
             }
@@ -581,7 +590,7 @@ namespace iSeries.Champions.Draven
         {
             get
             {
-                return AxeObject != null && AxeObject.IsValid && this.EndTime >= Game.Time;
+                return this.AxeObject != null && this.AxeObject.IsValid && this.EndTime >= Game.Time;
             }
         }
 

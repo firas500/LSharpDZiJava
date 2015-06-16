@@ -41,7 +41,8 @@ namespace iSeries.Champions.Kalista
             var comboMenu = new Menu("Combo Options", "com.iseries.kalista.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.kalista.combo.useQ", "Use Q").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.kalista.combo.qMana", "Min Mana for Q %").SetValue(new Slider(40, 10, 80)));
+                comboMenu.AddItem(
+                    new MenuItem("com.iseries.kalista.combo.qMana", "Min Mana for Q %").SetValue(new Slider(40, 10, 80)));
                 comboMenu.AddItem(new MenuItem("com.iseries.kalista.combo.useE", "Use E").SetValue(true));
                 root.AddSubMenu(comboMenu);
             }
@@ -50,7 +51,8 @@ namespace iSeries.Champions.Kalista
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.useQ", "Use Q").SetValue(false));
                 harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.useE", "Use E").SetValue(false));
-                harassMenu.AddItem(new MenuItem("com.iseries.kalista.harass.stacks", "E Stacks").SetValue(new Slider(5, 2, 10)));
+                harassMenu.AddItem(
+                    new MenuItem("com.iseries.kalista.harass.stacks", "E Stacks").SetValue(new Slider(5, 2, 10)));
                 root.AddSubMenu(harassMenu);
             }
 

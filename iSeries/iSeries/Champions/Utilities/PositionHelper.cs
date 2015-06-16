@@ -19,7 +19,6 @@
 //   TODO The position helper.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace iSeries.Champions.Utilities
 {
     using System.Collections.Generic;
@@ -31,7 +30,7 @@ namespace iSeries.Champions.Utilities
     using SharpDX;
 
     /// <summary>
-    /// TODO The position helper.
+    ///     TODO The position helper.
     /// </summary>
     internal class PositionHelper
     {

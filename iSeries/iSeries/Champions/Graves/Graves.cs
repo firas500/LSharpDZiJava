@@ -19,19 +19,31 @@
 //   TODO The graves.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace iSeries.Champions.Graves
 {
     using System;
 
+    using iSeries.General;
+
     using LeagueSharp.Common;
 
     /// <summary>
-    /// TODO The graves.
+    ///     TODO The graves.
     /// </summary>
     internal class Graves : Champion
     {
         #region Public Methods and Operators
+
+        /// <summary>
+        ///     Gets the champion type
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="ChampionType" />.
+        /// </returns>
+        public override ChampionType GetChampionType()
+        {
+            return ChampionType.Marksman;
+        }
 
         /// <summary>
         ///     <c>OnCombo</c> subscribed orb walker function.

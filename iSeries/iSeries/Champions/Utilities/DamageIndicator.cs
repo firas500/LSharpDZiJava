@@ -82,7 +82,13 @@ namespace iSeries.Champions.Utilities
         /// <summary>
         ///     TODO The text.
         /// </summary>
-        private static readonly Render.Text Text = new Render.Text(0, 0, string.Empty, 14, SharpDX.Color.Red, "monospace");
+        private static readonly Render.Text Text = new Render.Text(
+            0, 
+            0, 
+            string.Empty, 
+            14, 
+            SharpDX.Color.Red, 
+            "monospace");
 
         /// <summary>
         ///     TODO The _damage to unit.

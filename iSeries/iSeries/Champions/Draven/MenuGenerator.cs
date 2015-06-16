@@ -44,7 +44,8 @@ namespace iSeries.Champions.Draven
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.useW", "Use W").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.useE", "Use E").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.useR", "Use R").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.catchcombo", "Catch Axes in Combo").SetValue(true));
+                comboMenu.AddItem(
+                    new MenuItem("com.iseries.draven.combo.catchcombo", "Catch Axes in Combo").SetValue(true));
                 comboMenu.AddItem(new MenuItem("com.iseries.draven.combo.wmana", "W Mana").SetValue(new Slider(35)));
                 root.AddSubMenu(comboMenu);
             }
@@ -52,7 +53,8 @@ namespace iSeries.Champions.Draven
             var harassMenu = new Menu("Harass Options", "com.iseries.draven.harass");
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.draven.harass.useE", "Use E").SetValue(false));
-                harassMenu.AddItem(new MenuItem("com.iseries.draven.harass.catchharass", "Catch Axes in Harass").SetValue(true));
+                harassMenu.AddItem(
+                    new MenuItem("com.iseries.draven.harass.catchharass", "Catch Axes in Harass").SetValue(true));
 
                 root.AddSubMenu(harassMenu);
             }
@@ -65,16 +67,18 @@ namespace iSeries.Champions.Draven
 
             var misc = new Menu("Misc Options", "com.iseries.draven.misc");
             {
+                misc.AddItem(new MenuItem("com.iseries.draven.misc.maxQ", "Max Axes").SetValue(new Slider(2, 1, 4)));
                 misc.AddItem(
-                    new MenuItem("com.iseries.draven.misc.maxQ", "Max Axes").SetValue(new Slider(2, 1, 4)));
+                    new MenuItem("com.iseries.draven.misc.catchrange", "Catch Range").SetValue(new Slider(395, 65, 850)));
                 misc.AddItem(
-                    new MenuItem("com.iseries.draven.misc.catchrange", "Catch Range").SetValue(new Slider(395,65,850)));
-                misc.AddItem(new MenuItem("com.iseries.draven.misc.safedistance", "Axes Safe Distance").SetValue(new Slider(120, 0, 550)));
+                    new MenuItem("com.iseries.draven.misc.safedistance", "Axes Safe Distance").SetValue(
+                        new Slider(120, 0, 550)));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.eagp", "E Antigapcloser").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.eint", "E Interrupter").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.epeel", "E Peel").SetValue(true));
                 root.AddSubMenu(misc);
             }
+
             root.AddToMainMenu();
         }
 

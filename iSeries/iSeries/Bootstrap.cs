@@ -44,7 +44,7 @@ namespace iSeries
         /// <summary>
         /// TODO The orb walking.
         /// </summary>
-        public static Menu OrbWalking;
+        private static Menu orbwalking;
 
         /// <summary>
         ///     TODO The champ list.
@@ -89,7 +89,7 @@ namespace iSeries
                 windUp = 40;
             }
 
-            OrbWalking.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
+            orbwalking.Item("ExtraWindup").SetValue(windUp < 200 ? new Slider(windUp, 200, 0) : new Slider(200, 200, 0));
         }
 
         /// <summary>
@@ -113,27 +113,36 @@ namespace iSeries
         {
             if (ChampList.ContainsKey(ObjectManager.Player.ChampionName))
             {
-                Variables.Menu = new Menu("iSeries: " + ObjectManager.Player.ChampionName, "com.iseries", true);
-
-                var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-                TargetSelector.AddToMenu(targetSelectorMenu);
-                Variables.Menu.AddSubMenu(targetSelectorMenu);
-                OrbWalking = Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-                Variables.Orbwalker = new Orbwalking.Orbwalker(OrbWalking);
-
-                OrbWalking.AddItem(new MenuItem("AutoWindup", "iSeries - Auto Windup").SetValue(false)).ValueChanged +=
-                    (sender, argsEvent) =>
-                        {
-                            if (argsEvent.GetNewValue<bool>())
-                            {
-                                CheckAutoWindUp();
-                            }
-                        };
-
+                GenerateBaseMenu();
                 ChampList[ObjectManager.Player.ChampionName]();
-
                 Console.WriteLine("Loaded: " + ObjectManager.Player.ChampionName);
             }
+        }
+
+        /// <summary>
+        ///     Generates the base menu
+        /// </summary>
+        private static void GenerateBaseMenu()
+        {
+            Variables.Menu = new Menu("iSeries: " + ObjectManager.Player.ChampionName, "com.iseries." + ObjectManager.Player.ChampionName, true);
+
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(targetSelectorMenu);
+            Variables.Menu.AddSubMenu(targetSelectorMenu);
+
+            orbwalking = Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+            Variables.Orbwalker = new Orbwalking.Orbwalker(orbwalking);
+
+            orbwalking.AddItem(new MenuItem("AutoWindup", "iSeries - Auto Windup").SetValue(false)).ValueChanged +=
+                (sender, argsEvent) =>
+                {
+                    if (argsEvent.GetNewValue<bool>())
+                    {
+                        CheckAutoWindUp();
+                    }
+                };
+
+            // TODO add an item manager / auto qss etc / some utils maybe?
         }
 
         #endregion

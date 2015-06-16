@@ -79,6 +79,7 @@
     <Compile Include="Champions\Twitch\Twitch.cs" />
     <Compile Include="Champions\Utilities\DamageIndicator.cs" />
     <Compile Include="Champions\Utilities\PositionHelper.cs" />
+    <Compile Include="General\ChampionType.cs" />
     <Compile Include="General\Enumerators.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Variables.cs" />

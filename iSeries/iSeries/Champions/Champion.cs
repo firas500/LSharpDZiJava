@@ -16,13 +16,14 @@
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
 // <summary>
-//      The Generic champion
+//   The Generic champion
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace iSeries.Champions
 {
     using System;
+
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -66,14 +67,12 @@ namespace iSeries.Champions
         #region Public Methods and Operators
 
         /// <summary>
-        ///     Invokes the champion.
+        ///     Gets the champion type
         /// </summary>
-        public void Invoke()
-        {
-            Game.OnUpdate += this.OnUpdate;
-            Drawing.OnDraw += this.OnDraw;
-            this.CreateMenu(this.Menu);
-        }
+        /// <returns>
+        ///     The <see cref="ChampionType" />.
+        /// </returns>
+        public abstract ChampionType GetChampionType();
 
         /// <summary>
         ///     Gets a menu items value
@@ -85,12 +84,27 @@ namespace iSeries.Champions
         ///     The type parameter
         /// </typeparam>
         /// <returns>
-        ///     The <see cref="T"/>.
+        ///     The <see cref="T" />.
         /// </returns>
         public T GetItemValue<T>(string item)
         {
             return Variables.Menu.Item(item).GetValue<T>();
         }
+
+        /// <summary>
+        ///     Invokes the champion.
+        /// </summary>
+        public void Invoke()
+        {
+            Game.OnUpdate += this.OnUpdateFunctions;
+            Drawing.OnDraw += this.OnDraw;
+            this.CreateMenu(this.Menu);
+        }
+
+        /// <summary>
+        ///     <c>OnCombo</c> subscribed orb walker function.
+        /// </summary>
+        public abstract void OnCombo();
 
         /// <summary>
         ///     <c>OnDraw</c> subscribed event function.
@@ -101,6 +115,16 @@ namespace iSeries.Champions
         public abstract void OnDraw(EventArgs args);
 
         /// <summary>
+        ///     <c>OnHarass</c> subscribed orb walker function.
+        /// </summary>
+        public abstract void OnHarass();
+
+        /// <summary>
+        ///     <c>OnLaneclear</c> subscribed orb walker function.
+        /// </summary>
+        public abstract void OnLaneclear();
+
+        /// <summary>
         ///     <c>OnUpdate</c> subscribed event function.
         /// </summary>
         /// <param name="args">
@@ -108,21 +132,40 @@ namespace iSeries.Champions
         /// </param>
         public abstract void OnUpdate(EventArgs args);
 
-        /// <summary>
-        ///     <c>OnCombo</c> subscribed orb walker function.
-        /// </summary>
-        public abstract void OnCombo();
+        #endregion
+
+        #region Methods
 
         /// <summary>
-        ///     <c>OnHarass</c> subscribed orb walker function.
+        ///     <c>OnUpdate</c> subscribed event function.
         /// </summary>
-        public abstract void OnHarass();
+        /// <param name="args">
+        ///     The event data
+        /// </param>
+        private void OnUpdateFunctions(EventArgs args)
+        {
+            switch (this.GetChampionType())
+            {
+                case ChampionType.Marksman:
+                    // TODO more ad carry shit
+                    if (ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
+                    {
+                        ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
+                    }
+                    break;
+                case ChampionType.Mage:
+                    // TODO ap caster shit here :S
+                    break;
+                case ChampionType.Tank:
+                    // TODO tank shit
+                    break;
+                case ChampionType.Support:
+                    // TODO support shit
+                    break;
+            }
 
-
-        /// <summary>
-        ///     <c>OnLaneclear</c> subscribed orb walker function.
-        /// </summary>
-        public abstract void OnLaneclear();
+            this.OnUpdate(args);
+        }
 
         #endregion
     }

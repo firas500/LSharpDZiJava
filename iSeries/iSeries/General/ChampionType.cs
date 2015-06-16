@@ -1,5 +1,5 @@
 ﻿// --------------------------------------------------------------------------------------------------------------------
-// <copyright file="Variables.cs" company="LeagueSharp">
+// <copyright file="ChampionType.cs" company="LeagueSharp">
 //   Copyright (C) 2015 LeagueSharp
 //   
 //             This program is free software: you can redistribute it and/or modify
@@ -16,34 +16,35 @@
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
 // <summary>
-//   The Variables
+//   TODO The champion type.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries
+
+namespace iSeries.General
 {
-    using System.Diagnostics.CodeAnalysis;
-
-    using LeagueSharp.Common;
-
     /// <summary>
-    ///     The Variables
+    /// TODO The champion type.
     /// </summary>
-    internal class Variables
+    public enum ChampionType
     {
-        #region Public Properties
+        /// <summary>
+        /// TODO The marksman.
+        /// </summary>
+        Marksman, 
 
         /// <summary>
-        ///     Gets or sets the menu.
+        /// TODO The mage.
         /// </summary>
-        public static Menu Menu { get; set; }
+        Mage, 
 
         /// <summary>
-        ///     Gets or sets the orbwalker.
+        /// TODO The tank.
         /// </summary>
-        [SuppressMessage("StyleCop.CSharp.DocumentationRules", "SA1650:ElementDocumentationMustBeSpelledCorrectly", 
-            Justification = "Reviewed. Suppression is OK here.")]
-        public static Orbwalking.Orbwalker Orbwalker { get; set; }
+        Tank, 
 
-        #endregion
+        /// <summary>
+        /// TODO The support.
+        /// </summary>
+        Support
     }
 }

@@ -27,6 +27,7 @@ namespace iSeries.Champions.Twitch
     using System.Linq;
 
     using iSeries.Champions.Utilities;
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -73,6 +74,17 @@ namespace iSeries.Champions.Twitch
         #region Public Methods and Operators
 
         /// <summary>
+        ///     Gets the champion type
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="ChampionType" />.
+        /// </returns>
+        public override ChampionType GetChampionType()
+        {
+            return ChampionType.Marksman;
+        }
+
+        /// <summary>
         ///     <c>OnCombo</c> subscribed orb walker function.
         /// </summary>
         public override void OnCombo()
@@ -96,6 +108,7 @@ namespace iSeries.Champions.Twitch
                 {
                     return;
                 }
+
                 var wTarget = TargetSelector.GetTarget(
                     this.spells[SpellSlot.W].Range, 
                     TargetSelector.DamageType.Physical);
@@ -128,7 +141,7 @@ namespace iSeries.Champions.Twitch
                     if (stacks > 0)
                     {
                         Drawing.DrawText(
-                            Drawing.WorldToScreen(source.Position)[0] - 20,
+                            Drawing.WorldToScreen(source.Position)[0] - 20, 
                             Drawing.WorldToScreen(source.Position)[1], 
                             Color.White, 
                             "Stacks: " + stacks);

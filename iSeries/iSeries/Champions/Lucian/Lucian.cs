@@ -26,6 +26,7 @@ namespace iSeries.Champions.Lucian
     using System.Linq;
 
     using iSeries.Champions.Utilities;
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -139,6 +140,17 @@ namespace iSeries.Champions.Lucian
         #endregion
 
         #region Public Methods and Operators
+
+        /// <summary>
+        ///     Gets the champion type
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="ChampionType" />.
+        /// </returns>
+        public override ChampionType GetChampionType()
+        {
+            return ChampionType.Marksman;
+        }
 
         /// <summary>
         ///     Gets the combo damage

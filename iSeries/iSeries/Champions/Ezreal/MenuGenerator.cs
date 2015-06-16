@@ -19,13 +19,12 @@
 //   TODO The menu generator.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace iSeries.Champions.Ezreal
 {
     using LeagueSharp.Common;
 
     /// <summary>
-    /// TODO The menu generator.
+    ///     TODO The menu generator.
     /// </summary>
     internal class MenuGenerator
     {
@@ -57,7 +56,8 @@ namespace iSeries.Champions.Ezreal
             var laneclearMenu = new Menu("Laneclear Options", "com.iseries.ezreal.laneclear");
             {
                 laneclearMenu.AddItem(new MenuItem("com.iseries.ezreal.laneclear.useQ", "Use Q").SetValue(true));
-                laneclearMenu.AddItem(new MenuItem("com.iseries.ezreal.laneclear.useQKill", "Q Unkillable Minions").SetValue(true));
+                laneclearMenu.AddItem(
+                    new MenuItem("com.iseries.ezreal.laneclear.useQKill", "Q Unkillable Minions").SetValue(true));
                 root.AddSubMenu(laneclearMenu);
             }
 

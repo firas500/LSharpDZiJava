@@ -19,13 +19,12 @@
 //   TODO The menu generator.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace iSeries.Champions.Twitch
 {
     using LeagueSharp.Common;
 
     /// <summary>
-    /// TODO The menu generator.
+    ///     TODO The menu generator.
     /// </summary>
     internal class MenuGenerator
     {

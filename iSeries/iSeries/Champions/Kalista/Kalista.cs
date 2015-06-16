@@ -26,6 +26,7 @@ namespace iSeries.Champions.Kalista
     using System.Linq;
 
     using iSeries.Champions.Utilities;
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -40,7 +41,6 @@ namespace iSeries.Champions.Kalista
     /// </summary>
     internal class Kalista : Champion
     {
-
         #region Fields
 
         /// <summary>
@@ -90,25 +90,6 @@ namespace iSeries.Champions.Kalista
             // Damage Indicator
             DamageIndicator.DamageToUnit = this.GetComboDamage;
             DamageIndicator.Enabled = true;
-
-            Console.WriteLine("Kalista Loaded no menu :S");
-        }
-
-        /// <summary>
-        ///     The on process spell function
-        /// </summary>
-        /// <param name="sender">
-        ///     The Spell Sender
-        /// </param>
-        /// <param name="args">
-        ///     The Arguments
-        /// </param>
-        private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
-        {
-            if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
-            {
-                Orbwalking.ResetAutoAttackTimer();
-            }
         }
 
         #endregion
@@ -129,6 +110,17 @@ namespace iSeries.Champions.Kalista
             return target.AttackShield > 0
                        ? target.Health + target.AttackShield
                        : target.MagicShield > 0 ? target.Health + target.MagicShield : target.Health;
+        }
+
+        /// <summary>
+        ///     Gets the champion type
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="ChampionType" />.
+        /// </returns>
+        public override ChampionType GetChampionType()
+        {
+            return ChampionType.Marksman;
         }
 
         /// <summary>
@@ -409,6 +401,23 @@ namespace iSeries.Champions.Kalista
         }
 
         /// <summary>
+        ///     The on process spell function
+        /// </summary>
+        /// <param name="sender">
+        ///     The Spell Sender
+        /// </param>
+        /// <param name="args">
+        ///     The Arguments
+        /// </param>
+        private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
+        {
+            if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
+            {
+                Orbwalking.ResetAutoAttackTimer();
+            }
+        }
+
+        /// <summary>
         ///     The Functions to always process
         /// </summary>
         private void OnUpdateFunctions()
@@ -475,12 +484,13 @@ namespace iSeries.Champions.Kalista
                         MinionTypes.All, 
                         MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
-                        .FirstOrDefault(x => x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("Mini"));
+                        .FirstOrDefault(
+                            x =>
+                            x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("Mini"));
                 if (bigMinion != null && this.spells[SpellSlot.E].CanCast(bigMinion))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
-                
             }
         }
 

@@ -224,6 +224,20 @@ namespace iSeries.Champions.Kalista
             {
                 Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
             }
+
+            foreach (var source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.E].IsInRange(x)))
+            {
+                var stacks = source.GetBuffCount("kalistaexpungemarker");
+
+                if (stacks > 0)
+                {
+                    Drawing.DrawText(
+                        Drawing.WorldToScreen(source.Position)[0] - 20,
+                        Drawing.WorldToScreen(source.Position)[1],
+                        Color.White,
+                        "Stacks: " + stacks);
+                }
+            }
         }
 
         /// <summary>

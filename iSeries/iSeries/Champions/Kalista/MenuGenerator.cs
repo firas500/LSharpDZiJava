@@ -64,6 +64,7 @@ namespace iSeries.Champions.Kalista
                 laneclearMenu.AddItem(new MenuItem("com.iseries.kalista.laneclear.useE", "Use E").SetValue(true));
                 laneclearMenu.AddItem(
                     new MenuItem("com.iseries.kalista.laneclear.useENum", "E Number").SetValue(new Slider(4, 2, 10)));
+                laneclearMenu.AddItem(new MenuItem("com.iseries.kalista.laneclear.esingle", "Cast E Even On Single Minion if Under Turret").SetValue(false));
                 root.AddSubMenu(laneclearMenu);
             }
 

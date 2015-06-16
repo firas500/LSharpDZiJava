@@ -151,6 +151,8 @@ namespace iSeries.Champions.Draven
                     .ToList();
         }
 
+        private float LastCheckTick;
+
         /// <summary>
         ///     Gets the champion type
         /// </summary>
@@ -497,6 +499,22 @@ namespace iSeries.Champions.Draven
         private void OnUpdateFunctions()
         {
             this.CheckList();
+
+            if (Environment.TickCount - LastCheckTick < 120)
+            {
+                return;
+            }
+            LastCheckTick = Environment.TickCount;
+            if (GetItemValue<bool>("com.iseries.draven.misc.epeel")
+                && spells[SpellSlot.E].IsReady()
+                && ObjectManager.Player.CountEnemiesInRange(380f) > 0
+                && ObjectManager.Player.CountAlliesInRange(380f) == 0
+                && ObjectManager.Player.HealthPercent < 20)
+            {
+                var closest =
+                    ObjectManager.Player.GetEnemiesInRange(380f).OrderBy(h => h.Distance(ObjectManager.Player)).First();
+                spells[SpellSlot.E].Cast(closest.ServerPosition);
+            }
         }
 
         #endregion

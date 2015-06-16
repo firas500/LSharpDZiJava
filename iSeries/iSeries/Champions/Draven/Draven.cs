@@ -105,6 +105,11 @@ namespace iSeries.Champions.Draven
                 {
                     if (sender != null && sender.Name.Contains("Q_reticle_self"))
                     {
+                        if (this.GetItemValue<bool>("com.iseries.draven.combo.useW") && spells[SpellSlot.W].IsReady() && !HasWBuff() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(700f) > 0)
+                        {
+                            spells[SpellSlot.W].Cast();
+                        }
+
                         this.axesList.RemoveAll(axe => axe.AxeObject.NetworkId == sender.NetworkId);
                     }
                 };
@@ -221,6 +226,7 @@ namespace iSeries.Champions.Draven
                     this.spells[SpellSlot.R].Cast(rTarget);
                 }
             }
+
         }
 
         /// <summary>

@@ -19,13 +19,15 @@
 //   TODO The graves.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace iSeries.Champions.Graves
 {
     using System;
+    using System.Collections.Generic;
+    using System.Linq;
 
     using iSeries.General;
 
+    using LeagueSharp;
     using LeagueSharp.Common;
 
     /// <summary>
@@ -33,19 +35,48 @@ namespace iSeries.Champions.Graves
     /// </summary>
     internal class Graves : Champion
     {
+        #region Fields
 
         /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
-        {
-                            { SpellSlot.Q, new Spell(SpellSlot.Q, 800f) },
-                            { SpellSlot.W, new Spell(SpellSlot.W, 950f) },
-                            { SpellSlot.E, new Spell(SpellSlot.E, 425f) },
-                            { SpellSlot.R, new Spell(SpellSlot.R, 1100f) } //TODO Tweak this. It has 1000 range + 800 in cone
-        };
+                                                                   {
+                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q, 800f) }, 
+                                                                       { SpellSlot.W, new Spell(SpellSlot.W, 950f) }, 
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 425f) }, 
+                                                                       { SpellSlot.R, new Spell(SpellSlot.R, 1100f) }
+
+                                                                       // TODO Tweak this. It has 1000 range + 800 in cone
+                                                                   };
+
+        #endregion
 
         #region Public Methods and Operators
+
+        /// <summary>
+        /// TODO The get combo damage.
+        /// </summary>
+        /// <param name="spells">
+        /// TODO The spells.
+        /// </param>
+        /// <param name="unit">
+        /// TODO The unit.
+        /// </param>
+        /// <returns>
+        /// </returns>
+        public static float GetComboDamage(Dictionary<SpellSlot, Spell> spells, Obj_AI_Hero unit)
+        {
+            if (!unit.IsValidTarget())
+            {
+                return 0;
+            }
+
+            return
+                spells.Where(spell => spell.Value.IsReady())
+                    .Sum(spell => (float)ObjectManager.Player.GetSpellDamage(unit, spell.Key))
+                + (float)ObjectManager.Player.GetAutoAttackDamage(unit) * 2;
+        }
 
         /// <summary>
         ///     Gets the champion type
@@ -64,35 +95,44 @@ namespace iSeries.Champions.Graves
         public override void OnCombo()
         {
             var target = TargetSelector.GetTarget(
-                spells[SpellSlot.E].Range + spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
+                this.spells[SpellSlot.E].Range + this.spells[SpellSlot.Q].Range, 
+                TargetSelector.DamageType.Physical);
             if (target.IsValidTarget())
             {
-                if (GetComboDamage(spells, target) > target.Health + 20)
+                if (GetComboDamage(this.spells, target) > target.Health + 20)
                 {
                     ////TODO Burst Combo
                 }
                 else
                 {
-                    var myTarget =  TargetSelector.GetTarget( spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
-                    var rTarget = TargetSelector.GetTarget(spells[SpellSlot.R].Range, TargetSelector.DamageType.Physical);
+                    var myTarget = TargetSelector.GetTarget(
+                        this.spells[SpellSlot.Q].Range, 
+                        TargetSelector.DamageType.Physical);
+                    var rTarget = TargetSelector.GetTarget(
+                        this.spells[SpellSlot.R].Range, 
+                        TargetSelector.DamageType.Physical);
 
-                    if (GetItemValue<bool>("com.iseries.graves.combo.useQ") && spells[SpellSlot.Q].IsReady() && myTarget.IsValidTarget(spells[SpellSlot.Q].Range))
+                    if (this.GetItemValue<bool>("com.iseries.graves.combo.useQ") && this.spells[SpellSlot.Q].IsReady()
+                        && myTarget.IsValidTarget(this.spells[SpellSlot.Q].Range))
                     {
-                        spells[SpellSlot.Q].CastIfHitchanceEquals(target, HitChance.VeryHigh);
+                        this.spells[SpellSlot.Q].CastIfHitchanceEquals(target, HitChance.VeryHigh);
                     }
 
-                    if (GetItemValue<bool>("com.iseries.graves.combo.useW") && spells[SpellSlot.W].IsReady() && myTarget.IsValidTarget(spells[SpellSlot.Q].Range))
+                    if (this.GetItemValue<bool>("com.iseries.graves.combo.useW") && this.spells[SpellSlot.W].IsReady()
+                        && myTarget.IsValidTarget(this.spells[SpellSlot.Q].Range))
                     {
-                        spells[SpellSlot.W].CastIfWillHit(
-                            myTarget, GetItemValue<Slider>("com.iseries.graves.combo.minW").Value);
+                        this.spells[SpellSlot.W].CastIfWillHit(
+                            myTarget, 
+                            this.GetItemValue<Slider>("com.iseries.graves.combo.minW").Value);
                     }
 
-                    if (rTarget.IsValidTarget(spells[SpellSlot.R].Range) && spells[SpellSlot.R].IsReady() )
+                    if (rTarget.IsValidTarget(this.spells[SpellSlot.R].Range) && this.spells[SpellSlot.R].IsReady())
                     {
-                        if (GetItemValue<bool>("com.iseries.graves.combo.useR") && spells[SpellSlot.R].GetDamage(rTarget) >= rTarget.Health + 20 &&
-                        !(ObjectManager.Player.Distance(rTarget) < ObjectManager.Player.AttackRange + 120))
+                        if (this.GetItemValue<bool>("com.iseries.graves.combo.useR")
+                            && this.spells[SpellSlot.R].GetDamage(rTarget) >= rTarget.Health + 20
+                            && !(ObjectManager.Player.Distance(rTarget) < ObjectManager.Player.AttackRange + 120))
                         {
-                            spells[SpellSlot.R].CastIfHitchanceEquals(rTarget, HitChance.VeryHigh);
+                            this.spells[SpellSlot.R].CastIfHitchanceEquals(rTarget, HitChance.VeryHigh);
                         }
                     }
                 }
@@ -159,13 +199,6 @@ namespace iSeries.Champions.Graves
         /// </summary>
         private void OnUpdateFunctions()
         {
-        }
-
-        public static float GetComboDamage(Dictionary<SpellSlot, Spell> spells, Obj_AI_Hero unit)
-        {
-            if (!unit.IsValidTarget())
-                return 0;
-            return spells.Where(spell => spell.Value.IsReady()).Sum(spell => (float)ObjectManager.Player.GetSpellDamage(unit, spell.Key)) + (float)ObjectManager.Player.GetAutoAttackDamage(unit) * 2;
         }
 
         #endregion

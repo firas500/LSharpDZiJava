@@ -69,6 +69,12 @@ namespace iSeries.Champions.Kalista
 
             var misc = new Menu("Misc Options", "com.iseries.kalista.misc");
             {
+                misc.AddItem(
+                    new MenuItem("com.iseries.kalista.misc.dragonBug", "Dragon Vision").SetValue(
+                        new KeyBind("T".ToCharArray()[0], KeyBindType.Press)));
+                misc.AddItem(
+                    new MenuItem("com.iseries.kalista.misc.baronBug", "Baron Vision").SetValue(
+                        new KeyBind("Y".ToCharArray()[0], KeyBindType.Press)));
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.mobsteal", "Jungle Steal").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.lasthit", "Last Hit Assist").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.autoHarass", "Auto E Harass").SetValue(true));

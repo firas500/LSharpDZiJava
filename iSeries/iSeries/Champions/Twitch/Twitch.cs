@@ -44,8 +44,8 @@ namespace iSeries.Champions.Twitch
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
-                                                                       { SpellSlot.W, new Spell(SpellSlot.W, 950) }, 
-                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1200) }
+                                                                       { SpellSlot.W, new Spell(SpellSlot.W, 950f) }, 
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 1200f) }
                                                                    };
 
         #endregion
@@ -129,17 +129,44 @@ namespace iSeries.Champions.Twitch
         /// </summary>
         public override void OnCombo()
         {
-            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useE") && this.spells[SpellSlot.E].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEKillable") && this.spells[SpellSlot.E].IsReady())
             {
                 var killableTarget =
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
                         x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && this.GetActualDamage(x) > this.GetActualHealth(x));
+                        && this.GetActualDamage(x) > this.GetActualHealth(x) && !GetItemValue<bool>("com.iseries.twitch.noe."+x.ChampionName.ToLowerInvariant()));
                 if (killableTarget != null)
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEMaxStacks") && this.spells[SpellSlot.E].IsReady())
+            {
+                var killableTarget =
+                    HeroManager.Enemies.FirstOrDefault(
+                        x =>
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
+                        && x.GetBuffCount("twitchdeadlyvenom") == 6 && !GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                if (killableTarget != null)
+                {
+                    this.spells[SpellSlot.E].Cast();
+                }
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useENearlyOutOfRange") && this.spells[SpellSlot.E].IsReady())
+            {
+                var killableTarget =
+                    HeroManager.Enemies.FirstOrDefault(
+                        x =>
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
+                        && x.GetBuffCount("twitchdeadlyvenom") >= 4 && x.Distance(ObjectManager.Player) >= 1000f && !GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                if (killableTarget != null)
+                {
+                    this.spells[SpellSlot.E].Cast();
+                }
+
             }
 
             if (this.GetItemValue<bool>("com.iseries.twitch.combo.useW") && this.spells[SpellSlot.W].IsReady())

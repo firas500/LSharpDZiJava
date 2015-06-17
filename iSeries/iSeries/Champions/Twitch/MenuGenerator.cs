@@ -41,7 +41,9 @@ namespace iSeries.Champions.Twitch
             var comboMenu = new Menu("Combo Options", "com.iseries.twitch.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useW", "Use W").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useE", "Use E").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEKillable", "Use E When Killable").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEMaxStacks", "Use E At Max Stacks").SetValue(false));
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useENearlyOutOfRange", "Use E When Target is Nearly Out of Range").SetValue(false));
                 comboMenu.AddItem(
                     new MenuItem("com.iseries.twitch.combo.wMana", "Min Mana W %").SetValue(new Slider(40, 10)));
                 root.AddSubMenu(comboMenu);
@@ -74,6 +76,17 @@ namespace iSeries.Champions.Twitch
                 root.AddSubMenu(drawing);
             }
 
+            var noEOnMenu = new Menu("Don't E Options", "com.iseries.twitch.noe.");
+            {
+                foreach (var champ in HeroManager.Enemies)
+                {
+                    noEOnMenu.AddItem(
+                        new MenuItem(
+                            "com.iseries.twitch.noe." + champ.ChampionName.ToLowerInvariant(), champ.ChampionName).SetValue(false));
+                }
+                root.AddSubMenu(noEOnMenu);
+            }
+            
             root.AddToMainMenu();
         }
 

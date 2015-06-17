@@ -69,7 +69,7 @@ namespace iSeries.Champions.Twitch
             DamageIndicator.DamageToUnit = this.GetActualDamage;
             DamageIndicator.Enabled = true;
 
-            Spellbook.OnCastSpell += OnCastSpell;
+            Spellbook.OnCastSpell += this.OnCastSpell;
         }
 
         /// <summary>

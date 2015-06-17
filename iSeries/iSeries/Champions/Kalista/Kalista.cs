@@ -297,9 +297,7 @@ namespace iSeries.Champions.Kalista
             {
                 var qMinions = MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, 
-                    this.spells[SpellSlot.Q].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.NotAlly);
+                    this.spells[SpellSlot.Q].Range);
 
                 if (qMinions.Count < 1)
                 {
@@ -310,7 +308,11 @@ namespace iSeries.Champions.Kalista
                 {
                     var killable = 0;
 
-                    foreach (var collisionMinion in spells[SpellSlot.Q].GetCollision(ObjectManager.Player.ServerPosition.To2D(),new List<Vector2>(){source.ServerPosition.To2D()}))
+                    foreach (
+                        var collisionMinion in
+                            this.spells[SpellSlot.Q].GetCollision(
+                                ObjectManager.Player.ServerPosition.To2D(),
+                                new List<Vector2> { source.ServerPosition.To2D() }))
                     {
                         if (collisionMinion.Health < this.spells[SpellSlot.Q].GetDamage(collisionMinion))
                         {
@@ -325,7 +327,7 @@ namespace iSeries.Champions.Kalista
                     if (killable >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useQNum").Value
                         && !this.Player.IsWindingUp && !this.Player.IsDashing())
                     {
-                        this.spells[SpellSlot.Q].CastOnUnit(source);
+                        this.spells[SpellSlot.Q].Cast(source);
                     }
                 }
             }

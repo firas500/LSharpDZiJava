@@ -103,7 +103,7 @@ namespace iSeries.Champions.Draven
                 {
                     if (sender != null && sender.Name.Contains("Q_reticle_self"))
                     {
-                        if (this.GetItemValue<bool>("com.iseries.draven.combo.useW") && spells[SpellSlot.W].IsReady() && !HasWBuff() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(700f) > 0)
+                        if (this.GetItemValue<bool>("com.iseries.draven.combo.useW") && ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.draven.combo.wmana").Value && spells[SpellSlot.W].IsReady() && !HasWBuff() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(700f) > 0)
                         {
                             spells[SpellSlot.W].Cast();
                         }

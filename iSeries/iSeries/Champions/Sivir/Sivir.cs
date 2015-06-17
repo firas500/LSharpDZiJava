@@ -36,18 +36,15 @@ namespace iSeries.Champions.Sivir
     {
         #region Fields
         ////TODO
-        /// Adjust Spell Values
-        /// Implement R logic
-        /// Find W Buff?
+        /// Implement R logic ?
         /// 
         /// 
         /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
-        /// ////TODO Adjust Values
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
-                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q, 1100f) }, 
+                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q, 1250f) }, 
                                                                        { SpellSlot.W, new Spell(SpellSlot.W) }, 
                                                                        { SpellSlot.E, new Spell(SpellSlot.E) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 1000f) }
@@ -65,16 +62,15 @@ namespace iSeries.Champions.Sivir
             // Menu Generation
             this.CreateMenu = MenuGenerator.Generate;
 
-            // Spell initialization TODO
-            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
+            // Spell initialization
+            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 90f, 1350f, false, SkillshotType.SkillshotLine);
 
             // Useful shit
             Orbwalking.AfterAttack += (unit, target) =>
             {
                 if (spells[SpellSlot.W].IsReady() && GetItemValue<bool>("com.iseries.sivir.combo.useW") 
                     && target.IsValidTarget(ObjectManager.Player.AttackRange) 
-                    && ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.sivir.combo.wmana").Value
-                    && !ObjectManager.Player.HasBuff("WBuffGoesHere")) ////TODO W Buff goes here
+                    && ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.sivir.combo.wmana").Value)
                 {
                     spells[SpellSlot.W].Cast();
                 }

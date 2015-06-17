@@ -68,9 +68,15 @@ namespace iSeries.Champions.Ezreal
                     new MenuItem("com.iseries.ezreal.misc.hitchance", "Hitchance").SetValue(
                         new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));
                 misc.AddItem(new MenuItem("com.iseries.ezreal.misc.peel", "Peel With E").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.ezreal.misc.muramana", "Use Muramana").SetValue(true));
                 root.AddSubMenu(misc);
             }
 
+            var draw = new Menu("Misc Options", "com.iseries.ezreal.draw");
+            {
+                draw.AddItem(new MenuItem("com.iseries.ezreal.draw.q", "Draw Q").SetValue(false));
+                root.AddSubMenu(draw);
+            }
             root.AddToMainMenu();
         }
 

@@ -49,6 +49,7 @@ namespace iSeries.Champions.Ezreal
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 2500) }
                                                                    };
 
+        private float _lastCheckTick;
         #endregion
 
         #region Constructors and Destructors
@@ -87,6 +88,14 @@ namespace iSeries.Champions.Ezreal
                         this.spells[SpellSlot.Q].Cast((Obj_AI_Base)minion);
                     }
                 };
+            Orbwalking.OnAttack += (unit, target) =>
+            {
+                if (GetItemValue<bool>("com.iseries.ezreal.misc.muramana") && Items.HasItem(3042) &&
+                    Items.CanUseItem(3042) && !ObjectManager.Player.HasBuff("Muramana"))
+                {
+                    Items.UseItem(3042);
+                }
+            };
         }
 
         #endregion
@@ -147,10 +156,12 @@ namespace iSeries.Champions.Ezreal
             {
                 var target = TargetSelector.GetTargetNoCollision(this.spells[SpellSlot.Q]);
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
-                if (prediction.Hitchance >= this.GetHitchance() && target.IsValidTarget(this.spells[SpellSlot.Q].Range)
-                    && !this.HasSheen())
+                if (prediction.Hitchance >= this.GetHitchance() && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
                 {
-                    this.spells[SpellSlot.Q].Cast(target);
+                    if (!this.HasSheen() || target.Health + 15 < spells[SpellSlot.Q].GetDamage(target))
+                    {
+                        this.spells[SpellSlot.Q].Cast(target);
+                    }
                 }
             }
 
@@ -159,7 +170,10 @@ namespace iSeries.Champions.Ezreal
                 var target = TargetSelector.GetTarget(this.spells[SpellSlot.W].Range, TargetSelector.DamageType.Magical);
                 if (target.IsValidTarget(this.spells[SpellSlot.W].Range) && !this.HasSheen())
                 {
-                    this.spells[SpellSlot.W].Cast(target);
+                    if (!this.HasSheen() || target.Health + 15 < spells[SpellSlot.W].GetDamage(target))
+                    {
+                        this.spells[SpellSlot.W].Cast(target);
+                    }
                 }
             }
 
@@ -213,7 +227,10 @@ namespace iSeries.Champions.Ezreal
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.Q].Range, Color.DarkRed);
+            if (this.GetItemValue<bool>("com.iseries.ezreal.draw.q"))
+            {
+                Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.Q].Range, Color.DarkRed);
+            }
         }
 
         /// <summary>
@@ -333,6 +350,17 @@ namespace iSeries.Champions.Ezreal
                     .Where(hero => this.spells[SpellSlot.Q].IsReady()))
             {
                 this.spells[SpellSlot.Q].Cast(hero);
+            }
+
+            if (Environment.TickCount - _lastCheckTick < 3000)
+            {
+                return;
+            }
+            _lastCheckTick = Environment.TickCount;
+
+            if (GetItemValue<bool>("com.iseries.ezreal.misc.muramana") && Items.HasItem(3042) && Items.CanUseItem(3042) && ObjectManager.Player.HasBuff("Muramana"))
+            {
+                Items.UseItem(3042);
             }
         }
 

@@ -144,11 +144,12 @@ namespace iSeries.Champions
         /// </param>
         private void OnUpdateFunctions(EventArgs args)
         {
+           
             switch (this.GetChampionType())
             {
                 case ChampionType.Marksman:
                     // TODO more ad carry shit
-                    if (ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)))
+                    if (ObjectManager.Player.Level >= 6 && ObjectManager.Player.InShop() && !(Items.HasItem(3342) || Items.HasItem(3363)) && GetItemValue<bool>("com.iseries.autobuy"))
                     {
                         ObjectManager.Player.BuyItem(ItemId.Scrying_Orb_Trinket);
                     }

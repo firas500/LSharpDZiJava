@@ -132,7 +132,7 @@ namespace iSeries
         /// </summary>
         private static void GenerateBaseMenu()
         {
-            Variables.Menu = new Menu("iSeries: " + ObjectManager.Player.ChampionName, "com.iseries." + ObjectManager.Player.ChampionName, true);
+            Variables.Menu = new Menu("iSeries: " + ObjectManager.Player.ChampionName, "iseries." + ObjectManager.Player.ChampionName, true);
 
             var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
             TargetSelector.AddToMenu(targetSelectorMenu);
@@ -149,7 +149,7 @@ namespace iSeries
                         CheckAutoWindUp();
                     }
                 };
-
+            Variables.Menu.AddItem(new MenuItem("com.iseries.autobuy", "AutoBuy (Scrying Orb, etc)").SetValue(true));
             // TODO add an item manager / auto qss etc / some utils maybe?
             // Activator# Bik
         }

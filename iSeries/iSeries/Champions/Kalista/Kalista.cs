@@ -123,7 +123,7 @@ namespace iSeries.Champions.Kalista
         /// </returns>
         private float GetActualDamage(Obj_AI_Base target)
         {
-            if (target.HasBuff("ColossalStrength"))
+            if (target.HasBuff("FerociousHowl"))
             {
                 return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
             }

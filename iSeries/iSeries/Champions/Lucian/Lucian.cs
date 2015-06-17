@@ -204,7 +204,7 @@ namespace iSeries.Champions.Lucian
                     if (this.GetItemValue<bool>("com.iseries.lucian.combo.useW")
                         && target.IsValidTarget(this.spells[Spells.W].Range) && target != null && !this.HasPassive())
                     {
-                        if (this.spells[Spells.W].IsReady())
+                        if (this.spells[Spells.W].IsReady() && !target.IsDead)
                         {
                             this.spells[Spells.W].Cast(this.spells[Spells.W].GetPrediction(target).CastPosition);
                             this.spells[Spells.W].LastCastAttemptT = Environment.TickCount;

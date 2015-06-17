@@ -310,10 +310,7 @@ namespace iSeries.Champions.Kalista
                 {
                     var killable = 0;
 
-                    foreach (var collisionMinion in
-                        this.GetCollisionMinions(
-                            this.Player, 
-                            this.Player.ServerPosition.Extend(source.ServerPosition, this.spells[SpellSlot.Q].Range)))
+                    foreach (var collisionMinion in spells[SpellSlot.Q].GetCollision(ObjectManager.Player.ServerPosition.To2D(),new List<Vector2>(){source.ServerPosition.To2D()}))
                     {
                         if (collisionMinion.Health < this.spells[SpellSlot.Q].GetDamage(collisionMinion))
                         {

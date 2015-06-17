@@ -79,6 +79,12 @@ namespace iSeries.Champions.Kalista
                         return;
                     }
 
+                    var minionHealth = HealthPrediction.GetHealthPrediction(
+                        (Obj_AI_Base)minion,
+                        (int)
+                        (this.spells[SpellSlot.Q].Delay
+                         + (this.Player.Distance(minion) / this.spells[SpellSlot.Q].Speed) * 1000f + Game.Ping / 2f));
+
                     if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion)
                         && minion.Health <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
                     {

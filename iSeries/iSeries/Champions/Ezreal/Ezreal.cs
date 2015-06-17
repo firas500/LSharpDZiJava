@@ -81,16 +81,33 @@ namespace iSeries.Champions.Ezreal
                         return;
                     }
 
+                    var minionHealth = HealthPrediction.GetHealthPrediction(
+                        (Obj_AI_Base)minion,
+                        (int)
+                        (this.spells[SpellSlot.Q].Delay
+                         + (this.Player.Distance(minion) / this.spells[SpellSlot.Q].Speed) * 1000f + Game.Ping / 2f));
+
+                    if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion)
+                        && minionHealth <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
+
                     var pred = this.spells[SpellSlot.Q].GetPrediction((Obj_AI_Base)minion);
                     if (pred.Hitchance >= HitChance.Medium
-                        && this.spells[SpellSlot.Q].GetDamage((Obj_AI_Base)minion) > minion.Health)
+                        && this.spells[SpellSlot.Q].GetDamage((Obj_AI_Base)minion) > minionHealth)
                     {
                         this.spells[SpellSlot.Q].Cast((Obj_AI_Base)minion);
                     }
                 };
             Orbwalking.OnAttack += (unit, target) =>
             {
-                if (GetItemValue<bool>("com.iseries.ezreal.misc.muramana") && Items.HasItem(3042) &&
+                if (!unit.IsMe || !(target is Obj_AI_Hero))
+                {
+                    return;
+                }
+
+                if (this.GetItemValue<bool>("com.iseries.ezreal.misc.muramana") && Items.HasItem(3042) &&
                     Items.CanUseItem(3042) && !ObjectManager.Player.HasBuff("Muramana"))
                 {
                     Items.UseItem(3042);

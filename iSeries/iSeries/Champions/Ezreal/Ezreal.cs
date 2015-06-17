@@ -409,6 +409,7 @@ namespace iSeries.Champions.Ezreal
         /// </summary>
         private void OnUpdateFunctions()
         {
+            this.AutoHarass();
             foreach (var hero in
                 HeroManager.Enemies.Where(
                     x =>

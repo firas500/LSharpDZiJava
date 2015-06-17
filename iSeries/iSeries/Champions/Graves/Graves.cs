@@ -57,6 +57,18 @@ namespace iSeries.Champions.Graves
 
         #endregion
 
+        /// <summary>
+        ///     Initializes a new instance of the <see cref="Graves"/> class.
+        /// </summary>
+        public Graves()
+        {
+            this.CreateMenu = MenuGenerator.Generate;
+
+            this.spells[SpellSlot.Q].SetSkillshot(0.26f, 10f * 2 * (float)Math.PI / 180, 1950f, false, SkillshotType.SkillshotCone);
+            this.spells[SpellSlot.W].SetSkillshot(0.30f, 250f, 1650f, false, SkillshotType.SkillshotCircle);
+            this.spells[SpellSlot.R].SetSkillshot(0.22f, 150f, 2100, true, SkillshotType.SkillshotLine);
+        }
+
         #region Public Methods and Operators
 
         /// <summary>

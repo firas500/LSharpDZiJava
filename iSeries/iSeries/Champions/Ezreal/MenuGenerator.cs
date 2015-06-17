@@ -21,6 +21,7 @@
 // --------------------------------------------------------------------------------------------------------------------
 namespace iSeries.Champions.Ezreal
 {
+    using LeagueSharp;
     using LeagueSharp.Common;
 
     /// <summary>
@@ -48,6 +49,27 @@ namespace iSeries.Champions.Ezreal
 
             var harassMenu = new Menu("Harass Options", "com.iseries.ezreal.harass");
             {
+                var autoHarassMenu = new Menu("Auto Harass", "com.iseries.ezreal.harass.auto");
+                {
+                    var disabledChampions = new Menu("Disabled Champions", "com.iseries.ezreal.harass.auto.disable");
+                    {
+                        foreach (var hero in HeroManager.Enemies)
+                        {
+                            disabledChampions.AddItem(
+                                new MenuItem(
+                                    "com.iseries.ezreal.harass.auto.disable" + hero.ChampionName,
+                                    "Disable: " + hero.ChampionName).SetValue(false));
+                        }
+                        autoHarassMenu.AddSubMenu(disabledChampions);
+                    }
+                    autoHarassMenu.AddItem(
+                        new MenuItem("com.iseries.ereal.harass.auto.useQ", "Auto Harass Q").SetValue(false));
+                    autoHarassMenu.AddItem(
+                        new MenuItem("com.iseries.ereal.harass.auto.useQ", "Auto Harass W").SetValue(false));
+                    autoHarassMenu.AddItem(
+                        new MenuItem("com.iseries.ereal.harass.auto.autoHarass", "Enable Auto Harass").SetValue(false));
+                    harassMenu.AddSubMenu(autoHarassMenu);
+                }
                 harassMenu.AddItem(new MenuItem("com.iseries.ezreal.harass.useQ", "Use Q").SetValue(false));
                 harassMenu.AddItem(new MenuItem("com.iseries.ezreal.harass.useW", "Use W").SetValue(false));
                 root.AddSubMenu(harassMenu);

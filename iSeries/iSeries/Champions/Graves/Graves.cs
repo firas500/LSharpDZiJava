@@ -15,9 +15,6 @@
 //             You should have received a copy of the GNU General Public License
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
-// <summary>
-//   TODO The graves.
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 using SharpDX;
@@ -53,7 +50,10 @@ namespace iSeries.Champions.Graves
                                                                        // TODO Tweak this. It has 1000 range + 800 in cone
                                                                    };
 
-        private float LastCheckTick;
+        /// <summary>
+        ///     The last check tick
+        /// </summary>
+        private float lastCheckTick;
 
         #endregion
 
@@ -81,6 +81,7 @@ namespace iSeries.Champions.Graves
         /// TODO The unit.
         /// </param>
         /// <returns>
+        /// The <see cref="float"/>.
         /// </returns>
         public static float GetComboDamage(Dictionary<SpellSlot, Spell> spells, Obj_AI_Hero unit)
         {
@@ -117,50 +118,52 @@ namespace iSeries.Champions.Graves
             {
                 if (GetComboDamage(this.spells, target) > target.Health + 20)
                 {
-                    if (ObjectManager.Player.Distance(target) > spells[SpellSlot.Q].Range)
+                    if (ObjectManager.Player.Distance(target) > this.spells[SpellSlot.Q].Range)
                     {
-                        spells[SpellSlot.Q].From = ObjectManager.Player.ServerPosition.Extend(
-                            target.ServerPosition, spells[SpellSlot.E].Range);
-                        spells[SpellSlot.Q].RangeCheckFrom =
-                            ObjectManager.Player.ServerPosition.Extend(target.ServerPosition, spells[SpellSlot.E].Range);
-                        var QPrediction = spells[SpellSlot.Q].GetPrediction(target);
-                        if (QPrediction.Hitchance >= HitChance.High)
+                        this.spells[SpellSlot.Q].From = ObjectManager.Player.ServerPosition.Extend(
+                            target.ServerPosition, this.spells[SpellSlot.E].Range);
+                        this.spells[SpellSlot.Q].RangeCheckFrom =
+                            ObjectManager.Player.ServerPosition.Extend(target.ServerPosition, this.spells[SpellSlot.E].Range);
+                        var qPrediction = this.spells[SpellSlot.Q].GetPrediction(target);
+                        if (qPrediction.Hitchance >= HitChance.High)
                         {
-                            //EQR
-                            if (
-                                IsSafe(
+                            // EQR
+                            if (this.IsSafe(
                                     ObjectManager.Player.ServerPosition.Extend(
-                                        target.ServerPosition, spells[SpellSlot.E].Range)))
+                                        target.ServerPosition, this.spells[SpellSlot.E].Range)))
                             {
-                                spells[SpellSlot.E].Cast(
+                                this.spells[SpellSlot.E].Cast(
                                 ObjectManager.Player.ServerPosition.Extend(
-                                    target.ServerPosition, spells[SpellSlot.E].Range));
+                                    target.ServerPosition, this.spells[SpellSlot.E].Range));
                                 Utility.DelayAction.Add(
-                                    (int)(Game.Ping / 2f + 250 + 220), () =>
-                                    {
-                                        spells[SpellSlot.Q].Cast(QPrediction.CastPosition);
-                                        spells[SpellSlot.R].Cast(QPrediction.CastPosition);
-
+                                    (int)(Game.Ping / 2f + 250 + 220),
+                                    () =>
+                                        {
+                                            this.spells[SpellSlot.Q].Cast(qPrediction.CastPosition);
+                                            this.spells[SpellSlot.R].Cast(qPrediction.CastPosition);
                                     });
                             }
-                            spells[SpellSlot.Q].RangeCheckFrom = ObjectManager.Player.ServerPosition;
-                            spells[SpellSlot.Q].From = ObjectManager.Player.ServerPosition;
+
+                            this.spells[SpellSlot.Q].RangeCheckFrom = ObjectManager.Player.ServerPosition;
+                            this.spells[SpellSlot.Q].From = ObjectManager.Player.ServerPosition;
                         }
                         else
                         {
-                            var QPrediction2 = spells[SpellSlot.Q].GetPrediction(target);
-                            if (QPrediction2.Hitchance >= HitChance.High)
+                            var qPrediction2 = this.spells[SpellSlot.Q].GetPrediction(target);
+                            if (qPrediction2.Hitchance >= HitChance.High)
                             {
-                                spells[SpellSlot.Q].Cast(QPrediction2.CastPosition);
+                                this.spells[SpellSlot.Q].Cast(qPrediction2.CastPosition);
                                 Utility.DelayAction.Add(
-                                    (int) (Game.Ping / 2f + 250 + 100), () =>
-                                    {
-                                        if (IsSafe(ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 100)))
+                                    (int)(Game.Ping / 2f + 250 + 100),
+                                    () =>
                                         {
-                                            spells[SpellSlot.E].Cast(
+                                            if (this.IsSafe(ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 100)))
+                                        {
+                                            this.spells[SpellSlot.E].Cast(
                                             ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, 100));
                                         }
-                                        spells[SpellSlot.R].Cast(QPrediction2.CastPosition);
+
+                                        this.spells[SpellSlot.R].Cast(qPrediction2.CastPosition);
                                     });
                             }
                         }
@@ -200,13 +203,13 @@ namespace iSeries.Champions.Graves
         }
 
         /// <summary>
-        ///     Checks if a position is safe
+        /// Checks if a position is safe
         /// </summary>
         /// <param name="position">
-        ///     The Position
+        /// The Position
         /// </param>
         /// <returns>
-        ///     The <see cref="bool" />.
+        /// The <see cref="bool"/>.
         /// </returns>
         private bool IsSafe(Vector3 position)
         {
@@ -230,16 +233,16 @@ namespace iSeries.Champions.Graves
         }
 
         /// <summary>
-        ///     Gets Enemies near a position
+        /// Gets Enemies near a position
         /// </summary>
         /// <param name="position">
-        ///     The Position
+        /// The Position
         /// </param>
         /// <param name="range">
-        ///     The Range
+        /// The Range
         /// </param>
         /// <returns>
-        ///     a list of enemies
+        /// a list of enemies
         /// </returns>
         public static List<Obj_AI_Hero> GetLhEnemiesNearPosition(Vector3 position, float range)
         {
@@ -249,10 +252,10 @@ namespace iSeries.Champions.Graves
         }
 
         /// <summary>
-        ///     <c>OnDraw</c> subscribed event function.
+        /// <c>OnDraw</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnDraw(EventArgs args)
         {
@@ -279,20 +282,20 @@ namespace iSeries.Champions.Graves
         /// </summary>
         public override void OnLaneclear()
         {
-            var farmLocation = spells[SpellSlot.Q].GetLineFarmLocation(
-                MinionManager.GetMinions(ObjectManager.Player.ServerPosition, spells[SpellSlot.Q].Range));
+            var farmLocation = this.spells[SpellSlot.Q].GetLineFarmLocation(
+                MinionManager.GetMinions(ObjectManager.Player.ServerPosition, this.spells[SpellSlot.Q].Range));
             if (this.GetItemValue<bool>("com.iseries.graves.laneclear.useQ") &&
                 this.spells[SpellSlot.Q].IsReady() && farmLocation.MinionsHit > 2)
             {
-                spells[SpellSlot.Q].Cast(farmLocation.Position);
+                this.spells[SpellSlot.Q].Cast(farmLocation.Position);
             }
         }
 
         /// <summary>
-        ///     <c>OnUpdate</c> subscribed event function.
+        /// <c>OnUpdate</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnUpdate(EventArgs args)
         {
@@ -321,13 +324,14 @@ namespace iSeries.Champions.Graves
         /// </summary>
         private void OnUpdateFunctions()
         {
-            if (Environment.TickCount - LastCheckTick < 120)
+            if (Environment.TickCount - this.lastCheckTick < 120)
             {
                 return;
             }
-            LastCheckTick = Environment.TickCount;
-            if (GetItemValue<bool>("com.iseries.graves.misc.peel") 
-                && spells[SpellSlot.E].IsReady() 
+
+            this.lastCheckTick = Environment.TickCount;
+            if (this.GetItemValue<bool>("com.iseries.graves.misc.peel") 
+                && this.spells[SpellSlot.E].IsReady() 
                 && ObjectManager.Player.CountEnemiesInRange(380f) > 0 
                 && ObjectManager.Player.CountAlliesInRange(380f) == 0
                 && ObjectManager.Player.HealthPercent < 20)
@@ -335,11 +339,11 @@ namespace iSeries.Champions.Graves
                 var closest =
                     ObjectManager.Player.GetEnemiesInRange(380f).OrderBy(h => h.Distance(ObjectManager.Player)).First();
                 var extended = closest.ServerPosition.Extend(
-                    ObjectManager.Player.ServerPosition,
-                    ObjectManager.Player.Distance(closest) + spells[SpellSlot.E].Range);
-                if (IsSafe(extended))
+                    ObjectManager.Player.ServerPosition, 
+                    ObjectManager.Player.Distance(closest) + this.spells[SpellSlot.E].Range);
+                if (this.IsSafe(extended))
                 {
-                    spells[SpellSlot.E].Cast(extended);
+                    this.spells[SpellSlot.E].Cast(extended);
                 }
             }
         }

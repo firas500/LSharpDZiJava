@@ -276,6 +276,55 @@ namespace iSeries.Champions.Ezreal
         }
 
         /// <summary>
+        ///     Performs the Auto Harass
+        /// </summary>
+        public void AutoHarass()
+        {
+            if (!this.GetItemValue<bool>("com.iseries.ereal.harass.auto.autoHarass"))
+            {
+                return;
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.ereal.harass.auto.useQ") && this.spells[SpellSlot.Q].IsReady())
+            {
+                var target = TargetSelector.GetTargetNoCollision(this.spells[SpellSlot.Q]);
+
+                if (this.GetItemValue<bool>("com.iseries.ezreal.harass.auto.disable" + target.ChampionName))
+                {
+                    return;
+                }
+
+                if (target.IsValidTarget(this.spells[SpellSlot.Q].Range))
+                {
+                    var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
+                    if (prediction.Hitchance >= this.GetHitchance())
+                    {
+                        this.spells[SpellSlot.Q].Cast(prediction.CastPosition);
+                    }
+                }
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.ereal.harass.auto.useW") && this.spells[SpellSlot.W].IsReady())
+            {
+                var target = TargetSelector.GetTarget(this.spells[SpellSlot.W].Range, TargetSelector.DamageType.Magical);
+
+                if (this.GetItemValue<bool>("com.iseries.ezreal.harass.auto.disable" + target.ChampionName))
+                {
+                    return;
+                }
+
+                if (target.IsValidTarget(this.spells[SpellSlot.W].Range))
+                {
+                    var prediction = this.spells[SpellSlot.W].GetPrediction(target);
+                    if (prediction.Hitchance >= this.GetHitchance())
+                    {
+                        this.spells[SpellSlot.W].Cast(prediction.CastPosition);
+                    }
+                }
+            }
+        }
+
+        /// <summary>
         ///     <c>OnLaneclear</c> subscribed orb walker function.
         /// </summary>
         public override void OnLaneclear()

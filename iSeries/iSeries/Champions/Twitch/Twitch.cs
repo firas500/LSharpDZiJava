@@ -31,6 +31,7 @@ namespace iSeries.Champions.Twitch
 
     using LeagueSharp;
     using LeagueSharp.Common;
+    using LeagueSharp.Common.Data;
 
     /// <summary>
     ///     TODO The twitch.
@@ -67,6 +68,28 @@ namespace iSeries.Champions.Twitch
             // Damage Indicator
             DamageIndicator.DamageToUnit = this.GetActualDamage;
             DamageIndicator.Enabled = true;
+
+            Spellbook.OnCastSpell += OnCastSpell;
+        }
+
+        /// <summary>
+        ///     The on cast spell stuff
+        /// </summary>
+        /// <param name="sender">
+        ///     The Sender
+        /// </param>
+        /// <param name="args">
+        ///     The Args
+        /// </param>
+        private void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.R)
+            {
+                if (ItemData.Youmuus_Ghostblade.GetItem().IsReady())
+                {
+                    ItemData.Youmuus_Ghostblade.GetItem().Cast();
+                }
+            }
         }
 
         #endregion

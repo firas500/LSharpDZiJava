@@ -369,13 +369,13 @@ namespace iSeries.Champions.Ezreal
                 this.spells[SpellSlot.Q].Cast(hero);
             }
 
-            if (Environment.TickCount - _lastCheckTick < 3000)
+            if (Environment.TickCount - this._lastCheckTick < 3000)
             {
                 return;
             }
-            _lastCheckTick = Environment.TickCount;
+            this._lastCheckTick = Environment.TickCount;
 
-            if (GetItemValue<bool>("com.iseries.ezreal.misc.muramana") && Items.HasItem(3042) && Items.CanUseItem(3042) && ObjectManager.Player.HasBuff("Muramana"))
+            if (this.GetItemValue<bool>("com.iseries.ezreal.misc.muramana") && Items.HasItem(3042) && Items.CanUseItem(3042) && ObjectManager.Player.HasBuff("Muramana"))
             {
                 Items.UseItem(3042);
             }

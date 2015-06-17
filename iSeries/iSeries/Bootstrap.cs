@@ -19,20 +19,24 @@
 //   The bootstrap.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace iSeries
 {
+    #region
     using System;
     using System.Collections.Generic;
 
-    using iSeries.Champions.Draven;
-    using iSeries.Champions.Ezreal;
-    using iSeries.Champions.Graves;
-    using iSeries.Champions.Kalista;
-    using iSeries.Champions.Lucian;
-    using iSeries.Champions.Twitch;
+    using Champions.Draven;
+    using Champions.Ezreal;
+    using Champions.Graves;
+    using Champions.Kalista;
+    using Champions.Lucian;
+    using Champions.Twitch;
+    using Champions.Sivir;
 
     using LeagueSharp;
     using LeagueSharp.Common;
+    #endregion
 
     /// <summary>
     ///     The bootstrap.
@@ -56,7 +60,8 @@ namespace iSeries
                                                                                { "Lucian", () => new Lucian().Invoke() }, 
                                                                                { "Graves", () => new Graves().Invoke() }, 
                                                                                { "Draven", () => new Draven().Invoke() }, 
-                                                                               { "Twitch", () => new Twitch().Invoke() }
+                                                                               { "Twitch", () => new Twitch().Invoke() },
+                                                                               { "Sivir", () => new Sivir().Invoke() }, 
                                                                            };
 
         #endregion
@@ -64,7 +69,9 @@ namespace iSeries
         #region Methods
 
         /// <summary>
-        /// TODO The check auto wind up.
+        /// TODO The check auto wind up. 
+        /// 
+        /// This Broscience code iJava please ._.  -Asuna
         /// </summary>
         private static void CheckAutoWindUp()
         {
@@ -115,6 +122,7 @@ namespace iSeries
             {
                 GenerateBaseMenu();
                 ChampList[ObjectManager.Player.ChampionName]();
+                Console.WriteLine("iSeries ADC - By Asuna and Corey");
                 Console.WriteLine("Loaded: " + ObjectManager.Player.ChampionName);
             }
         }
@@ -143,6 +151,7 @@ namespace iSeries
                 };
 
             // TODO add an item manager / auto qss etc / some utils maybe?
+            // Activator# Bik
         }
 
         #endregion

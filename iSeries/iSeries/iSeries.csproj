@@ -75,6 +75,8 @@
     <Compile Include="Champions\Kalista\MenuGenerator.cs" />
     <Compile Include="Champions\Lucian\Lucian.cs" />
     <Compile Include="Champions\Lucian\MenuGenerator.cs" />
+    <Compile Include="Champions\Sivir\Sivir.cs" />
+    <Compile Include="Champions\Sivir\MenuGenerator.cs" />
     <Compile Include="Champions\Twitch\MenuGenerator.cs" />
     <Compile Include="Champions\Twitch\Twitch.cs" />
     <Compile Include="Champions\Utilities\DamageIndicator.cs" />

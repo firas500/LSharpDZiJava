@@ -65,7 +65,7 @@ namespace iSeries.Champions.Ezreal
                     autoHarassMenu.AddItem(
                         new MenuItem("com.iseries.ereal.harass.auto.useQ", "Auto Harass Q").SetValue(false));
                     autoHarassMenu.AddItem(
-                        new MenuItem("com.iseries.ereal.harass.auto.useQ", "Auto Harass W").SetValue(false));
+                        new MenuItem("com.iseries.ereal.harass.auto.useW", "Auto Harass W").SetValue(false));
                     autoHarassMenu.AddItem(
                         new MenuItem("com.iseries.ereal.harass.auto.autoHarass", "Enable Auto Harass").SetValue(false));
                     harassMenu.AddSubMenu(autoHarassMenu);

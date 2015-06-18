@@ -16,13 +16,13 @@
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Sivir
+namespace iSeries.Champions.Marksman.Sivir
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
 
-    using General;
+    using iSeries.General;
 
     using LeagueSharp;
     using LeagueSharp.Common;

@@ -17,9 +17,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-using SharpDX;
-
-namespace iSeries.Champions.Graves
+namespace iSeries.Champions.Marksman.Graves
 {
     using System;
     using System.Collections.Generic;
@@ -29,6 +27,8 @@ namespace iSeries.Champions.Graves
 
     using LeagueSharp;
     using LeagueSharp.Common;
+
+    using SharpDX;
 
     /// <summary>
     ///     TODO The graves.

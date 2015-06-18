@@ -19,7 +19,7 @@
 //   TODO The twitch.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Twitch
+namespace iSeries.Champions.Marksman.Twitch
 {
     using System;
     using System.Collections.Generic;
@@ -158,7 +158,7 @@ namespace iSeries.Champions.Twitch
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
                         x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && this.GetActualDamage(x) > this.GetActualHealth(x) && !GetItemValue<bool>("com.iseries.twitch.noe."+x.ChampionName.ToLowerInvariant()));
+                        && this.GetActualDamage(x) > this.GetActualHealth(x) && !this.GetItemValue<bool>("com.iseries.twitch.noe."+x.ChampionName.ToLowerInvariant()));
                 if (killableTarget != null)
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -171,7 +171,7 @@ namespace iSeries.Champions.Twitch
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
                         x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && x.GetBuffCount("twitchdeadlyvenom") == 6 && !GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                        && x.GetBuffCount("twitchdeadlyvenom") == 6 && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
                 if (killableTarget != null)
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -184,7 +184,7 @@ namespace iSeries.Champions.Twitch
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
                         x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && x.GetBuffCount("twitchdeadlyvenom") >= 4 && x.Distance(ObjectManager.Player) >= 1000f && !GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                        && x.GetBuffCount("twitchdeadlyvenom") >= 4 && x.Distance(ObjectManager.Player) >= 1000f && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
                 if (killableTarget != null)
                 {
                     this.spells[SpellSlot.E].Cast();

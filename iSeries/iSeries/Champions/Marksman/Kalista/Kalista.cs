@@ -19,7 +19,7 @@
 //   The given champion class
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Kalista
+namespace iSeries.Champions.Marksman.Kalista
 {
     using System;
     using System.Collections.Generic;

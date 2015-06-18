@@ -17,7 +17,7 @@
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
 
-namespace iSeries.Champions.Draven
+namespace iSeries.Champions.Marksman.Draven
 {
     using System;
     using System.Collections.Generic;
@@ -103,9 +103,9 @@ namespace iSeries.Champions.Draven
                 {
                     if (sender != null && sender.Name.Contains("Q_reticle_self"))
                     {
-                        if (this.GetItemValue<bool>("com.iseries.draven.combo.useW") && ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.draven.combo.wmana").Value && spells[SpellSlot.W].IsReady() && !HasWBuff() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(700f) > 0)
+                        if (this.GetItemValue<bool>("com.iseries.draven.combo.useW") && ObjectManager.Player.ManaPercent >= this.GetItemValue<Slider>("com.iseries.draven.combo.wmana").Value && this.spells[SpellSlot.W].IsReady() && !this.HasWBuff() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo && ObjectManager.Player.CountEnemiesInRange(700f) > 0)
                         {
-                            spells[SpellSlot.W].Cast();
+                            this.spells[SpellSlot.W].Cast();
                         }
 
                         this.axesList.RemoveAll(axe => axe.AxeObject.NetworkId == sender.NetworkId);

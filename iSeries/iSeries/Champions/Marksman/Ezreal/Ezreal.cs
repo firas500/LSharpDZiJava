@@ -19,7 +19,7 @@
 //   The Champion Class
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Ezreal
+namespace iSeries.Champions.Marksman.Ezreal
 {
     using System;
     using System.Collections.Generic;
@@ -175,7 +175,7 @@ namespace iSeries.Champions.Ezreal
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
                 if (prediction.Hitchance >= this.GetHitchance() && target.IsValidTarget(this.spells[SpellSlot.Q].Range))
                 {
-                    if (!this.HasSheen() || target.Health + 15 < spells[SpellSlot.Q].GetDamage(target))
+                    if (!this.HasSheen() || target.Health + 15 < this.spells[SpellSlot.Q].GetDamage(target))
                     {
                         this.spells[SpellSlot.Q].Cast(target);
                     }
@@ -187,7 +187,7 @@ namespace iSeries.Champions.Ezreal
                 var target = TargetSelector.GetTarget(this.spells[SpellSlot.W].Range, TargetSelector.DamageType.Magical);
                 if (target.IsValidTarget(this.spells[SpellSlot.W].Range) && !this.HasSheen())
                 {
-                    if (!this.HasSheen() || target.Health + 15 < spells[SpellSlot.W].GetDamage(target))
+                    if (!this.HasSheen() || target.Health + 15 < this.spells[SpellSlot.W].GetDamage(target))
                     {
                         this.spells[SpellSlot.W].Cast(target);
                     }

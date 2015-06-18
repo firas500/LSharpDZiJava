@@ -19,7 +19,7 @@
 //   The menu generator class.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Kalista
+namespace iSeries.Champions.Marksman.Kalista
 {
     using LeagueSharp.Common;
 

@@ -238,10 +238,13 @@ namespace iSeries.Champions.Draven
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            Render.Circle.DrawCircle(
-                Game.CursorPos, 
-                this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value, 
-                Color.Gold);
+            if (this.GetItemValue<bool>("com.iseries.draven.draw.drawCatch"))
+            {
+                Render.Circle.DrawCircle(
+                    Game.CursorPos,
+                    this.Menu.Item("com.iseries.draven.misc.catchrange").GetValue<Slider>().Value,
+                    Color.Gold);
+            }
 
             foreach (var reticle in this.axesList)
             {

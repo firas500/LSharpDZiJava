@@ -1,4 +1,4 @@
-﻿// --------------------------------------------------------------------------------------------------------------------
+// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Kalista.cs" company="LeagueSharp">
 //   Copyright (C) 2015 LeagueSharp
 //   
@@ -295,16 +295,8 @@ namespace iSeries.Champions.Kalista
         {
             if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useQ") && this.spells[SpellSlot.Q].IsReady())
             {
-                var qMinions = MinionManager.GetMinions(
-                    ObjectManager.Player.ServerPosition, 
-                    this.spells[SpellSlot.Q].Range);
-
-                if (qMinions.Count < 1)
-                {
-                    return;
-                }
-
-var qMinions = MinionManager.GetMinions(Player.ServerPosition, this.spells[SpellSlot.Q].Range, MinionTypes.All, MinionTeam.Enemy);
+               
+                var qMinions = MinionManager.GetMinions(Player.ServerPosition, this.spells[SpellSlot.Q].Range, MinionTypes.All, MinionTeam.Enemy);
 
                 if (qMinions.Count <= 0)
                 {

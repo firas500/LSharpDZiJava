@@ -213,17 +213,25 @@ namespace iSeries.Champions.Sivir
         /// </param>
         private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsEnemy && args.Target.IsMe && this.GetItemValue<bool>("com.iseries.sivir.misc.eshield"))
+            if (sender.IsEnemy && args.Target.IsMe && GetItemValue<bool>("com.iseries.sivir.misc.eshield"))
             {
-                var onlyIfKill = this.GetItemValue<bool>("com.iseries.sivir.misc.eshieldkill");
-                var willKill = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name)
-                               > ObjectManager.Player.Health + 15;
+                var onlyIfKill = GetItemValue<bool>("com.iseries.sivir.misc.eshieldkill");
+                var willKill = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name) > ObjectManager.Player.Health + 15;
                 if (onlyIfKill && !willKill)
                 {
                     return;
                 }
-
-                this.spells[SpellSlot.E].Cast();
+                if (willKill)
+                {
+                    spells[SpellSlot.E].Cast();
+                }
+                else
+                {
+                    if (!Orbwalking.IsAutoAttack(args.SData.Name))
+                    {
+                        spells[SpellSlot.E].Cast();
+                    }
+                }
             }
         }
 

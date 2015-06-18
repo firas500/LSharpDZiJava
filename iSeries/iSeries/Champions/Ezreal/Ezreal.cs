@@ -329,7 +329,14 @@ namespace iSeries.Champions.Ezreal
         /// </summary>
         public override void OnLaneclear()
         {
-            // idek...
+            if (this.GetItemValue<bool>("com.iseries.ezreal.laneclear.useQ") && this.spells[SpellSlot.Q].IsReady())
+            {
+                var killableMininon = MinionManager.GetMinions(this.spells[SpellSlot.Q].Range).FirstOrDefault(x => !x.Name.Contains("Ward") && x.IsValidTarget() && x.Health < this.spells[SpellSlot.Q].GetDamage(x));
+                if (killableMininon != null)
+                {
+                    this.spells[SpellSlot.Q].Cast(killableMininon);
+                }
+            }
         }
 
         /// <summary>

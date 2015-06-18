@@ -15,18 +15,19 @@
 //             You should have received a copy of the GNU General Public License
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
-// <summary>
-//   The given champion class
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace iSeries.Champions.Sivir
 {
     using System;
     using System.Collections.Generic;
     using System.Linq;
+
     using General;
+
     using LeagueSharp;
     using LeagueSharp.Common;
+
     using SharpDX;
 
     /// <summary>
@@ -35,10 +36,7 @@ namespace iSeries.Champions.Sivir
     internal class Sivir : Champion
     {
         #region Fields
-        ////TODO
-        /// Implement R logic ?
-        /// 
-        /// 
+
         /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
@@ -67,22 +65,23 @@ namespace iSeries.Champions.Sivir
 
             // Useful shit
             Orbwalking.AfterAttack += (unit, target) =>
-            {
-                if (spells[SpellSlot.W].IsReady() && GetItemValue<bool>("com.iseries.sivir.combo.useW") 
-                    && target.IsValidTarget(ObjectManager.Player.AttackRange) 
-                    && ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.sivir.combo.wmana").Value)
                 {
-                    spells[SpellSlot.W].Cast();
-                }
-            };
+                    if (this.spells[SpellSlot.W].IsReady() && this.GetItemValue<bool>("com.iseries.sivir.combo.useW")
+                        && target.IsValidTarget(ObjectManager.Player.AttackRange)
+                        && ObjectManager.Player.ManaPercent
+                        >= this.GetItemValue<Slider>("com.iseries.sivir.combo.wmana").Value)
+                    {
+                        this.spells[SpellSlot.W].Cast();
+                    }
+                };
 
             Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpellCast;
-
         }
 
         #endregion
 
         #region Public Methods and Operators
+
         /// <summary>
         ///     Gets the champion type
         /// </summary>
@@ -95,77 +94,89 @@ namespace iSeries.Champions.Sivir
         }
 
         /// <summary>
-        ///     <c>OnCombo</c> subscribed orbwalker function.
+        ///     <c>OnCombo</c> subscribed orb walker function.
         /// </summary>
         public override void OnCombo()
         {
-            var QTarget = TargetSelector.GetTarget(spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
-            if (QTarget.IsValidTarget() 
-                && spells[SpellSlot.Q].IsReady() 
-                && GetItemValue<bool>("com.iseries.sivir.combo.useQ"))
+            var qTarget = TargetSelector.GetTarget(this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
+            if (qTarget.IsValidTarget() && this.spells[SpellSlot.Q].IsReady()
+                && this.GetItemValue<bool>("com.iseries.sivir.combo.useQ"))
             {
-                spells[SpellSlot.Q].CastIfHitchanceEquals(QTarget, HitChance.VeryHigh);
+                this.spells[SpellSlot.Q].CastIfHitchanceEquals(qTarget, HitChance.VeryHigh);
             }
-
         }
 
         /// <summary>
-        ///     <c>OnDraw</c> subscribed event function.
+        /// <c>OnDraw</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            if (GetItemValue<bool>("com.iseries.sivir.draw.q"))
+            if (this.GetItemValue<bool>("com.iseries.sivir.draw.q"))
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.ServerPosition,spells[SpellSlot.Q].Range,System.Drawing.Color.Red);
+                Render.Circle.DrawCircle(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.Q].Range, 
+                    System.Drawing.Color.Red);
             }
         }
 
         /// <summary>
-        ///     <c>OnHarass</c> subscribed orbwalker function.
+        ///     <c>OnHarass</c> subscribed orb walker function.
         /// </summary>
         public override void OnHarass()
         {
-            var QTarget = TargetSelector.GetTarget(spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
-            if (QTarget.IsValidTarget() 
-                && spells[SpellSlot.Q].IsReady() 
-                && GetItemValue<bool>("com.iseries.sivir.harass.useQ") 
-                && ObjectManager.Player.ManaPercent > GetItemValue<Slider>("com.iseries.sivir.harass.qmana").Value)
+            var qTarget = TargetSelector.GetTarget(this.spells[SpellSlot.Q].Range, TargetSelector.DamageType.Physical);
+            if (qTarget.IsValidTarget() && this.spells[SpellSlot.Q].IsReady()
+                && this.GetItemValue<bool>("com.iseries.sivir.harass.useQ")
+                && ObjectManager.Player.ManaPercent > this.GetItemValue<Slider>("com.iseries.sivir.harass.qmana").Value)
             {
-                spells[SpellSlot.Q].CastIfHitchanceEquals(QTarget, HitChance.VeryHigh);
+                this.spells[SpellSlot.Q].CastIfHitchanceEquals(qTarget, HitChance.VeryHigh);
             }
-
         }
 
         /// <summary>
-        ///     <c>OnLaneclear</c> subscribed orbwalker function.
+        ///     <c>OnLaneclear</c> subscribed orb walker function.
         /// </summary>
         public override void OnLaneclear()
         {
-            if (GetItemValue<bool>("com.iseries.sivir.farm.useQ") &&
-                ObjectManager.Player.ManaPercent < GetItemValue<Slider>("com.iseries.sivir.farm.qmana").Value)
+            if (this.GetItemValue<bool>("com.iseries.sivir.farm.useQ")
+                && ObjectManager.Player.ManaPercent < this.GetItemValue<Slider>("com.iseries.sivir.farm.qmana").Value)
             {
-                var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, spells[SpellSlot.Q].Range);
-                var lineFarmLocation = spells[SpellSlot.Q].GetLineFarmLocation(minions);
+                var minions = MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.Q].Range);
+                var lineFarmLocation = this.spells[SpellSlot.Q].GetLineFarmLocation(minions);
                 if (lineFarmLocation.MinionsHit >= 3)
                 {
-                    spells[SpellSlot.Q].Cast(lineFarmLocation.Position);
+                    this.spells[SpellSlot.Q].Cast(lineFarmLocation.Position);
                 }
             }
         }
 
+        /// <summary>
+        /// TODO The under ally turret.
+        /// </summary>
+        /// <param name="position">
+        /// TODO The position.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
         public static bool UnderAllyTurret(Vector3 position)
         {
-            return ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950, false, position) && turret.IsAlly);
+            return
+                ObjectManager.Get<Obj_AI_Turret>()
+                    .Any(turret => turret.IsValidTarget(950, false, position) && turret.IsAlly);
         }
 
         /// <summary>
-        ///     <c>OnUpdate</c> subscribed event function.
+        /// <c>OnUpdate</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnUpdate(EventArgs args)
         {
@@ -192,25 +203,27 @@ namespace iSeries.Champions.Sivir
         #region Methods
 
         /// <summary>
-        ///     The on process spell function
+        /// The on process spell function
         /// </summary>
         /// <param name="sender">
-        ///     The Spell Sender
+        /// The Spell Sender
         /// </param>
         /// <param name="args">
-        ///     The Arguments
+        /// The Arguments
         /// </param>
         private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsEnemy && args.Target.IsMe && GetItemValue<bool>("com.iseries.sivir.misc.eshield"))
+            if (sender.IsEnemy && args.Target.IsMe && this.GetItemValue<bool>("com.iseries.sivir.misc.eshield"))
             {
-                var onlyIfKill = GetItemValue<bool>("com.iseries.sivir.misc.eshieldkill");
-                var willKill = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name) > ObjectManager.Player.Health + 15;
+                var onlyIfKill = this.GetItemValue<bool>("com.iseries.sivir.misc.eshieldkill");
+                var willKill = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name)
+                               > ObjectManager.Player.Health + 15;
                 if (onlyIfKill && !willKill)
                 {
                     return;
                 }
-                spells[SpellSlot.E].Cast();
+
+                this.spells[SpellSlot.E].Cast();
             }
         }
 
@@ -219,7 +232,6 @@ namespace iSeries.Champions.Sivir
         /// </summary>
         private void OnUpdateFunctions()
         {
-       
         }
 
         #endregion

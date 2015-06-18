@@ -304,17 +304,24 @@ namespace iSeries.Champions.Kalista
                     return;
                 }
 
-                foreach (var source in qMinions.Where(x => x.Health < this.spells[SpellSlot.Q].GetDamage(x)))
+var qMinions = MinionManager.GetMinions(Player.ServerPosition, this.spells[SpellSlot.Q].Range, MinionTypes.All, MinionTeam.Enemy);
+
+                if (qMinions.Count <= 0)
+                {
+                    return;
+                }
+
+                foreach (var source in qMinions.Where(x => x.Health <= this.spells[SpellSlot.Q].GetDamage(x)))
                 {
                     var killable = 0;
 
                     foreach (
-                        var collisionMinion in
-                            this.spells[SpellSlot.Q].GetCollision(
+                        var collisionMinion in this.spells[SpellSlot.Q].GetCollision(
                                 ObjectManager.Player.ServerPosition.To2D(),
-                                new List<Vector2> { source.ServerPosition.To2D() }))
+                                new List<Vector2> { source.ServerPosition.To2D() }, this.spells[SpellSlot.Q].Range))
+
                     {
-                        if (collisionMinion.Health < this.spells[SpellSlot.Q].GetDamage(collisionMinion))
+                        if (collisionMinion.Health <= this.spells[SpellSlot.Q].GetDamage(collisionMinion))
                         {
                             killable++;
                         }
@@ -327,7 +334,8 @@ namespace iSeries.Champions.Kalista
                     if (killable >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useQNum").Value
                         && !this.Player.IsWindingUp && !this.Player.IsDashing())
                     {
-                        this.spells[SpellSlot.Q].Cast(source);
+                        this.spells[SpellSlot.Q].Cast(source.ServerPosition);
+                        break;
                     }
                 }
             }

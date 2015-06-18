@@ -65,6 +65,12 @@ namespace iSeries.Champions.Draven
                 root.AddSubMenu(farmMenu);
             }
 
+            var drawing = new Menu("Drawing Options", "com.iseries.draven.draw");
+            {
+                drawing.AddItem(new MenuItem("com.iseries.draven.draw.drawCatch", "Draw Catch Range").SetValue(false));
+                root.AddSubMenu(drawing);
+            }
+
             var misc = new Menu("Misc Options", "com.iseries.draven.misc");
             {
                 misc.AddItem(new MenuItem("com.iseries.draven.misc.maxQ", "Max Axes").SetValue(new Slider(2, 1, 4)));

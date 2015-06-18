@@ -210,7 +210,17 @@ namespace iSeries.Champions.Sivir
                 {
                     return;
                 }
-                spells[SpellSlot.E].Cast();
+                if (willKill)
+                {
+                    spells[SpellSlot.E].Cast();
+                }
+                else
+                {
+                    if (!Orbwalking.IsAutoAttack(args.SData.Name))
+                    {
+                        spells[SpellSlot.E].Cast();
+                    }
+                }
             }
         }
 

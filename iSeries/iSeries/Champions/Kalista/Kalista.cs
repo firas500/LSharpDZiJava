@@ -1,4 +1,4 @@
-// --------------------------------------------------------------------------------------------------------------------
+﻿// --------------------------------------------------------------------------------------------------------------------
 // <copyright file="Kalista.cs" company="LeagueSharp">
 //   Copyright (C) 2015 LeagueSharp
 //   
@@ -80,7 +80,7 @@ namespace iSeries.Champions.Kalista
                     }
 
                     var minionHealth = HealthPrediction.GetHealthPrediction(
-                        (Obj_AI_Base)minion,
+                        (Obj_AI_Base)minion, 
                         (int)
                         (this.spells[SpellSlot.Q].Delay
                          + (this.Player.Distance(minion) / this.spells[SpellSlot.Q].Speed) * 1000f + Game.Ping / 2f));
@@ -103,6 +103,21 @@ namespace iSeries.Champions.Kalista
         #region Public Methods and Operators
 
         /// <summary>
+        /// TODO The under ally turret.
+        /// </summary>
+        /// <param name="position">
+        /// TODO The position.
+        /// </param>
+        /// <returns>
+        /// </returns>
+        public static bool UnderAllyTurret(Vector3 position)
+        {
+            return
+                ObjectManager.Get<Obj_AI_Turret>()
+                    .Any(turret => turret.IsValidTarget(950, false, position) && turret.IsAlly);
+        }
+
+        /// <summary>
         ///     Gets the targets health including the shield amount
         /// </summary>
         /// <param name="target">
@@ -116,30 +131,6 @@ namespace iSeries.Champions.Kalista
             return target.AttackShield > 0
                        ? target.Health + target.AttackShield
                        : target.MagicShield > 0 ? target.Health + target.MagicShield : target.Health;
-        }
-
-        /// <summary>
-        ///     Gets actual damage blah blah
-        /// </summary>
-        /// <param name="target">
-        ///     The target
-        /// </param>
-        /// <returns>
-        ///     The <see cref="float"/>.
-        /// </returns>
-        private float GetActualDamage(Obj_AI_Base target)
-        {
-            if (target.HasBuff("FerociousHowl"))
-            {
-                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
-            }
-
-            if (this.Player.HasBuff("summonerexhaust"))
-            {
-                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.4);
-            }
-
-            return this.spells[SpellSlot.E].GetDamage(target);
         }
 
         /// <summary>
@@ -209,8 +200,7 @@ namespace iSeries.Champions.Kalista
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
-                if (rendTarget != null
-                    && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget)
+                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget)
                     && !rendTarget.IsDead)
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -238,9 +228,9 @@ namespace iSeries.Champions.Kalista
                 if (stacks > 0)
                 {
                     Drawing.DrawText(
-                        Drawing.WorldToScreen(source.Position)[0] - 20,
-                        Drawing.WorldToScreen(source.Position)[1],
-                        Color.White,
+                        Drawing.WorldToScreen(source.Position)[0] - 20, 
+                        Drawing.WorldToScreen(source.Position)[1], 
+                        Color.White, 
                         "Stacks: " + stacks);
                 }
             }
@@ -295,8 +285,11 @@ namespace iSeries.Champions.Kalista
         {
             if (this.GetItemValue<bool>("com.iseries.kalista.laneclear.useQ") && this.spells[SpellSlot.Q].IsReady())
             {
-               
-                var qMinions = MinionManager.GetMinions(Player.ServerPosition, this.spells[SpellSlot.Q].Range, MinionTypes.All, MinionTeam.Enemy);
+                var qMinions = MinionManager.GetMinions(
+                    this.Player.ServerPosition, 
+                    this.spells[SpellSlot.Q].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.Enemy);
 
                 if (qMinions.Count <= 0)
                 {
@@ -307,11 +300,11 @@ namespace iSeries.Champions.Kalista
                 {
                     var killable = 0;
 
-                    foreach (
-                        var collisionMinion in this.spells[SpellSlot.Q].GetCollision(
-                                ObjectManager.Player.ServerPosition.To2D(),
-                                new List<Vector2> { source.ServerPosition.To2D() }, this.spells[SpellSlot.Q].Range))
-
+                    foreach (var collisionMinion in
+                        this.spells[SpellSlot.Q].GetCollision(
+                            ObjectManager.Player.ServerPosition.To2D(), 
+                            new List<Vector2> { source.ServerPosition.To2D() }, 
+                            this.spells[SpellSlot.Q].Range))
                     {
                         if (collisionMinion.Health <= this.spells[SpellSlot.Q].GetDamage(collisionMinion))
                         {
@@ -344,19 +337,15 @@ namespace iSeries.Champions.Kalista
                     MinionManager.GetMinions(this.spells[SpellSlot.E].Range)
                         .Count(
                             x =>
-                            this.spells[SpellSlot.E].CanCast(x) && x.Health <= this.spells[SpellSlot.E].GetDamage(x) && UnderAllyTurret(x.ServerPosition));
+                            this.spells[SpellSlot.E].CanCast(x) && x.Health <= this.spells[SpellSlot.E].GetDamage(x)
+                            && UnderAllyTurret(x.ServerPosition));
 
-                if ((minionkillcount >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useENum").Value) 
-                    || (GetItemValue<bool>("com.iseries.kalista.laneclear.esingle") && minionkillcountTurret > 0) )
+                if ((minionkillcount >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useENum").Value)
+                    || (this.GetItemValue<bool>("com.iseries.kalista.laneclear.esingle") && minionkillcountTurret > 0))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
             }
-        }
-        public static bool UnderAllyTurret(Vector3 position)
-        {
-            return
-                ObjectManager.Get<Obj_AI_Turret>().Any(turret => turret.IsValidTarget(950, false, position) && turret.IsAlly);
         }
 
         /// <summary>
@@ -388,6 +377,30 @@ namespace iSeries.Champions.Kalista
         #endregion
 
         #region Methods
+
+        /// <summary>
+        ///     Gets actual damage blah blah
+        /// </summary>
+        /// <param name="target">
+        ///     The target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float" />.
+        /// </returns>
+        private float GetActualDamage(Obj_AI_Base target)
+        {
+            if (target.HasBuff("FerociousHowl"))
+            {
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
+            }
+
+            if (this.Player.HasBuff("summonerexhaust"))
+            {
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.4);
+            }
+
+            return this.spells[SpellSlot.E].GetDamage(target);
+        }
 
         /// <summary>
         ///     TODO The get collision minions.
@@ -456,6 +469,28 @@ namespace iSeries.Champions.Kalista
         }
 
         /// <summary>
+        ///     Handles the Sentinel trick
+        /// </summary>
+        private void HandleSentinels()
+        {
+            if (!this.spells[SpellSlot.W].IsReady())
+            {
+                return;
+            }
+
+            if (this.GetItemValue<KeyBind>("com.iseries.kalista.misc.baronBug").Active
+                && ObjectManager.Player.Distance(SummonersRift.River.Baron) <= this.spells[SpellSlot.W].Range)
+            {
+                this.spells[SpellSlot.W].Cast(SummonersRift.River.Baron);
+            }
+            else if (this.GetItemValue<KeyBind>("com.iseries.kalista.misc.dragonBug").Active
+                     && ObjectManager.Player.Distance(SummonersRift.River.Dragon) <= this.spells[SpellSlot.W].Range)
+            {
+                this.spells[SpellSlot.W].Cast(SummonersRift.River.Dragon);
+            }
+        }
+
+        /// <summary>
         ///     The on process spell function
         /// </summary>
         /// <param name="sender">
@@ -502,9 +537,7 @@ namespace iSeries.Champions.Kalista
 
             foreach (var hero in
                 HeroManager.Enemies.Where(
-                    x =>
-                    this.spells[SpellSlot.E].IsInRange(x)
-                    && this.GetActualHealth(x) < this.GetActualDamage(x)))
+                    x => this.spells[SpellSlot.E].IsInRange(x) && this.GetActualHealth(x) < this.GetActualDamage(x)))
             {
                 if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
                     || hero.HasBuffOfType(BuffType.SpellShield))
@@ -547,29 +580,8 @@ namespace iSeries.Champions.Kalista
                     this.spells[SpellSlot.E].Cast();
                 }
             }
+
             this.HandleSentinels();
-        }
-
-        /// <summary>
-        ///     Handles the Sentinel trick
-        /// </summary>
-        private void HandleSentinels()
-        {
-            if (!this.spells[SpellSlot.W].IsReady())
-            {
-                return;
-            }
-
-            if (this.GetItemValue<KeyBind>("com.iseries.kalista.misc.baronBug").Active
-                && ObjectManager.Player.Distance(SummonersRift.River.Baron) <= this.spells[SpellSlot.W].Range)
-            {
-                this.spells[SpellSlot.W].Cast(SummonersRift.River.Baron);
-            }
-            else if (this.GetItemValue<KeyBind>("com.iseries.kalista.misc.dragonBug").Active
-                     && ObjectManager.Player.Distance(SummonersRift.River.Dragon) <= this.spells[SpellSlot.W].Range)
-            {
-                this.spells[SpellSlot.W].Cast(SummonersRift.River.Dragon);
-            }
         }
 
         #endregion

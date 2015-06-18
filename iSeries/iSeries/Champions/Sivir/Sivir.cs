@@ -16,7 +16,6 @@
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
 // --------------------------------------------------------------------------------------------------------------------
-
 namespace iSeries.Champions.Sivir
 {
     using System;
@@ -213,23 +212,24 @@ namespace iSeries.Champions.Sivir
         /// </param>
         private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
-            if (sender.IsEnemy && args.Target.IsMe && GetItemValue<bool>("com.iseries.sivir.misc.eshield"))
+            if (sender.IsEnemy && args.Target.IsMe && this.GetItemValue<bool>("com.iseries.sivir.misc.eshield"))
             {
-                var onlyIfKill = GetItemValue<bool>("com.iseries.sivir.misc.eshieldkill");
+                var onlyIfKill = this.GetItemValue<bool>("com.iseries.sivir.misc.eshieldkill");
                 var willKill = sender.GetSpellDamage(ObjectManager.Player, args.SData.Name) > ObjectManager.Player.Health + 15;
                 if (onlyIfKill && !willKill)
                 {
                     return;
                 }
+
                 if (willKill)
                 {
-                    spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].Cast();
                 }
                 else
                 {
                     if (!Orbwalking.IsAutoAttack(args.SData.Name))
                     {
-                        spells[SpellSlot.E].Cast();
+                        this.spells[SpellSlot.E].Cast();
                     }
                 }
             }

@@ -427,6 +427,24 @@ namespace iSeries.Champions.Marksman.Kalista
         }
 
         /// <summary>
+        ///     Gets the damage to baron
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float" />.
+        /// </returns>
+        private float GetBaronReduction(Obj_AI_Base target)
+        {
+            // Buff Name: barontarget or barondebuff
+            // Baron's Gaze: Baron Nashor takes 50% reduced damage from champions he's damaged in the last 15 seconds. 
+            return this.Player.HasBuff("barontarget")
+                       ? this.spells[SpellSlot.E].GetDamage(target) * 0.5f
+                       : this.spells[SpellSlot.E].GetDamage(target);
+        }
+
+        /// <summary>
         ///     TODO The get collision minions.
         /// </summary>
         /// <param name="source">
@@ -452,6 +470,23 @@ namespace iSeries.Champions.Marksman.Kalista
                 Collision.GetCollision(new List<Vector3> { targetPosition }, input)
                     .OrderBy(obj => obj.Distance(source))
                     .ToList();
+        }
+
+        /// <summary>
+        ///     Gets the damage to drake
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float" />.
+        /// </returns>
+        private float GetDragonReduction(Obj_AI_Base target)
+        {
+            return this.Player.HasBuff("s5test_dragonslayerbuff")
+                       ? this.spells[SpellSlot.E].GetDamage(target)
+                         + target.HPRegenRate / 2 * (.07f * target.GetBuffCount("s5test_dragonslayerbuff"))
+                       : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
         }
 
         /// <summary>
@@ -558,7 +593,8 @@ namespace iSeries.Champions.Marksman.Kalista
                             return;
                         }
 
-                        if (slot == attacker.GetSpellSlot("SummonerDot") && args.Target != null && args.Target.NetworkId == this.SoulBound.NetworkId)
+                        if (slot == attacker.GetSpellSlot("SummonerDot") && args.Target != null
+                            && args.Target.NetworkId == this.SoulBound.NetworkId)
                         {
                             this.instantDamage.Add(
                                 Game.Time + 2, 
@@ -663,7 +699,7 @@ namespace iSeries.Champions.Marksman.Kalista
 
             if (this.GetItemValue<bool>("com.iseries.kalista.misc.mobsteal") && this.spells[SpellSlot.E].IsReady())
             {
-                var bigMinion =
+                var normalMob =
                     MinionManager.GetMinions(
                         this.Player.ServerPosition, 
                         this.spells[SpellSlot.E].Range, 
@@ -672,9 +708,36 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
                             x =>
-                            x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) + (x.HPRegenRate / 2)
-                            && !x.Name.Contains("Mini"));
-                if (bigMinion != null && this.spells[SpellSlot.E].CanCast(bigMinion))
+                            x.IsValid && x.Health < this.GetActualDamage(x) && !x.Name.Contains("Mini")
+                            && x.Name.ToLowerInvariant() != "SRU_Dragon" && x.Name.ToLowerInvariant() != "SRU_Baron");
+
+                var baron =
+                    MinionManager.GetMinions(
+                        this.Player.ServerPosition, 
+                        this.spells[SpellSlot.E].Range, 
+                        MinionTypes.All, 
+                        MinionTeam.NotAlly, 
+                        MinionOrderTypes.MaxHealth)
+                        .FirstOrDefault(
+                            x =>
+                            x.IsValid && x.Health < this.GetBaronReduction(x)
+                            && x.Name.ToLowerInvariant() == "SRU_Baron");
+
+                var dragon =
+                    MinionManager.GetMinions(
+                        this.Player.ServerPosition, 
+                        this.spells[SpellSlot.E].Range, 
+                        MinionTypes.All, 
+                        MinionTeam.NotAlly, 
+                        MinionOrderTypes.MaxHealth)
+                        .FirstOrDefault(
+                            x =>
+                            x.IsValid && x.Health < this.GetDragonReduction(x)
+                            && x.Name.ToLowerInvariant() == "SRU_Dragon");
+
+                if ((normalMob != null && this.spells[SpellSlot.E].CanCast(normalMob))
+                    || (baron != null && this.spells[SpellSlot.E].CanCast(baron))
+                    || (dragon != null && this.spells[SpellSlot.E].CanCast(dragon)))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

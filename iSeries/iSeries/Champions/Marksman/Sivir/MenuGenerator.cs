@@ -16,17 +16,17 @@
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
 // <summary>
-//   TODO The menu generator.
+//   The menu generator class.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Graves
+namespace iSeries.Champions.Marksman.Sivir
 {
     using LeagueSharp.Common;
 
     /// <summary>
-    ///     TODO The menu generator.
+    ///     The menu generator class.
     /// </summary>
-    internal class MenuGenerator
+    public static class MenuGenerator
     {
         #region Public Methods and Operators
 
@@ -38,34 +38,40 @@ namespace iSeries.Champions.Graves
         /// </param>
         public static void Generate(Menu root)
         {
-            var comboMenu = new Menu("Combo Options", "com.iseries.graves.combo");
+            var comboMenu = new Menu("Combo Options", "com.iseries.sivir.combo");
             {
-                comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.useQ", "Use Q").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.useW", "Use W").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.useR", "Use R").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.graves.combo.minW", "Min. Enemies for W").SetValue(new Slider(2,1,5)));
+                comboMenu.AddItem(new MenuItem("com.iseries.sivir.combo.useQ", "Use Q").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.sivir.combo.useW", "Use W").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.sivir.combo.wmana", "W Mana").SetValue(new Slider(35)));
                 root.AddSubMenu(comboMenu);
             }
 
-            var harassMenu = new Menu("Harass Options", "com.iseries.graves.harass");
+            var harassMenu = new Menu("Harass Options", "com.iseries.sivir.harass");
             {
-                harassMenu.AddItem(new MenuItem("com.iseries.graves.harass.useQ", "Use Q").SetValue(false));
+                harassMenu.AddItem(new MenuItem("com.iseries.sivir.harass.useQ", "Use Q").SetValue(false));
+                harassMenu.AddItem(new MenuItem("com.iseries.sivir.harass.qmana", "Q Mana").SetValue(new Slider(35)));
                 root.AddSubMenu(harassMenu);
             }
 
-            var laneclearMenu = new Menu("Laneclear Options", "com.iseries.graves.laneclear");
+            var farmMenu = new Menu("Laneclear Options", "com.iseries.sivir.farm");
             {
-                laneclearMenu.AddItem(new MenuItem("com.iseries.graves.laneclear.useQ", "Use Q").SetValue(true));
-                root.AddSubMenu(laneclearMenu);
+                farmMenu.AddItem(new MenuItem("com.iseries.sivir.farm.useQ", "Q in Laneclear").SetValue(false));
+                farmMenu.AddItem(new MenuItem("com.iseries.sivir.farm.qmana", "Q Mana").SetValue(new Slider(35)));
+                root.AddSubMenu(farmMenu);
             }
 
-            var misc = new Menu("Misc Options", "com.iseries.graves.misc");
+            var misc = new Menu("Misc Options", "com.iseries.sivir.misc");
             {
-                misc.AddItem(
-                    new MenuItem("com.iseries.graves.misc.hitchance", "Hitchance").SetValue(
-                        new StringList(new[] { "Low", "Medium", "High", "Very High" }, 3)));
-                misc.AddItem(new MenuItem("com.iseries.graves.misc.peel", "Peel With E").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.sivir.misc.eshield", "E Shield Targetted Spells").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.sivir.misc.eshieldkill", "Only if they will kill").SetValue(false));
+
                 root.AddSubMenu(misc);
+            }
+
+            var draw = new Menu("Draw Options", "com.iseries.sivir.draw");
+            {
+                draw.AddItem(new MenuItem("com.iseries.sivir.draw.q", "Draw Q").SetValue(true));
+                root.AddSubMenu(draw);
             }
 
             root.AddToMainMenu();

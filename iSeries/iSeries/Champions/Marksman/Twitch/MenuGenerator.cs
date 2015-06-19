@@ -19,7 +19,7 @@
 //   TODO The menu generator.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Twitch
+namespace iSeries.Champions.Marksman.Twitch
 {
     using LeagueSharp.Common;
 

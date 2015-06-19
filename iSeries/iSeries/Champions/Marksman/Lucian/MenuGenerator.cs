@@ -19,7 +19,7 @@
 //   The menu generator class.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Lucian
+namespace iSeries.Champions.Marksman.Lucian
 {
     using LeagueSharp.Common;
 

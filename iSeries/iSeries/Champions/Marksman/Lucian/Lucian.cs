@@ -19,7 +19,7 @@
 //   The Champion Class
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Lucian
+namespace iSeries.Champions.Marksman.Lucian
 {
     using System;
     using System.Collections.Generic;

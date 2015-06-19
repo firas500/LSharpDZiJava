@@ -26,13 +26,13 @@ namespace iSeries
     using System;
     using System.Collections.Generic;
 
-    using Champions.Draven;
-    using Champions.Ezreal;
-    using Champions.Graves;
-    using Champions.Kalista;
-    using Champions.Lucian;
-    using Champions.Twitch;
-    using Champions.Sivir;
+    using iSeries.Champions.Marksman.Draven;
+    using iSeries.Champions.Marksman.Ezreal;
+    using iSeries.Champions.Marksman.Graves;
+    using iSeries.Champions.Marksman.Kalista;
+    using iSeries.Champions.Marksman.Lucian;
+    using iSeries.Champions.Marksman.Sivir;
+    using iSeries.Champions.Marksman.Twitch;
 
     using LeagueSharp;
     using LeagueSharp.Common;

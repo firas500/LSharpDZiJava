@@ -19,7 +19,7 @@
 //   The menu generator class.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Draven
+namespace iSeries.Champions.Marksman.Draven
 {
     using LeagueSharp.Common;
 

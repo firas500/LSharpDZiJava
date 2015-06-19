@@ -19,9 +19,8 @@
 //   TODO The menu generator.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-namespace iSeries.Champions.Ezreal
+namespace iSeries.Champions.Marksman.Ezreal
 {
-    using LeagueSharp;
     using LeagueSharp.Common;
 
     /// <summary>

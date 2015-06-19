@@ -44,6 +44,16 @@ namespace iSeries.Champions.Marksman.Kalista
         #region Fields
 
         /// <summary>
+        ///     Gets the incoming damage
+        /// </summary>
+        private readonly Dictionary<float, float> incomingDamage = new Dictionary<float, float>();
+
+        /// <summary>
+        ///     Gets the instant damage
+        /// </summary>
+        private readonly Dictionary<float, float> instantDamage = new Dictionary<float, float>();
+
+        /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
@@ -94,13 +104,33 @@ namespace iSeries.Champions.Marksman.Kalista
 
         #endregion
 
+        #region Public Properties
+
+        /// <summary>
+        ///     Gets the total incoming damage sum
+        /// </summary>
+        public float IncomingDamage
+        {
+            get
+            {
+                return this.incomingDamage.Sum(e => e.Value) + this.instantDamage.Sum(e => e.Value);
+            }
+        }
+
+        /// <summary>
+        ///     Gets the soul bound.
+        /// </summary>
+        public Obj_AI_Hero SoulBound { get; private set; }
+
+        #endregion
+
         #region Public Methods and Operators
 
         /// <summary>
-        /// TODO The under ally turret.
+        ///     TODO The under ally turret.
         /// </summary>
         /// <param name="position">
-        /// TODO The position.
+        ///     TODO The position.
         /// </param>
         /// <returns>
         /// </returns>
@@ -499,6 +529,53 @@ namespace iSeries.Champions.Marksman.Kalista
             {
                 Orbwalking.ResetAutoAttackTimer();
             }
+
+            if (sender.IsEnemy)
+            {
+                if (this.SoulBound != null && this.GetItemValue<bool>("com.iseries.kalista.misc.saveAlly"))
+                {
+                    if ((!(sender is Obj_AI_Hero) || args.SData.IsAutoAttack()) && args.Target != null
+                        && args.Target.NetworkId == this.SoulBound.NetworkId)
+                    {
+                        this.incomingDamage.Add(
+                            this.SoulBound.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed
+                            + Game.Time, 
+                            (float)sender.GetAutoAttackDamage(this.SoulBound));
+                    }
+                    else
+                    {
+                        var hero = sender as Obj_AI_Hero;
+                        if (hero == null)
+                        {
+                            return;
+                        }
+
+                        var attacker = hero;
+                        var slot = attacker.GetSpellSlot(args.SData.Name);
+
+                        if (slot == SpellSlot.Unknown)
+                        {
+                            return;
+                        }
+
+                        if (slot == attacker.GetSpellSlot("SummonerDot") && args.Target != null && args.Target.NetworkId == this.SoulBound.NetworkId)
+                        {
+                            this.instantDamage.Add(
+                                Game.Time + 2, 
+                                (float)attacker.GetSummonerSpellDamage(this.SoulBound, Damage.SummonerSpell.Ignite));
+                        }
+                        else if (slot.HasFlag(SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)
+                                 && ((args.Target != null && args.Target.NetworkId == this.SoulBound.NetworkId)
+                                     || args.End.Distance(this.SoulBound.ServerPosition, true)
+                                     < Math.Pow(args.SData.LineWidth, 2)))
+                        {
+                            this.instantDamage.Add(
+                                Game.Time + 2, 
+                                (float)attacker.GetSpellDamage(this.SoulBound, slot));
+                        }
+                    }
+                }
+            }
         }
 
         /// <summary>
@@ -506,6 +583,33 @@ namespace iSeries.Champions.Marksman.Kalista
         /// </summary>
         private void OnUpdateFunctions()
         {
+            if (this.SoulBound == null)
+            {
+                this.SoulBound =
+                    HeroManager.Allies.Find(
+                        h => h.Buffs.Any(b => b.Caster.IsMe && b.Name.Contains("kalistacoopstrikeally")));
+            }
+            else if (this.GetItemValue<bool>("com.iseries.kalista.misc.saveAlly") && this.spells[SpellSlot.R].IsReady())
+            {
+                if (this.SoulBound.HealthPercent < 5
+                    && (this.SoulBound.CountEnemiesInRange(500) > 0 || this.IncomingDamage > this.SoulBound.Health))
+                {
+                    this.spells[SpellSlot.R].Cast();
+                }
+            }
+
+            var itemsToRemove = this.incomingDamage.Where(entry => entry.Key < Game.Time).ToArray();
+            foreach (var item in itemsToRemove)
+            {
+                this.incomingDamage.Remove(item.Key);
+            }
+
+            itemsToRemove = this.instantDamage.Where(entry => entry.Key < Game.Time).ToArray();
+            foreach (var item in itemsToRemove)
+            {
+                this.instantDamage.Remove(item.Key);
+            }
+
             if (Variables.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo
                 && this.GetItemValue<bool>("com.iseries.kalista.misc.autoHarass"))
             {
@@ -568,7 +672,8 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
                             x =>
-                            x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) + (x.HPRegenRate / 2) && !x.Name.Contains("Mini"));
+                            x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) + (x.HPRegenRate / 2)
+                            && !x.Name.Contains("Mini"));
                 if (bigMinion != null && this.spells[SpellSlot.E].CanCast(bigMinion))
                 {
                     this.spells[SpellSlot.E].Cast();

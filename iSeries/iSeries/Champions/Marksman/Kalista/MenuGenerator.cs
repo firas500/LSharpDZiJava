@@ -76,6 +76,7 @@ namespace iSeries.Champions.Marksman.Kalista
                 misc.AddItem(
                     new MenuItem("com.iseries.kalista.misc.baronBug", "Baron Vision").SetValue(
                         new KeyBind("Y".ToCharArray()[0], KeyBindType.Press)));
+                misc.AddItem(new MenuItem("com.iseries.kalista.misc.saveAlly", "Save Ally With Ult").SetValue(false));
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.mobsteal", "Jungle Steal").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.lasthit", "Last Hit Assist").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.kalista.misc.autoHarass", "Auto E Harass").SetValue(true));

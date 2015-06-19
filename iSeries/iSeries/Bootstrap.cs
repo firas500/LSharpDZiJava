@@ -34,6 +34,7 @@ namespace iSeries
     using iSeries.Champions.Marksman.Kalista;
     using iSeries.Champions.Marksman.Lucian;
     using iSeries.Champions.Marksman.Sivir;
+    using iSeries.Champions.Marksman.Tristana;
     using iSeries.Champions.Marksman.Twitch;
 
     using LeagueSharp;
@@ -64,7 +65,8 @@ namespace iSeries
                                                                                { "Draven", () => new Draven().Invoke() }, 
                                                                                { "Twitch", () => new Twitch().Invoke() },
                                                                                { "Sivir", () => new Sivir().Invoke() }, 
-                                                                               { "Vayne", () => new Vayne().Invoke() }, 
+                                                                               { "Vayne", () => new Vayne().Invoke() },
+                                                                               { "Tristana", () => new Tristana().Invoke() }
                                                                            };
 
         #endregion

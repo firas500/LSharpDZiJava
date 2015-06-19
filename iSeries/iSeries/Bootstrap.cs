@@ -20,6 +20,8 @@
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
+using iSeries.Champions.Marksman.Vayne;
+
 namespace iSeries
 {
     #region
@@ -62,6 +64,7 @@ namespace iSeries
                                                                                { "Draven", () => new Draven().Invoke() }, 
                                                                                { "Twitch", () => new Twitch().Invoke() },
                                                                                { "Sivir", () => new Sivir().Invoke() }, 
+                                                                               { "Vayne", () => new Vayne().Invoke() }, 
                                                                            };
 
         #endregion

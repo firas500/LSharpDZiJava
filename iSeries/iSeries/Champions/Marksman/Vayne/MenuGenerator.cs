@@ -54,7 +54,7 @@ namespace iSeries.Champions.Marksman.Vayne
 
             var laneclearMenu = new Menu("Laneclear Options", "com.iseries.vayne.laneclear");
             {
-                laneclearMenu.AddItem(new MenuItem("soontm", "SOON™").SetValue(true));
+                laneclearMenu.AddItem(new MenuItem("com.iseries.vayne.laneclear.useQ", "Use Q").SetValue(false));
                 root.AddSubMenu(laneclearMenu);
             }
 
@@ -77,7 +77,7 @@ namespace iSeries.Champions.Marksman.Vayne
                 {
                     noEOnMenu.AddItem(
                         new MenuItem(
-                            "com.iseries.twitch.noe." + champ.ChampionName.ToLowerInvariant(), champ.ChampionName).SetValue(false));
+                            "com.iseries.vayne.noe." + champ.ChampionName.ToLowerInvariant(), champ.ChampionName).SetValue(false));
                 }
                 root.AddSubMenu(noEOnMenu);
             }

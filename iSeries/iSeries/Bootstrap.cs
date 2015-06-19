@@ -19,12 +19,10 @@
 //   The bootstrap.
 // </summary>
 // --------------------------------------------------------------------------------------------------------------------
-
-using iSeries.Champions.Marksman.Vayne;
-
 namespace iSeries
 {
     #region
+
     using System;
     using System.Collections.Generic;
 
@@ -36,9 +34,11 @@ namespace iSeries
     using iSeries.Champions.Marksman.Sivir;
     using iSeries.Champions.Marksman.Tristana;
     using iSeries.Champions.Marksman.Twitch;
+    using iSeries.Champions.Marksman.Vayne;
 
     using LeagueSharp;
     using LeagueSharp.Common;
+
     #endregion
 
     /// <summary>
@@ -47,11 +47,6 @@ namespace iSeries
     internal class Bootstrap
     {
         #region Static Fields
-
-        /// <summary>
-        /// TODO The orb walking.
-        /// </summary>
-        private static Menu orbwalking;
 
         /// <summary>
         ///     TODO The champ list.
@@ -63,20 +58,26 @@ namespace iSeries
                                                                                { "Lucian", () => new Lucian().Invoke() }, 
                                                                                { "Graves", () => new Graves().Invoke() }, 
                                                                                { "Draven", () => new Draven().Invoke() }, 
-                                                                               { "Twitch", () => new Twitch().Invoke() },
+                                                                               { "Twitch", () => new Twitch().Invoke() }, 
                                                                                { "Sivir", () => new Sivir().Invoke() }, 
-                                                                               { "Vayne", () => new Vayne().Invoke() },
-                                                                               { "Tristana", () => new Tristana().Invoke() }
+                                                                               { "Vayne", () => new Vayne().Invoke() }, 
+                                                                               {
+                                                                                   "Tristana", () => new Tristana().Invoke()
+                                                                               }
                                                                            };
+
+        /// <summary>
+        ///     TODO The orb walking.
+        /// </summary>
+        private static Menu orbwalking;
 
         #endregion
 
         #region Methods
 
         /// <summary>
-        /// TODO The check auto wind up. 
-        /// 
-        /// This Broscience code iJava please ._.  -Asuna
+        ///     TODO The check auto wind up.
+        ///     This Broscience code iJava please ._.  -Asuna
         /// </summary>
         private static void CheckAutoWindUp()
         {
@@ -105,6 +106,37 @@ namespace iSeries
         }
 
         /// <summary>
+        ///     Generates the base menu
+        /// </summary>
+        private static void GenerateBaseMenu()
+        {
+            Variables.Menu = new Menu(
+                "iSeries: " + ObjectManager.Player.ChampionName, 
+                "iseries." + ObjectManager.Player.ChampionName, 
+                true);
+
+            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
+            TargetSelector.AddToMenu(targetSelectorMenu);
+            Variables.Menu.AddSubMenu(targetSelectorMenu);
+
+            orbwalking = Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
+            Variables.Orbwalker = new Orbwalking.Orbwalker(orbwalking);
+
+            orbwalking.AddItem(new MenuItem("AutoWindup", "iSeries - Auto Windup").SetValue(false)).ValueChanged +=
+                (sender, argsEvent) =>
+                    {
+                        if (argsEvent.GetNewValue<bool>())
+                        {
+                            CheckAutoWindUp();
+                        }
+                    };
+            Variables.Menu.AddItem(new MenuItem("com.iseries.autobuy", "AutoBuy (Scrying Orb, etc)").SetValue(true));
+
+            // TODO add an item manager / auto qss etc / some utils maybe?
+            // Activator# Bik
+        }
+
+        /// <summary>
         ///     The main method.
         /// </summary>
         /// <param name="args">
@@ -130,33 +162,6 @@ namespace iSeries
                 Console.WriteLine("iSeries ADC - By Asuna and Corey");
                 Console.WriteLine("Loaded: " + ObjectManager.Player.ChampionName);
             }
-        }
-
-        /// <summary>
-        ///     Generates the base menu
-        /// </summary>
-        private static void GenerateBaseMenu()
-        {
-            Variables.Menu = new Menu("iSeries: " + ObjectManager.Player.ChampionName, "iseries." + ObjectManager.Player.ChampionName, true);
-
-            var targetSelectorMenu = new Menu("Target Selector", "Target Selector");
-            TargetSelector.AddToMenu(targetSelectorMenu);
-            Variables.Menu.AddSubMenu(targetSelectorMenu);
-
-            orbwalking = Variables.Menu.AddSubMenu(new Menu("Orbwalking", "Orbwalking"));
-            Variables.Orbwalker = new Orbwalking.Orbwalker(orbwalking);
-
-            orbwalking.AddItem(new MenuItem("AutoWindup", "iSeries - Auto Windup").SetValue(false)).ValueChanged +=
-                (sender, argsEvent) =>
-                {
-                    if (argsEvent.GetNewValue<bool>())
-                    {
-                        CheckAutoWindUp();
-                    }
-                };
-            Variables.Menu.AddItem(new MenuItem("com.iseries.autobuy", "AutoBuy (Scrying Orb, etc)").SetValue(true));
-            // TODO add an item manager / auto qss etc / some utils maybe?
-            // Activator# Bik
         }
 
         #endregion

@@ -79,12 +79,6 @@ namespace iSeries.Champions.Marksman.Kalista
                         return;
                     }
 
-                    var minionHealth = HealthPrediction.GetHealthPrediction(
-                        (Obj_AI_Base)minion, 
-                        (int)
-                        (this.spells[SpellSlot.Q].Delay
-                         + (this.Player.Distance(minion) / this.spells[SpellSlot.Q].Speed) * 1000f + Game.Ping / 2f));
-
                     if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion)
                         && minion.Health <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
                     {
@@ -574,7 +568,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
                             x =>
-                            x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("Mini"));
+                            x.IsValid && x.Health < this.spells[SpellSlot.E].GetDamage(x) + (x.HPRegenRate / 2) && !x.Name.Contains("Mini"));
                 if (bigMinion != null && this.spells[SpellSlot.E].CanCast(bigMinion))
                 {
                     this.spells[SpellSlot.E].Cast();

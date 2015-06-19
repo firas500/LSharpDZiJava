@@ -66,7 +66,9 @@ namespace iSeries.Champions.Sivir
             // Useful shit
             Orbwalking.AfterAttack += (unit, target) =>
                 {
-                    if (this.spells[SpellSlot.W].IsReady() && this.GetItemValue<bool>("com.iseries.sivir.combo.useW")
+                    if (this.spells[SpellSlot.W].IsReady()
+                        && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
+                        && this.GetItemValue<bool>("com.iseries.sivir.combo.useW")
                         && target.IsValidTarget(ObjectManager.Player.AttackRange)
                         && ObjectManager.Player.ManaPercent
                         >= this.GetItemValue<Slider>("com.iseries.sivir.combo.wmana").Value)

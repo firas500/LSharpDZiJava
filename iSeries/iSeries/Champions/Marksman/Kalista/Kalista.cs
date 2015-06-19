@@ -440,8 +440,8 @@ namespace iSeries.Champions.Marksman.Kalista
             // Buff Name: barontarget or barondebuff
             // Baron's Gaze: Baron Nashor takes 50% reduced damage from champions he's damaged in the last 15 seconds. 
             return this.Player.HasBuff("barontarget")
-                       ? this.spells[SpellSlot.E].GetDamage(target) * 0.5f
-                       : this.spells[SpellSlot.E].GetDamage(target);
+                       ? this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2 * 0.5f
+                       : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
         }
 
         /// <summary>

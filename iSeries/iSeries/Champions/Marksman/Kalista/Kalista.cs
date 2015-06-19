@@ -709,7 +709,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         .FirstOrDefault(
                             x =>
                             x.IsValid && x.Health < this.GetActualDamage(x) && !x.Name.Contains("Mini")
-                            && x.Name.ToLowerInvariant() != "SRU_Dragon" && x.Name.ToLowerInvariant() != "SRU_Baron");
+                            && !x.Name.Contains("Dragon") && !x.Name.Contains("Baron"));
 
                 var baron =
                     MinionManager.GetMinions(
@@ -721,7 +721,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         .FirstOrDefault(
                             x =>
                             x.IsValid && x.Health < this.GetBaronReduction(x)
-                            && x.Name.ToLowerInvariant() == "SRU_Baron");
+                            && x.Name.Contains("Baron"));
 
                 var dragon =
                     MinionManager.GetMinions(
@@ -733,7 +733,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         .FirstOrDefault(
                             x =>
                             x.IsValid && x.Health < this.GetDragonReduction(x)
-                            && x.Name.ToLowerInvariant() == "SRU_Dragon");
+                            && x.Name.Contains("Dragon"));
 
                 if ((normalMob != null && this.spells[SpellSlot.E].CanCast(normalMob))
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))

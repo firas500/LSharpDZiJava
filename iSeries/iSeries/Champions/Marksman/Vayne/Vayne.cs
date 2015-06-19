@@ -54,7 +54,6 @@ namespace iSeries.Champions.Marksman.Vayne
         public override ChampionType GetChampionType()
         {
             return ChampionType.Marksman;
-            
         }
 
         /// <summary>

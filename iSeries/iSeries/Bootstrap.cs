@@ -61,9 +61,7 @@ namespace iSeries
                                                                                { "Twitch", () => new Twitch().Invoke() }, 
                                                                                { "Sivir", () => new Sivir().Invoke() }, 
                                                                                { "Vayne", () => new Vayne().Invoke() }, 
-                                                                               {
-                                                                                   "Tristana", () => new Tristana().Invoke()
-                                                                               }
+                                                                               { "Tristana", () => new Tristana().Invoke() },
                                                                            };
 
         /// <summary>

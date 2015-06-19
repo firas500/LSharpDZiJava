@@ -79,6 +79,8 @@
     <Compile Include="Champions\Marksman\Sivir\MenuGenerator.cs" />
     <Compile Include="Champions\Marksman\Twitch\MenuGenerator.cs" />
     <Compile Include="Champions\Marksman\Twitch\Twitch.cs" />
+    <Compile Include="Champions\Marksman\Vayne\MenuGenerator.cs" />
+    <Compile Include="Champions\Marksman\Vayne\Vayne.cs" />
     <Compile Include="Champions\Utilities\DamageIndicator.cs" />
     <Compile Include="Champions\Utilities\PositionHelper.cs" />
     <Compile Include="General\ChampionType.cs" />

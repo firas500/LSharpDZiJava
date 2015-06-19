@@ -59,19 +59,7 @@ namespace iSeries.Champions.Marksman.Tristana
             DamageIndicator.DamageToUnit = this.GetComboDamage;
             DamageIndicator.Enabled = true;
 
-            Orbwalking.AfterAttack += (unit, target) =>
-                {
-                    if (!unit.IsMe || !this.spells[SpellSlot.Q].IsReady() || !(target is Obj_AI_Hero))
-                    {
-                        return;
-                    }
-
-                    if (this.GetItemValue<bool>("com.iseries.tristana.useQ") && target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(target))
-                        && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-                    {
-                        this.spells[SpellSlot.Q].Cast();
-                    }
-                };
+            Orbwalking.AfterAttack += this.OnAfterAttack;
 
             AntiGapcloser.OnEnemyGapcloser += gapcloser =>
                 {
@@ -93,6 +81,26 @@ namespace iSeries.Champions.Marksman.Tristana
                         this.spells[SpellSlot.R].CastOnUnit(sender);
                     }
                 };
+        }
+
+        /// <summary>
+        ///     The After Attack Event
+        /// </summary>
+        /// <param name="unit">
+        ///     The Unit
+        /// </param>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        private void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            if (this.spells[SpellSlot.Q].IsReady()
+                        && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
+                        && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ")
+                        && target.IsValidTarget(ObjectManager.Player.AttackRange))
+            {
+                this.spells[SpellSlot.Q].Cast();
+            }
         }
 
         #endregion

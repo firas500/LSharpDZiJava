@@ -206,7 +206,7 @@ namespace iSeries.Champions.Marksman.Lucian
                     {
                         if (this.spells[Spells.W].IsReady() && !target.IsDead)
                         {
-                            this.spells[Spells.W].Cast(this.spells[Spells.W].GetPrediction(target).CastPosition);
+                            this.spells[Spells.W].Cast(target);
                             this.spells[Spells.W].LastCastAttemptT = Environment.TickCount;
                         }
                     }

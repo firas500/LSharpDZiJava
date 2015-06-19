@@ -15,15 +15,14 @@
 //             You should have received a copy of the GNU General Public License
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
-// <summary>
-// Vayne!
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
 
 using System.Collections.Generic;
 using System.Drawing;
 using System.Linq;
+
 using iSeries.Champions.Utilities;
+
 using LeagueSharp;
 using LeagueSharp.Common;
 
@@ -45,9 +44,9 @@ namespace iSeries.Champions.Marksman.Vayne
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
-                                                                        { SpellSlot.Q, new Spell(SpellSlot.Q) },
-                                                                        { SpellSlot.W, new Spell(SpellSlot.W) },
-                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 590f) },
+                                                                        { SpellSlot.Q, new Spell(SpellSlot.Q) }, 
+                                                                        { SpellSlot.W, new Spell(SpellSlot.W) }, 
+                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 590f) }, 
                                                                         { SpellSlot.R, new Spell(SpellSlot.R) }
                                                                    };
 
@@ -62,65 +61,77 @@ namespace iSeries.Champions.Marksman.Vayne
         {
             this.CreateMenu = MenuGenerator.Generate;
 
-            spells[SpellSlot.E].SetTargetted(0.25f, 2000f);
+            this.spells[SpellSlot.E].SetTargetted(0.25f, 2000f);
 
-            Orbwalking.AfterAttack += Orbwalking_AfterAttack;
+            Orbwalking.AfterAttack += this.Orbwalking_AfterAttack;
 
             AntiGapcloser.OnEnemyGapcloser += gapcloser =>
             {
-                if (GetItemValue<bool>("com.iseries.vayne.misc.gapcloser"))
+                if (this.GetItemValue<bool>("com.iseries.vayne.misc.gapcloser"))
                 {
-                      if (gapcloser.Sender.IsValidTarget(spells[SpellSlot.E].Range) && gapcloser.End.Distance(ObjectManager.Player.ServerPosition) <= 400f)
+                      if (gapcloser.Sender.IsValidTarget(this.spells[SpellSlot.E].Range) && gapcloser.End.Distance(ObjectManager.Player.ServerPosition) <= 400f)
                        {
-                            spells[SpellSlot.E].Cast(gapcloser.Sender);
+                           this.spells[SpellSlot.E].Cast(gapcloser.Sender);
                        }
                 }
             };
 
             Interrupter2.OnInterruptableTarget += (sender, args) =>
             {
-                if (GetItemValue<bool>("dz191.vhr.misc.general.interrupt"))
+                if (this.GetItemValue<bool>("dz191.vhr.misc.general.interrupt"))
                 {
-                    if (args.DangerLevel == Interrupter2.DangerLevel.High && sender.IsValidTarget(spells[SpellSlot.E].Range))
+                    if (args.DangerLevel == Interrupter2.DangerLevel.High && sender.IsValidTarget(this.spells[SpellSlot.E].Range))
                     {
-                        spells[SpellSlot.E].Cast(sender);
+                        this.spells[SpellSlot.E].Cast(sender);
                     }
                 }
             };
         }
 
-        public void Orbwalking_AfterAttack(LeagueSharp.AttackableUnit unit, LeagueSharp.AttackableUnit target)
+        /// <summary>
+        /// The After
+        /// </summary>
+        /// <param name="unit">
+        /// The Unit
+        /// </param>
+        /// <param name="target">
+        /// The Target
+        /// </param>
+        public void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            //com.iseries.vayne.combo.useQ"
-            if (!spells[SpellSlot.Q].IsReady() || !(target is Obj_AI_Hero) || !(target.IsValidTarget()))
+            // com.iseries.vayne.combo.useQ"
+            if (!this.spells[SpellSlot.Q].IsReady() || !(target is Obj_AI_Hero) || !target.IsValidTarget())
             {
                 return;
             }
+
             var orbwalkerTarget = (Obj_AI_Hero) target;
-            var tumbleEnd = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, spells[SpellSlot.Q].Range);
+            var tumbleEnd = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, this.spells[SpellSlot.Q].Range);
 
             switch (Variables.Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    if (GetItemValue<bool>("com.iseries.vayne.combo.useQ") && PositionHelper.IsSafePosition(tumbleEnd) && tumbleEnd.Distance(orbwalkerTarget.ServerPosition) <= 570f)
+                    if (this.GetItemValue<bool>("com.iseries.vayne.combo.useQ") && PositionHelper.IsSafePosition(tumbleEnd) && tumbleEnd.Distance(orbwalkerTarget.ServerPosition) <= 570f)
                     {
-                        spells[SpellSlot.Q].Cast(tumbleEnd);
+                        this.spells[SpellSlot.Q].Cast(tumbleEnd);
                     }
+
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
-                    if (GetItemValue<bool>("com.iseries.vayne.harass.useQ") && PositionHelper.IsSafePosition(tumbleEnd) && tumbleEnd.Distance(orbwalkerTarget.ServerPosition) <= 570f)
+                    if (this.GetItemValue<bool>("com.iseries.vayne.harass.useQ") && PositionHelper.IsSafePosition(tumbleEnd) && tumbleEnd.Distance(orbwalkerTarget.ServerPosition) <= 570f)
                     {
-                        spells[SpellSlot.Q].Cast(tumbleEnd);
-                        Utility.DelayAction.Add((int)(Game.Ping/2f + 250 + 325), Orbwalking.ResetAutoAttackTimer);
+                        this.spells[SpellSlot.Q].Cast(tumbleEnd);
+                        Utility.DelayAction.Add((int)(Game.Ping / 2f + 250 + 325), Orbwalking.ResetAutoAttackTimer);
                     }
+
                     break;
                 case Orbwalking.OrbwalkingMode.LaneClear:
-                    if (spells[SpellSlot.Q].IsReady() && GetItemValue<bool>("com.iseries.vayne.laneclear.useQ"))
+                    if (this.spells[SpellSlot.Q].IsReady() && this.GetItemValue<bool>("com.iseries.vayne.laneclear.useQ"))
                     {
                         var minionsInRange =
-                            MinionManager.GetMinions(ObjectManager.Player.ServerPosition, Player.AttackRange)
+                            MinionManager.GetMinions(ObjectManager.Player.ServerPosition, this.Player.AttackRange)
                                 .FindAll(
-                                    m => m.Health <= Player.GetAutoAttackDamage(m) + spells[SpellSlot.Q].GetDamage(m))
+                                    m => m.Health <= this.Player.GetAutoAttackDamage(m) + this.spells[SpellSlot.Q].GetDamage(m))
                                 .ToList();
                         if (minionsInRange.Any())
                         {
@@ -128,15 +139,16 @@ namespace iSeries.Champions.Marksman.Vayne
                             {
                                 var firstMinion = minionsInRange.OrderBy(m => m.HealthPercent).First();
                                 var endPosition = ObjectManager.Player.ServerPosition.Extend(
-                                    firstMinion.ServerPosition, spells[SpellSlot.Q].Range);
+                                    firstMinion.ServerPosition, this.spells[SpellSlot.Q].Range);
                                 if (PositionHelper.IsSafePosition(endPosition))
                                 {
-                                    spells[SpellSlot.Q].Cast(firstMinion.ServerPosition);
+                                    this.spells[SpellSlot.Q].Cast(firstMinion.ServerPosition);
                                     Variables.Orbwalker.ForceTarget(firstMinion);
                                 }
                             }
                         }
                     }
+
                     break;
             }
         }
@@ -157,25 +169,25 @@ namespace iSeries.Champions.Marksman.Vayne
         /// </summary>
         public override void OnCombo()
         {
-            if (!spells[SpellSlot.E].IsReady() || !GetItemValue<bool>("com.iseries.vayne.combo.useE"))
+            if (!this.spells[SpellSlot.E].IsReady() || !this.GetItemValue<bool>("com.iseries.vayne.combo.useE"))
             {
                 return;
             }
 
-            foreach (var target in HeroManager.Enemies.Where(h => h.IsValidTarget(spells[SpellSlot.E].Range) 
+            foreach (var target in HeroManager.Enemies.Where(h => h.IsValidTarget(this.spells[SpellSlot.E].Range) 
                 && !h.HasBuffOfType(BuffType.SpellShield) 
                 && !h.HasBuffOfType(BuffType.SpellImmunity)
-                && !GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
+                && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
             {
-                var pushDistance = 400;
+                const int PushDistance = 410;
                 var targetPosition = target.ServerPosition;
-                var endPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -pushDistance);
-                for (var i = 0; i < pushDistance; i += (int)target.BoundingRadius)
+                var endPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -PushDistance);
+                for (var i = 0; i < PushDistance; i += (int)target.BoundingRadius)
                 {
                     var extendedPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -i);
-                    if ((extendedPosition.IsWall()) || endPosition.IsWall())
+                    if (extendedPosition.IsWall() || endPosition.IsWall())
                     {
-                        spells[SpellSlot.E].Cast(target);
+                        this.spells[SpellSlot.E].Cast(target);
                         break;
                     }
                 }
@@ -183,16 +195,16 @@ namespace iSeries.Champions.Marksman.Vayne
         }
 
         /// <summary>
-        ///     <c>OnDraw</c> subscribed event function.
+        /// <c>OnDraw</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            if (GetItemValue<bool>("com.iseries.twitch.vayne.drawE"))
+            if (this.GetItemValue<bool>("com.iseries.twitch.vayne.drawE"))
             {
-                Render.Circle.DrawCircle(ObjectManager.Player.Position,spells[SpellSlot.E].Range,Color.Red);
+                Render.Circle.DrawCircle(ObjectManager.Player.Position, this.spells[SpellSlot.E].Range, Color.Red);
             }
         }
 
@@ -201,15 +213,15 @@ namespace iSeries.Champions.Marksman.Vayne
         /// </summary>
         public override void OnHarass()
         {
-            if (!spells[SpellSlot.E].IsReady() || !GetItemValue<bool>("com.iseries.vayne.harass.useE"))
+            if (!this.spells[SpellSlot.E].IsReady() || !this.GetItemValue<bool>("com.iseries.vayne.harass.useE"))
             {
                 return;
             }
 
-            foreach (var target in HeroManager.Enemies.Where(h => h.IsValidTarget(spells[SpellSlot.E].Range) 
+            foreach (var target in HeroManager.Enemies.Where(h => h.IsValidTarget(this.spells[SpellSlot.E].Range) 
                 && !h.HasBuffOfType(BuffType.SpellShield) 
                 && !h.HasBuffOfType(BuffType.SpellImmunity) 
-                && !GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
+                && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
             {
                 var pushDistance = 400;
                 var targetPosition = target.ServerPosition;
@@ -217,9 +229,9 @@ namespace iSeries.Champions.Marksman.Vayne
                 for (var i = 0; i < pushDistance; i += (int)target.BoundingRadius)
                 {
                     var extendedPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -i);
-                    if ((extendedPosition.IsWall()) || endPosition.IsWall())
+                    if (extendedPosition.IsWall() || endPosition.IsWall())
                     {
-                        spells[SpellSlot.E].Cast(target);
+                        this.spells[SpellSlot.E].Cast(target);
                         break;
                     }
                 }
@@ -235,10 +247,10 @@ namespace iSeries.Champions.Marksman.Vayne
         }
 
         /// <summary>
-        ///     <c>OnUpdate</c> subscribed event function.
+        /// <c>OnUpdate</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnUpdate(EventArgs args)
         {

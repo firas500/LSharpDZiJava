@@ -142,7 +142,7 @@ namespace iSeries.Champions
         /// <param name="args">
         ///     The event data
         /// </param>
-        private void OnUpdateFunctions(EventArgs args)
+        protected void OnUpdateFunctions(EventArgs args)
         {
            
             switch (this.GetChampionType())

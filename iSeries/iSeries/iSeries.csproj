@@ -77,6 +77,8 @@
     <Compile Include="Champions\Marksman\Lucian\MenuGenerator.cs" />
     <Compile Include="Champions\Marksman\Sivir\Sivir.cs" />
     <Compile Include="Champions\Marksman\Sivir\MenuGenerator.cs" />
+    <Compile Include="Champions\Marksman\Tristana\MenuGenerator.cs" />
+    <Compile Include="Champions\Marksman\Tristana\Tristana.cs" />
     <Compile Include="Champions\Marksman\Twitch\MenuGenerator.cs" />
     <Compile Include="Champions\Marksman\Twitch\Twitch.cs" />
     <Compile Include="Champions\Marksman\Vayne\MenuGenerator.cs" />

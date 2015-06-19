@@ -370,19 +370,17 @@ namespace iSeries.Champions.Marksman.Lucian
         {
             double shots = 0;
 
-            if (this.spells[Spells.R].Level == 1)
+            switch (this.spells[Spells.R].Level)
             {
-                shots = 7.5 + 7.5 * (this.Player.AttackSpeedMod - .6);
-            }
-
-            if (this.spells[Spells.R].Level == 2)
-            {
-                shots = 7.5 + 9 * (this.Player.AttackSpeedMod - .6);
-            }
-
-            if (this.spells[Spells.R].Level == 3)
-            {
-                shots = 7.5 + 10.5 * (this.Player.AttackSpeedMod - .6);
+                case 1:
+                    shots = 7.5 + 7.5 * (this.Player.AttackSpeedMod - .6);
+                    break;
+                case 2:
+                    shots = 7.5 + 9 * (this.Player.AttackSpeedMod - .6);
+                    break;
+                case 3:
+                    shots = 7.5 + 10.5 * (this.Player.AttackSpeedMod - .6);
+                    break;
             }
 
             return shots / 1.4;

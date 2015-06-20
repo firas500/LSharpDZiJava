@@ -256,7 +256,7 @@ namespace IKalista
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
+                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("mini"));
 
             var bigMinions =
                 MinionManager.GetMinions(
@@ -270,10 +270,31 @@ namespace IKalista
                         x.Health <= this.spells[SpellSlot.E].GetDamage(x)
                         && (x.SkinName.ToLower().Contains("siege") || x.SkinName.ToLower().Contains("super")));
 
+            var baron =
+                MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.NotAlly, 
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(x => x.IsValid && x.Health < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
+
+            var dragon =
+                MinionManager.GetMinions(
+                    ObjectManager.Player.ServerPosition, 
+                    this.spells[SpellSlot.E].Range, 
+                    MinionTypes.All, 
+                    MinionTeam.NotAlly, 
+                    MinionOrderTypes.MaxHealth)
+                    .FirstOrDefault(
+                        x => x.IsValid && x.Health < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
+
             switch (this.stringListLinks["jungStealMode"].Value.SelectedIndex)
             {
                 case 0: // jungle mobs
-                    if (junglelMinions != null)
+                    if ((junglelMinions != null && this.spells[SpellSlot.E].CanCast(junglelMinions))
+                        || (baron != null && this.spells[SpellSlot.E].CanCast(baron))
+                        || (dragon != null && this.spells[SpellSlot.E].CanCast(dragon)))
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -289,7 +310,10 @@ namespace IKalista
                     break;
 
                 case 2: // both
-                    if (junglelMinions != null || bigMinions != null)
+                    if ((junglelMinions != null && this.spells[SpellSlot.E].CanCast(junglelMinions))
+                        || (baron != null && this.spells[SpellSlot.E].CanCast(baron))
+                        || (dragon != null && this.spells[SpellSlot.E].CanCast(dragon))
+                        || (bigMinions != null && this.spells[SpellSlot.E].CanCast(bigMinions)))
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
@@ -314,6 +338,24 @@ namespace IKalista
             {
                 this.spells[SpellSlot.Q].Cast(extendedPosition);
             }
+        }
+
+        /// <summary>
+        ///     Gets the damage to baron
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float" />.
+        /// </returns>
+        private float GetBaronReduction(Obj_AI_Base target)
+        {
+            // Buff Name: barontarget or barondebuff
+            // Baron's Gaze: Baron Nashor takes 50% reduced damage from champions he's damaged in the last 15 seconds. 
+            return ObjectManager.Player.HasBuff("barontarget")
+                       ? this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2 * 0.5f
+                       : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
         }
 
         /// <summary>
@@ -379,6 +421,23 @@ namespace IKalista
         }
 
         /// <summary>
+        ///     Gets the damage to drake
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float" />.
+        /// </returns>
+        private float GetDragonReduction(Obj_AI_Base target)
+        {
+            return ObjectManager.Player.HasBuff("s5test_dragonslayerbuff")
+                       ? this.spells[SpellSlot.E].GetDamage(target)
+                         + target.HPRegenRate / 2 * (.07f * target.GetBuffCount("s5test_dragonslayerbuff"))
+                       : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
+        }
+
+        /// <summary>
         ///     Gets the correct Rend Damage
         /// </summary>
         /// <param name="target">
@@ -398,6 +457,7 @@ namespace IKalista
                     {
                         return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
                     }
+
                     return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
                 case 1:
                     return this.GetCustomDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
@@ -527,7 +587,8 @@ namespace IKalista
             Drawing.OnDraw += args =>
                 {
                     foreach (
-                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage"))
+                        var link in this.circleLinks.Where(link => link.Value.Value.Active && link.Key != "drawEDamage")
+                        )
                     {
                         Render.Circle.DrawCircle(
                             ObjectManager.Player.Position, 

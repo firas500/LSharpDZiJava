@@ -104,12 +104,12 @@ namespace iSeries.Champions.Marksman.Kalista
 
         #endregion
 
-        #region Public Properties
+        #region Properties
 
         /// <summary>
         ///     Gets the total incoming damage sum
         /// </summary>
-        public float IncomingDamage
+        private float IncomingDamage
         {
             get
             {
@@ -118,21 +118,22 @@ namespace iSeries.Champions.Marksman.Kalista
         }
 
         /// <summary>
-        ///     Gets the soul bound.
+        ///     Gets or sets the Soul bound hero
         /// </summary>
-        public Obj_AI_Hero SoulBound { get; private set; }
+        private Obj_AI_Hero SoulBound { get; set; }
 
         #endregion
 
         #region Public Methods and Operators
 
         /// <summary>
-        ///     TODO The under ally turret.
+        ///     Checks if the given position is under our turret
         /// </summary>
         /// <param name="position">
-        ///     TODO The position.
+        ///     The Position
         /// </param>
         /// <returns>
+        ///     <see cref="bool"/>
         /// </returns>
         public static bool UnderAllyTurret(Vector3 position)
         {
@@ -311,9 +312,7 @@ namespace iSeries.Champions.Marksman.Kalista
             {
                 var qMinions = MinionManager.GetMinions(
                     this.Player.ServerPosition, 
-                    this.spells[SpellSlot.Q].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.Enemy);
+                    this.spells[SpellSlot.Q].Range);
 
                 if (qMinions.Count <= 0)
                 {
@@ -719,9 +718,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
-                            x =>
-                            x.IsValid && x.Health < this.GetBaronReduction(x)
-                            && x.Name.Contains("Baron"));
+                            x => x.IsValid && x.Health < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
 
                 var dragon =
                     MinionManager.GetMinions(
@@ -731,9 +728,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
-                            x =>
-                            x.IsValid && x.Health < this.GetDragonReduction(x)
-                            && x.Name.Contains("Dragon"));
+                            x => x.IsValid && x.Health < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
 
                 if ((normalMob != null && this.spells[SpellSlot.E].CanCast(normalMob))
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))

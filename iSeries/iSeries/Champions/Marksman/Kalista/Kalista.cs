@@ -717,7 +717,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
-                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
+                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetActualDamage(x) && x.Name.Contains("Baron"));
 
                 var dragon =
                     MinionManager.GetMinions(
@@ -727,7 +727,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
-                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
+                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetActualDamage(x) && x.Name.Contains("Dragon"));
 
                 if ((normalMob != null && this.spells[SpellSlot.E].CanCast(normalMob))
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))

@@ -954,6 +954,12 @@ namespace IKalista
 
             if (BoolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
             {
+
+                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady() && ObjectManager.Player.Mana < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
+                {
+                    return;
+                }
+
                 foreach (var selectedMinion in
                     from selectedMinion in minions
                     let killcount =

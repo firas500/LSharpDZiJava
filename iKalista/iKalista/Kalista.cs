@@ -568,12 +568,12 @@ namespace IKalista
                         return;
                     }
 
-                    if (BoolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
+                   /* if (BoolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
                         && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion)
                         && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].Cast(killableMinion);
-                    }
+                    }*/
 
                     if (BoolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
@@ -648,6 +648,7 @@ namespace IKalista
                 this.ProcessLink("eHealth", comboMenu.AddLinkedSlider("Health To E Death %", 15, 5, 50));
                 this.ProcessLink("saveAllyR", comboMenu.AddLinkedBool("Save Ally with R"));
                 this.ProcessLink("allyPercent", comboMenu.AddLinkedSlider("Save Ally Percentage", 20));
+                this.ProcessLink("saveManaR", comboMenu.AddLinkedBool("Save Mana For Ultimate"));
             }
 
             var harassMenu = this.menu.MainMenu.AddSubMenu("Harass Options");
@@ -792,12 +793,16 @@ namespace IKalista
                     BoolLinks["useQ"].Value ? this.spells[SpellSlot.Q].Range : this.spells[SpellSlot.E].Range, 
                     TargetSelector.DamageType.Physical);
 
-            if (this.spells[SpellSlot.Q].IsReady() && BoolLinks["useQ"].Value && !ObjectManager.Player.IsDashing()
-                && !ObjectManager.Player.IsWindingUp)
+            if (this.spells[SpellSlot.Q].IsReady() && BoolLinks["useQ"].Value && !ObjectManager.Player.IsDashing() && !ObjectManager.Player.IsWindingUp)
             {
                 if (BoolLinks["qMana"].Value && !this.spells[SpellSlot.Q].IsKillable(target)
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost)
+                {
+                    return;
+                }
+
+                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady() && ObjectManager.Player.Mana < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
                 {
                     return;
                 }
@@ -865,6 +870,11 @@ namespace IKalista
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost
                     && this.spells[SpellSlot.Q].GetDamage(spearTarget) < this.GetTargetHealth(spearTarget))
+                {
+                    return;
+                }
+
+                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady() && ObjectManager.Player.Mana < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
                 {
                     return;
                 }

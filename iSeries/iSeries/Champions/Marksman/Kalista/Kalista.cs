@@ -439,7 +439,7 @@ namespace iSeries.Champions.Marksman.Kalista
             // Buff Name: barontarget or barondebuff
             // Baron's Gaze: Baron Nashor takes 50% reduced damage from champions he's damaged in the last 15 seconds. 
             return this.Player.HasBuff("barontarget")
-                       ? this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2 * 0.5f
+                       ? this.spells[SpellSlot.E].GetDamage(target) * 0.5f
                        : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
         }
 
@@ -483,8 +483,7 @@ namespace iSeries.Champions.Marksman.Kalista
         private float GetDragonReduction(Obj_AI_Base target)
         {
             return this.Player.HasBuff("s5test_dragonslayerbuff")
-                       ? this.spells[SpellSlot.E].GetDamage(target)
-                         + target.HPRegenRate / 2 * (.07f * target.GetBuffCount("s5test_dragonslayerbuff"))
+                       ? this.spells[SpellSlot.E].GetDamage(target) * (.07f * target.GetBuffCount("s5test_dragonslayerbuff"))
                        : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
         }
 
@@ -718,7 +717,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
-                            x => x.IsValid && x.Health < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
+                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
 
                 var dragon =
                     MinionManager.GetMinions(
@@ -728,7 +727,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         MinionTeam.NotAlly, 
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
-                            x => x.IsValid && x.Health < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
+                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
 
                 if ((normalMob != null && this.spells[SpellSlot.E].CanCast(normalMob))
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))

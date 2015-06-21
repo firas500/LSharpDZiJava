@@ -206,8 +206,12 @@ namespace iSeries.Champions.Marksman.Lucian
                     {
                         if (this.spells[Spells.W].IsReady() && !target.IsDead)
                         {
-                            this.spells[Spells.W].Cast(target);
-                            this.spells[Spells.W].LastCastAttemptT = Environment.TickCount;
+                            var prediction = this.spells[Spells.W].GetPrediction(target);
+                            if (prediction.Hitchance >= HitChance.Medium)
+                            {
+                                this.spells[Spells.W].Cast(target);
+                                this.spells[Spells.W].LastCastAttemptT = Environment.TickCount;
+                            }
                         }
                     }
 
@@ -525,15 +529,6 @@ namespace iSeries.Champions.Marksman.Lucian
                 {
                     this.spells[Spells.Q].CastOnUnit(hero);
                 }
-            }
-
-            foreach (var hero in
-                HeroManager.Enemies.Where(
-                    x => this.spells[Spells.W].IsInRange(x) && x.Health + 5 < this.spells[Spells.W].GetDamage(x))
-                    .Where(hero => this.spells[Spells.W].GetPrediction(hero).Hitchance != HitChance.Collision))
-            {
-                this.spells[Spells.W].Cast(hero.Position);
-                this.spells[Spells.W].LastCastAttemptT = Environment.TickCount;
             }
         }
 

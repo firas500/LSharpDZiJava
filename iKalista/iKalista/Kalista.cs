@@ -277,7 +277,7 @@ namespace IKalista
                     MinionTypes.All, 
                     MinionTeam.NotAlly, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.IsValid && x.Health + (x.HPRegenRate / 2)< this.spells[SpellSlot.E].GetDamage(x) && x.Name.Contains("Baron"));
+                    .FirstOrDefault(x => x.IsValid && x.Health < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
 
             var dragon =
                 MinionManager.GetMinions(

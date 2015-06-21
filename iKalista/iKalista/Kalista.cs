@@ -256,7 +256,7 @@ namespace IKalista
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("mini"));
+                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
 
             var bigMinions =
                 MinionManager.GetMinions(
@@ -274,8 +274,8 @@ namespace IKalista
                 MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
-                    MinionTypes.All, 
-                    MinionTeam.NotAlly, 
+                    MinionTypes.All,
+                    MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
                     .FirstOrDefault(x => x.IsValid && x.Health < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
 
@@ -284,7 +284,7 @@ namespace IKalista
                     ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
                     MinionTypes.All, 
-                    MinionTeam.NotAlly, 
+                    MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
                     .FirstOrDefault(
                         x => x.IsValid && x.Health < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
@@ -433,7 +433,8 @@ namespace IKalista
         {
             // DragonSlayer: Reduces damage dealt by 7% per a stack
             return ObjectManager.Player.HasBuff("s5test_dragonslayerbuff")
-                       ? this.spells[SpellSlot.E].GetDamage(target) * (.07f * target.GetBuffCount("s5test_dragonslayerbuff"))
+                       ? this.spells[SpellSlot.E].GetDamage(target)
+                         * (1 - (.07f * ObjectManager.Player.GetBuffCount("s5test_dragonslayerbuff")))
                        : this.spells[SpellSlot.E].GetDamage(target);
         }
 
@@ -568,13 +569,12 @@ namespace IKalista
                         return;
                     }
 
-                   /* if (BoolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
+                    /* if (BoolLinks["qKillable"].Value && !killableMinion.HasBuff("KalistaExpungeMarker")
                         && this.spells[SpellSlot.Q].IsReady() && this.spells[SpellSlot.Q].CanCast(killableMinion)
                         && !ObjectManager.Player.IsWindingUp && !ObjectManager.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].Cast(killableMinion);
                     }*/
-
                     if (BoolLinks["eUnkillable"].Value
                         && this.spells[SpellSlot.E].GetDamage(killableMinion) > killableMinion.Health + 10
                         && this.spells[SpellSlot.E].CanCast(killableMinion)
@@ -793,7 +793,8 @@ namespace IKalista
                     BoolLinks["useQ"].Value ? this.spells[SpellSlot.Q].Range : this.spells[SpellSlot.E].Range, 
                     TargetSelector.DamageType.Physical);
 
-            if (this.spells[SpellSlot.Q].IsReady() && BoolLinks["useQ"].Value && !ObjectManager.Player.IsDashing() && !ObjectManager.Player.IsWindingUp)
+            if (this.spells[SpellSlot.Q].IsReady() && BoolLinks["useQ"].Value && !ObjectManager.Player.IsDashing()
+                && !ObjectManager.Player.IsWindingUp)
             {
                 if (BoolLinks["qMana"].Value && !this.spells[SpellSlot.Q].IsKillable(target)
                     && ObjectManager.Player.Mana
@@ -802,7 +803,9 @@ namespace IKalista
                     return;
                 }
 
-                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady() && ObjectManager.Player.Mana < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
+                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady()
+                    && ObjectManager.Player.Mana
+                    < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
                 {
                     return;
                 }
@@ -874,7 +877,9 @@ namespace IKalista
                     return;
                 }
 
-                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady() && ObjectManager.Player.Mana < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
+                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady()
+                    && ObjectManager.Player.Mana
+                    < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
                 {
                     return;
                 }
@@ -954,8 +959,9 @@ namespace IKalista
 
             if (BoolLinks["useQLC"].Value && this.spells[SpellSlot.Q].IsReady())
             {
-
-                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady() && ObjectManager.Player.Mana < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
+                if (BoolLinks["saveManaR"].Value && this.spells[SpellSlot.R].IsReady()
+                    && ObjectManager.Player.Mana
+                    < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.R].Instance.ManaCost)
                 {
                     return;
                 }

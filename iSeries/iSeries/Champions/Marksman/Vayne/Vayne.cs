@@ -23,7 +23,6 @@ namespace iSeries.Champions.Marksman.Vayne
 {
     using System;
     using System.Collections.Generic;
-    using System.Drawing;
     using System.Linq;
 
     using iSeries.Champions.Utilities;
@@ -31,6 +30,10 @@ namespace iSeries.Champions.Marksman.Vayne
 
     using LeagueSharp;
     using LeagueSharp.Common;
+
+    using SharpDX;
+
+    using Color = System.Drawing.Color;
 
     /// <summary>
     ///     The Champion Class
@@ -63,7 +66,7 @@ namespace iSeries.Champions.Marksman.Vayne
 
             this.spells[SpellSlot.E].SetTargetted(0.25f, 2000f);
 
-            Orbwalking.AfterAttack += this.Orbwalking_AfterAttack;
+            Orbwalking.AfterAttack += this.OrbwalkingAfterAttack;
 
             AntiGapcloser.OnEnemyGapcloser += gapcloser =>
                 {
@@ -115,13 +118,12 @@ namespace iSeries.Champions.Marksman.Vayne
                 return;
             }
 
-            foreach (
-                var target in
-                    HeroManager.Enemies.Where(
-                        h =>
-                        h.IsValidTarget(this.spells[SpellSlot.E].Range) && !h.HasBuffOfType(BuffType.SpellShield)
-                        && !h.HasBuffOfType(BuffType.SpellImmunity)
-                        && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
+            foreach (var target in
+                HeroManager.Enemies.Where(
+                    h =>
+                    h.IsValidTarget(this.spells[SpellSlot.E].Range) && !h.HasBuffOfType(BuffType.SpellShield)
+                    && !h.HasBuffOfType(BuffType.SpellImmunity)
+                    && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
             {
                 const int PushDistance = 410;
                 var targetPosition = target.ServerPosition;
@@ -162,13 +164,12 @@ namespace iSeries.Champions.Marksman.Vayne
                 return;
             }
 
-            foreach (
-                var target in
-                    HeroManager.Enemies.Where(
-                        h =>
-                        h.IsValidTarget(this.spells[SpellSlot.E].Range) && !h.HasBuffOfType(BuffType.SpellShield)
-                        && !h.HasBuffOfType(BuffType.SpellImmunity)
-                        && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
+            foreach (var target in
+                HeroManager.Enemies.Where(
+                    h =>
+                    h.IsValidTarget(this.spells[SpellSlot.E].Range) && !h.HasBuffOfType(BuffType.SpellShield)
+                    && !h.HasBuffOfType(BuffType.SpellImmunity)
+                    && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
             {
                 var pushDistance = 400;
                 var targetPosition = target.ServerPosition;
@@ -220,34 +221,28 @@ namespace iSeries.Champions.Marksman.Vayne
         /// <param name="target">
         ///     The Target
         /// </param>
-        public void Orbwalking_AfterAttack(AttackableUnit unit, AttackableUnit target)
+        public void OrbwalkingAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            // com.iseries.vayne.combo.useQ"
-            if (!this.spells[SpellSlot.Q].IsReady() || !(target is Obj_AI_Hero) || !target.IsValidTarget())
+            if (!(target is Obj_AI_Base) || !unit.IsMe)
             {
                 return;
             }
 
-            var orbwalkerTarget = (Obj_AI_Hero)target;
-            var tumbleEnd = ObjectManager.Player.ServerPosition.Extend(Game.CursorPos, this.spells[SpellSlot.Q].Range);
+            Console.WriteLine("After Attack Called??");
 
             switch (Variables.Orbwalker.ActiveMode)
             {
                 case Orbwalking.OrbwalkingMode.Combo:
-                    if (this.GetItemValue<bool>("com.iseries.vayne.combo.useQ")
-                        && PositionHelper.IsSafePosition(tumbleEnd)
-                        && tumbleEnd.Distance(orbwalkerTarget.ServerPosition) <= 570f)
+                    if (this.GetItemValue<bool>("com.iseries.vayne.combo.useQ"))
                     {
-                        this.spells[SpellSlot.Q].Cast(tumbleEnd);
+                        this.CastTumble((Obj_AI_Hero)target);
                     }
 
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
-                    if (this.GetItemValue<bool>("com.iseries.vayne.harass.useQ")
-                        && PositionHelper.IsSafePosition(tumbleEnd)
-                        && tumbleEnd.Distance(orbwalkerTarget.ServerPosition) <= 570f)
+                    if (this.GetItemValue<bool>("com.iseries.vayne.harass.useQ"))
                     {
-                        this.spells[SpellSlot.Q].Cast(tumbleEnd);
+                        this.CastTumble((Obj_AI_Hero)target);
                         Utility.DelayAction.Add((int)(Game.Ping / 2f + 250 + 325), Orbwalking.ResetAutoAttackTimer);
                     }
 
@@ -281,6 +276,33 @@ namespace iSeries.Champions.Marksman.Vayne
                     }
 
                     break;
+            }
+        }
+
+        #endregion
+
+        #region Methods
+
+        /// <summary>
+        ///     TODO The cast tumble.
+        /// </summary>
+        /// <param name="target">
+        ///     TODO The target.
+        /// </param>
+        private void CastTumble(Obj_AI_Base target)
+        {
+            if (!this.spells[SpellSlot.Q].IsReady())
+            {
+                return;
+            }
+
+            var positionAfter = this.Player.ServerPosition.To2D().Extend(Game.CursorPos.To2D(), 300f).To3D();
+            var distanceAfterTumble = Vector3.DistanceSquared(positionAfter, target.ServerPosition);
+
+            if (distanceAfterTumble <= 550 * 550 && distanceAfterTumble >= 100 * 100
+                && PositionHelper.IsSafePosition(positionAfter))
+            {
+                this.spells[SpellSlot.Q].Cast(Game.CursorPos);
             }
         }
 

@@ -440,7 +440,7 @@ namespace iSeries.Champions.Marksman.Kalista
             // Baron's Gaze: Baron Nashor takes 50% reduced damage from champions he's damaged in the last 15 seconds. 
             return this.Player.HasBuff("barontarget")
                        ? this.spells[SpellSlot.E].GetDamage(target) * 0.5f
-                       : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
+                       : this.spells[SpellSlot.E].GetDamage(target);
         }
 
         /// <summary>
@@ -482,9 +482,11 @@ namespace iSeries.Champions.Marksman.Kalista
         /// </returns>
         private float GetDragonReduction(Obj_AI_Base target)
         {
+            // DragonSlayer: Reduces damage dealt by 7% per a stack
             return this.Player.HasBuff("s5test_dragonslayerbuff")
-                       ? this.spells[SpellSlot.E].GetDamage(target) * (.07f * target.GetBuffCount("s5test_dragonslayerbuff"))
-                       : this.spells[SpellSlot.E].GetDamage(target) + target.HPRegenRate / 2;
+                       ? this.spells[SpellSlot.E].GetDamage(target)
+                         * (1 - (.07f * this.Player.GetBuffCount("s5test_dragonslayerbuff")))
+                       : this.spells[SpellSlot.E].GetDamage(target);
         }
 
         /// <summary>
@@ -713,21 +715,20 @@ namespace iSeries.Champions.Marksman.Kalista
                     MinionManager.GetMinions(
                         this.Player.ServerPosition, 
                         this.spells[SpellSlot.E].Range, 
-                        MinionTypes.All, 
-                        MinionTeam.NotAlly, 
+                        MinionTypes.All,
+                        MinionTeam.Neutral, 
                         MinionOrderTypes.MaxHealth)
-                        .FirstOrDefault(
-                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetActualDamage(x) && x.Name.Contains("Baron"));
+                        .FirstOrDefault(x => x.IsValid && x.Health < this.GetBaronReduction(x) && x.Name.Contains("Baron"));
 
                 var dragon =
                     MinionManager.GetMinions(
                         this.Player.ServerPosition, 
                         this.spells[SpellSlot.E].Range, 
                         MinionTypes.All, 
-                        MinionTeam.NotAlly, 
+                        MinionTeam.Neutral,
                         MinionOrderTypes.MaxHealth)
-                        .FirstOrDefault(
-                            x => x.IsValid && x.Health + (x.HPRegenRate / 2) < this.GetActualDamage(x) && x.Name.Contains("Dragon"));
+                    .FirstOrDefault(
+                        x => x.IsValid && x.Health < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
 
                 if ((normalMob != null && this.spells[SpellSlot.E].CanCast(normalMob))
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))

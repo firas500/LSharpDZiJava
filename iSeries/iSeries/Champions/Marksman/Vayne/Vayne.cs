@@ -187,6 +187,59 @@ namespace iSeries.Champions.Marksman.Vayne
         }
 
         /// <summary>
+        /// TODO The check condemn.
+        /// </summary>
+        /// <param name="fromPosition">
+        /// TODO The from position.
+        /// </param>
+        /// <param name="target">
+        /// TODO The target.
+        /// </param>
+        /// <returns>
+        /// The <see cref="bool"/>.
+        /// </returns>
+        private bool CheckCondemn(Vector3 fromPosition, out Obj_AI_Hero target)
+        {
+            if (fromPosition.UnderTurret(true) || !this.spells[SpellSlot.E].IsReady())
+            {
+                target = null;
+                return false;
+            }
+            if (
+                !HeroManager.Enemies.Any(
+                    h =>
+                        h.IsValidTarget(this.spells[SpellSlot.E].Range) && !h.HasBuffOfType(BuffType.SpellShield) &&
+                        !h.HasBuffOfType(BuffType.SpellImmunity)))
+            {
+                target = null;
+                return false;
+            }
+
+            foreach (var unit in
+                HeroManager.Enemies.Where(
+                    h =>
+                    h.IsValidTarget(this.spells[SpellSlot.E].Range) && !h.HasBuffOfType(BuffType.SpellShield)
+                    && !h.HasBuffOfType(BuffType.SpellImmunity)
+                    && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
+            {
+                const int PushDistance = 400;
+                var targetPosition = unit.ServerPosition;
+                var endPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -PushDistance);
+                for (var i = 0; i < PushDistance; i += (int)unit.BoundingRadius)
+                {
+                    var extendedPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -i);
+                    if (extendedPosition.IsWall() || endPosition.IsWall())
+                    {
+                        target = unit;
+                        return true;
+                    }
+                }
+            }
+            target = null;
+            return false;
+        }
+
+        /// <summary>
         ///     <c>OnLaneclear</c> subscribed orb walker function.
         /// </summary>
         public override void OnLaneclear()
@@ -235,14 +288,14 @@ namespace iSeries.Champions.Marksman.Vayne
                 case Orbwalking.OrbwalkingMode.Combo:
                     if (this.GetItemValue<bool>("com.iseries.vayne.combo.useQ"))
                     {
-                        this.CastTumble((Obj_AI_Hero)target);
+                        this.CastQE((Obj_AI_Hero) target);
                     }
 
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
                     if (this.GetItemValue<bool>("com.iseries.vayne.harass.useQ"))
                     {
-                        this.CastTumble((Obj_AI_Hero)target);
+                        this.CastQE((Obj_AI_Hero)target);
                         Utility.DelayAction.Add((int)(Game.Ping / 2f + 250 + 325), Orbwalking.ResetAutoAttackTimer);
                     }
 
@@ -299,10 +352,71 @@ namespace iSeries.Champions.Marksman.Vayne
             var positionAfter = this.Player.ServerPosition.To2D().Extend(Game.CursorPos.To2D(), 300f).To3D();
             var distanceAfterTumble = Vector3.DistanceSquared(positionAfter, target.ServerPosition);
 
-            if (distanceAfterTumble <= 550 * 550 && distanceAfterTumble >= 100 * 100
-                && PositionHelper.IsSafePosition(positionAfter))
+            if (distanceAfterTumble <= 550 * 550 && distanceAfterTumble >= 100 * 100 && PositionHelper.IsSafePosition(positionAfter))
             {
                 this.spells[SpellSlot.Q].Cast(Game.CursorPos);
+            }
+        }
+
+        /// <summary>
+        /// TODO The cast tumble.
+        /// </summary>
+        /// <param name="position">
+        /// TODO The position.
+        /// </param>
+        /// <param name="target">
+        /// TODO The target.
+        /// </param>
+        private void CastTumble(Vector3 position, Obj_AI_Base target)
+        {
+            if (!this.spells[SpellSlot.Q].IsReady())
+            {
+                return;
+            }
+
+            var positionAfter = this.Player.ServerPosition.To2D().Extend(Game.CursorPos.To2D(), 300f).To3D();
+            var distanceAfterTumble = Vector3.DistanceSquared(positionAfter, target.ServerPosition);
+
+            if (distanceAfterTumble <= 550 * 550 && distanceAfterTumble >= 100 * 100 && PositionHelper.IsSafePosition(positionAfter))
+            {
+                this.spells[SpellSlot.Q].Cast(Game.CursorPos);
+            }
+        }
+
+        private void CastQE(Obj_AI_Base target)
+        {
+            var myPosition = Game.CursorPos;
+            Obj_AI_Hero myTarget = null;
+
+            if (this.spells[SpellSlot.E].IsReady())
+            {
+                const int CurrentStep = 30;
+                var direction = ObjectManager.Player.Direction.To2D().Perpendicular();
+                for (var i = 0f; i < 360f; i += CurrentStep)
+                {
+                    var angleRad = Geometry.DegreeToRadian(i);
+                    var rotatedPosition = ObjectManager.Player.Position.To2D() + (300f * direction.Rotated(angleRad));
+                    if (this.CheckCondemn(rotatedPosition.To3D(), out myTarget) && PositionHelper.IsSafePosition(rotatedPosition.To3D()))
+                    {
+                        myPosition = rotatedPosition.To3D();
+                        break;
+                    }
+                }
+            }
+
+            this.CastTumble(myPosition, target);
+
+            if (myPosition != Game.CursorPos && myTarget != null && myTarget.IsValidTarget(300f + this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsReady())
+            {
+                Utility.DelayAction.Add(
+                    (int)(Game.Ping / 2f + this.spells[SpellSlot.Q].Delay * 1000 + 300f / 1500f + 50f),
+                    () =>
+                        {
+                        if (!this.spells[SpellSlot.Q].IsReady())
+                        {
+                            this.spells[SpellSlot.E].Cast(myTarget);
+                        }
+                    });
             }
         }
 

@@ -171,10 +171,10 @@ namespace iSeries.Champions.Marksman.Vayne
                     && !h.HasBuffOfType(BuffType.SpellImmunity)
                     && !this.GetItemValue<bool>("com.iseries.vayne.noe." + h.ChampionName.ToLowerInvariant())))
             {
-                var pushDistance = 400;
+                const int PushDistance = 400;
                 var targetPosition = target.ServerPosition;
-                var endPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -pushDistance);
-                for (var i = 0; i < pushDistance; i += (int)target.BoundingRadius)
+                var endPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -PushDistance);
+                for (var i = 0; i < PushDistance; i += (int)target.BoundingRadius)
                 {
                     var extendedPosition = targetPosition.Extend(ObjectManager.Player.ServerPosition, -i);
                     if (extendedPosition.IsWall() || endPosition.IsWall())

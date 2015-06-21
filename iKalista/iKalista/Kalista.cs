@@ -256,7 +256,10 @@ namespace IKalista
                     MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
-                    .FirstOrDefault(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x));
+                    .FirstOrDefault(
+                        x =>
+                        x.Health <= this.spells[SpellSlot.E].GetDamage(x) && !x.Name.Contains("Mini")
+                        && !x.Name.Contains("Dragon") && !x.Name.Contains("Baron"));
 
             var bigMinions =
                 MinionManager.GetMinions(
@@ -274,7 +277,7 @@ namespace IKalista
                 MinionManager.GetMinions(
                     ObjectManager.Player.ServerPosition, 
                     this.spells[SpellSlot.E].Range, 
-                    MinionTypes.All,
+                    MinionTypes.All, 
                     MinionTeam.Neutral, 
                     MinionOrderTypes.MaxHealth)
                     .FirstOrDefault(x => x.IsValid && x.Health < this.GetBaronReduction(x) && x.Name.Contains("Baron"));

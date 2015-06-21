@@ -431,6 +431,7 @@ namespace IKalista
         /// </returns>
         private float GetDragonReduction(Obj_AI_Base target)
         {
+            // DragonSlayer: Reduces damage dealt by 7% per a stack
             return ObjectManager.Player.HasBuff("s5test_dragonslayerbuff")
                        ? this.spells[SpellSlot.E].GetDamage(target) * (.07f * target.GetBuffCount("s5test_dragonslayerbuff"))
                        : this.spells[SpellSlot.E].GetDamage(target);

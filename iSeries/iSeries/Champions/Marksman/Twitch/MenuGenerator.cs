@@ -51,8 +51,9 @@ namespace iSeries.Champions.Marksman.Twitch
 
             var harassMenu = new Menu("Harass Options", "com.iseries.twitch.harass");
             {
-                harassMenu.AddItem(new MenuItem("com.iseries.twitch.harass.useQ", "Use Q").SetValue(false));
                 harassMenu.AddItem(new MenuItem("com.iseries.twitch.harass.useE", "Use E").SetValue(false));
+                harassMenu.AddItem(
+                    new MenuItem("com.iseries.twitch.harass.eStacks", "E Stacks").SetValue(new Slider(5, 1,6)));
                 root.AddSubMenu(harassMenu);
             }
 

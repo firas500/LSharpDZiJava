@@ -245,18 +245,33 @@ namespace iSeries.Champions.Marksman.Twitch
         /// </summary>
         public override void OnHarass()
         {
-            //com.iseries.twitch.harass.eStacks
-            if (GetItemValue<bool>("com.iseries.twitch.harass.useE") && spells[SpellSlot.E].IsReady())
+            if (ObjectManager.Player.ManaPercent > GetItemValue<Slider>("com.iseries.twitch.harass.mana").Value)
             {
+                //com.iseries.twitch.harass.eStacks
+                if (GetItemValue<bool>("com.iseries.twitch.harass.useE") && spells[SpellSlot.E].IsReady())
+                {
                     var target =
                         HeroManager.Enemies.FirstOrDefault(
                             x =>
-                            x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                            && x.GetBuffCount("twitchdeadlyvenom") >= GetItemValue<Slider>("com.iseries.twitch.harass.eStacks").Value && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                                x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x) &&
+                                x.GetBuffCount("twitchdeadlyvenom") >=
+                                GetItemValue<Slider>("com.iseries.twitch.harass.eStacks").Value &&
+                                !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
                     if (target != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
+                }
+
+                if (GetItemValue<bool>("com.iseries.twitch.harass.useW") && spells[SpellSlot.W].IsReady())
+                {
+                    var Target = TargetSelector.GetTarget(spells[SpellSlot.W].Range, TargetSelector.DamageType.Physical);
+                    if (Target.IsValidTarget() && spells[SpellSlot.W].CanCast(Target))
+                    {
+                        spells[SpellSlot.W].CastIfHitchanceEquals(Target, HitChance.VeryHigh);
+                        spells[SpellSlot.W].CastIfWillHit(Target, 2);
+                    }
+                }
             }
         }
 

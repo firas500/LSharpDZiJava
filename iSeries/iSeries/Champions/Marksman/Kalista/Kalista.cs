@@ -225,9 +225,10 @@ namespace iSeries.Champions.Marksman.Kalista
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
-                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget) && !rendTarget.IsDead)
+                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget) && !rendTarget.IsDead && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
-                    Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
+                    this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
         }

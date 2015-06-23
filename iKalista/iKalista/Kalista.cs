@@ -840,7 +840,7 @@ namespace IKalista
                 if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target))
                     || (stacks >= this.sliderLinks["minStacks"].Value.Value))
                 {
-                    this.spells[SpellSlot.E].Cast();
+                    Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
                 }
             }
         }
@@ -948,7 +948,7 @@ namespace IKalista
                 if (minion != null && target != null && this.spells[SpellSlot.E].CanCast(minion)
                     && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
-                    this.spells[SpellSlot.E].Cast();
+                    Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
                 }
             }
         }
@@ -1095,7 +1095,7 @@ namespace IKalista
                     if (stacks >= this.sliderLinks["eDeathC"].Value.Value
                         && !ObjectManager.Player.HasBuff("summonerexhaust"))
                     {
-                        this.spells[SpellSlot.E].Cast();
+                        Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
                     }
                 }
             }

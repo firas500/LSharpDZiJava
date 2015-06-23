@@ -227,7 +227,7 @@ namespace iSeries.Champions.Marksman.Kalista
 
                 if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget) && !rendTarget.IsDead)
                 {
-                    this.spells[SpellSlot.E].Cast();
+                    Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
                 }
             }
         }
@@ -678,7 +678,7 @@ namespace iSeries.Champions.Marksman.Kalista
                     return;
                 }
 
-                this.spells[SpellSlot.E].Cast();
+                Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
             }
 
             foreach (var hero in

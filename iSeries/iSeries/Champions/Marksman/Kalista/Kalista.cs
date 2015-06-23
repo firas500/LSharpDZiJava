@@ -220,7 +220,7 @@ namespace iSeries.Champions.Marksman.Kalista
                 var rendTarget =
                     HeroManager.Enemies.Where(
                         x =>
-                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= 1
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) > 1
                         && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();

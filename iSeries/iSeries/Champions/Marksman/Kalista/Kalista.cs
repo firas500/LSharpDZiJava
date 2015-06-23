@@ -225,8 +225,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
-                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget)
-                    && !rendTarget.IsDead)
+                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget) && !rendTarget.IsDead)
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -671,7 +670,7 @@ namespace iSeries.Champions.Marksman.Kalista
 
             foreach (var hero in
                 HeroManager.Enemies.Where(
-                    x => this.spells[SpellSlot.E].IsInRange(x) && this.GetActualHealth(x) < this.GetActualDamage(x)))
+                    x => this.spells[SpellSlot.E].IsInRange(x) && this.GetActualHealth(x) < this.GetActualDamage(x) && !x.IsDead))
             {
                 if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
                     || hero.HasBuffOfType(BuffType.SpellShield))

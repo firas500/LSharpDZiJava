@@ -251,19 +251,32 @@ namespace iSeries.Champions.Marksman.Kalista
                 Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
             }
 
-            foreach (var source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.E].IsInRange(x)))
+            foreach (var source in HeroManager.Enemies.Where(x => this.Player.Distance(x) <= 2000f && !x.IsDead))
             {
                 var stacks = source.GetBuffCount("kalistaexpungemarker");
 
                 if (stacks > 0)
                 {
-                    Drawing.DrawText(
-                        Drawing.WorldToScreen(source.Position)[0] - 20, 
-                        Drawing.WorldToScreen(source.Position)[1], 
-                        Color.White, 
-                        "Stacks: " + stacks);
+                    if (this.GetItemValue<bool>("com.iseries.kalista.drawing.drawStacks"))
+                    {
+                        Drawing.DrawText(
+                            Drawing.WorldToScreen(source.Position)[0] - 80,
+                            Drawing.WorldToScreen(source.Position)[1],
+                            Color.White,
+                            "Stacks: " + stacks);
+                    }
                 }
-            }
+
+
+                if (this.GetItemValue<bool>("com.iseries.kalista.drawing.drawStacksKill"))
+                    {
+                        var stacksToKill = Math.Ceiling(source.Health / this.spells[SpellSlot.E].GetDamage(source)) - 1;
+
+                        Drawing.DrawText(
+                            Drawing.WorldToScreen(source.Position)[0],
+                            Drawing.WorldToScreen(source.Position)[1], Color.White,"Stack Kill: " + stacksToKill);
+                    }
+                }
         }
 
         /// <summary>
@@ -683,14 +696,11 @@ namespace iSeries.Champions.Marksman.Kalista
         {
             if (target.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsReady())
             {
-                var buff = target.GetBuff("kalistaexpungemark");
-                if (buff.IsValidBuff())
-                {
-                    var stacksLeft = target.Health
-                                     - (this.spells[SpellSlot.E].GetDamage(target) * buff.Count)
-                                     / this.spells[SpellSlot.E].GetDamage(target);
-                    Console.WriteLine("Stacks Left: " + stacksLeft);
-                }
+                var damagePerSpear = new[] { 10, 14, 19, 25, 32 };
+                var additionalDamage = new[] { 0.2f, 0.225f, 0.25f, 0.275f, 0.3f };
+
+                var calculation = target.Health / damagePerSpear[this.Player.Level]
+                                  + additionalDamage[this.Player.Level];
             }
         }
 

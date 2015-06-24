@@ -86,6 +86,8 @@ namespace iSeries.Champions.Marksman.Kalista
             var drawing = new Menu("Drawing Options", "com.iseries.kalista.drawing");
             {
                 drawing.AddItem(new MenuItem("com.iseries.kalista.drawing.drawE", "Draw E Range").SetValue(true));
+                drawing.AddItem(new MenuItem("com.iseries.kalista.drawing.drawStacks", "Draw Stacks").SetValue(true));
+                drawing.AddItem(new MenuItem("com.iseries.kalista.drawing.drawStacksKill", "Draw Stacks To Kill").SetValue(true));
                 root.AddSubMenu(drawing);
             }
 

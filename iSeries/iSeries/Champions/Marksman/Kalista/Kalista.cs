@@ -363,10 +363,14 @@ namespace iSeries.Champions.Marksman.Kalista
                             this.spells[SpellSlot.E].CanCast(x) && x.Health <= this.spells[SpellSlot.E].GetDamage(x)
                             && UnderAllyTurret(x.ServerPosition));
 
-                if ((minionkillcount >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useENum").Value)
-                    || (this.GetItemValue<bool>("com.iseries.kalista.laneclear.esingle") && minionkillcountTurret > 0))
+                if ((minionkillcount >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useENum").Value) || (this.GetItemValue<bool>("com.iseries.kalista.laneclear.esingle") && minionkillcountTurret > 0))
                 {
+                    if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
+                    {
+                        return;
+                    }
                     this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
         }
@@ -679,7 +683,12 @@ namespace iSeries.Champions.Marksman.Kalista
                     return;
                 }
 
-                Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
+                if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
+                {
+                    return;
+                }
+                this.spells[SpellSlot.E].Cast();
+                this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
             }
 
             foreach (var hero in
@@ -734,7 +743,12 @@ namespace iSeries.Champions.Marksman.Kalista
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))
                     || (dragon != null && this.spells[SpellSlot.E].CanCast(dragon)))
                 {
+                    if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
+                    {
+                        return;
+                    }
                     this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
 

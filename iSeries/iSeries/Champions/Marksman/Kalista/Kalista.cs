@@ -92,7 +92,12 @@ namespace iSeries.Champions.Marksman.Kalista
                     if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion)
                         && minion.Health <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
                     {
+                        if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
+                        {
+                            return;
+                        }
                         this.spells[SpellSlot.E].Cast();
+                        this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                     }
                 };
             Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpellCast;

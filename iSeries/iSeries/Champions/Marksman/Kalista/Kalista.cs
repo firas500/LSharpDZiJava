@@ -274,9 +274,11 @@ namespace iSeries.Champions.Marksman.Kalista
 
                         Drawing.DrawText(
                             Drawing.WorldToScreen(source.Position)[0],
-                            Drawing.WorldToScreen(source.Position)[1], Color.White,"Stack Kill: " + stacksToKill);
+                            Drawing.WorldToScreen(source.Position)[1],
+                            Color.White,
+                            "Stack Kill: " + stacksToKill);
                     }
-                }
+            }
         }
 
         /// <summary>

@@ -30,9 +30,10 @@ namespace iSeries.Champions.Marksman.Lucian
 
     using LeagueSharp;
     using LeagueSharp.Common;
-    using LeagueSharp.Common.Data;
 
     using SharpDX;
+
+    using ItemData = LeagueSharp.Common.Data.ItemData;
 
     /// <summary>
     ///     The Champion Class

@@ -674,6 +674,27 @@ namespace iSeries.Champions.Marksman.Kalista
         }
 
         /// <summary>
+        ///     Credits daniel, i suck at math
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        public void OpDrawingShit(Obj_AI_Base target)
+        {
+            if (target.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsReady())
+            {
+                var buff = target.GetBuff("kalistaexpungemark");
+                if (buff.IsValidBuff())
+                {
+                    var stacksLeft = target.Health
+                                     - (this.spells[SpellSlot.E].GetDamage(target) * buff.Count)
+                                     / this.spells[SpellSlot.E].GetDamage(target);
+                    Console.WriteLine("Stacks Left: " + stacksLeft);
+                }
+            }
+        }
+
+        /// <summary>
         ///     The Functions to always process
         /// </summary>
         private void OnUpdateFunctions()

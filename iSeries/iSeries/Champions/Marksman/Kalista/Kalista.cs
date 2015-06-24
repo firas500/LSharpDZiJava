@@ -230,7 +230,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
-                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget) && !rendTarget.IsDead && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget) && !rendTarget.IsDead && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500 && !this.HasUndyingBuff(rendTarget))
                 {
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
@@ -450,6 +450,56 @@ namespace iSeries.Champions.Marksman.Kalista
             return this.Player.HasBuff("barontarget")
                        ? this.spells[SpellSlot.E].GetDamage(target) * 0.5f
                        : this.spells[SpellSlot.E].GetDamage(target);
+        }
+
+        /// <summary>
+        ///     Checks if a target has an immortal buff
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="bool" />.
+        /// </returns>
+        public bool HasUndyingBuff(Obj_AI_Hero target)
+        {
+            // Tryndamere R
+            if (target.ChampionName == "Tryndamere"
+                && target.Buffs.Any(
+                    b => b.Caster.NetworkId == target.NetworkId && b.IsValidBuff() && b.DisplayName == "Undying Rage"))
+            {
+                return true;
+            }
+
+            // Zilean R
+            if (target.Buffs.Any(b => b.IsValidBuff() && b.DisplayName == "Chrono Shift"))
+            {
+                return true;
+            }
+
+            // Kayle R
+            if (target.Buffs.Any(b => b.IsValidBuff() && b.DisplayName == "JudicatorIntervention"))
+            {
+                return true;
+            }
+
+            // Poppy R
+            if (target.ChampionName == "Poppy")
+            {
+                if (
+                    HeroManager.Allies.Any(
+                        o =>
+                        !o.IsMe
+                        && o.Buffs.Any(
+                            b =>
+                            b.Caster.NetworkId == target.NetworkId && b.IsValidBuff()
+                            && b.DisplayName == "PoppyDITarget")))
+                {
+                    return true;
+                }
+            }
+
+            return false;
         }
 
         /// <summary>
@@ -674,7 +724,12 @@ namespace iSeries.Champions.Marksman.Kalista
                 if (minion != null && target != null && this.spells[SpellSlot.E].CanCast(minion)
                     && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
+                    if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
+                    {
+                        return;
+                    }
                     this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
 
@@ -688,7 +743,7 @@ namespace iSeries.Champions.Marksman.Kalista
                     return;
                 }
 
-                if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
+                if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500 || this.HasUndyingBuff(hero))
                 {
                     return;
                 }

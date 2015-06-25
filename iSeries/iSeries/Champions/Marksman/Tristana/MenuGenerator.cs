@@ -67,9 +67,10 @@ namespace iSeries.Champions.Marksman.Tristana
                 root.AddSubMenu(misc);
             }
 
-            var drawing = new Menu("Drawing Options", "com.iseries.vayne.drawing");
+            var drawing = new Menu("Drawing Options", "com.iseries.tristana.drawing");
             {
-                drawing.AddItem(new MenuItem("com.iseries.twitch.vayne.drawE", "Draw E Range").SetValue(true));
+                drawing.AddItem(new MenuItem("com.iseries.tristana.drawing.drawW", "Draw W Range").SetValue(false));
+                drawing.AddItem(new MenuItem("com.iseries.tristana.drawing.drawE", "Draw E Range").SetValue(true));
                 root.AddSubMenu(drawing);
             }
 

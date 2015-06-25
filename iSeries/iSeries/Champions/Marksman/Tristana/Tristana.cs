@@ -23,6 +23,7 @@ namespace iSeries.Champions.Marksman.Tristana
 {
     using System;
     using System.Collections.Generic;
+    using System.Drawing;
     using System.Linq;
 
     using iSeries.Champions.Utilities;
@@ -43,6 +44,7 @@ namespace iSeries.Champions.Marksman.Tristana
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
                                                                        { SpellSlot.Q, new Spell(SpellSlot.Q) }, 
+                                                                       { SpellSlot.W, new Spell(SpellSlot.W, 900f) },
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 630f) },
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 630f) }
                                                                    };
@@ -94,12 +96,15 @@ namespace iSeries.Champions.Marksman.Tristana
         /// </param>
         private void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (this.spells[SpellSlot.Q].IsReady()
-                        && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
-                        && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ")
-                        && target.IsValidTarget(ObjectManager.Player.AttackRange))
+            if (target is Obj_AI_Hero && unit.IsMe)
             {
-                this.spells[SpellSlot.Q].Cast();
+
+                if (this.spells[SpellSlot.Q].IsReady()
+                    && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
+                    && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ") && target.IsValidTarget(1000f))
+                {
+                    this.spells[SpellSlot.Q].Cast();
+                }
             }
         }
 
@@ -176,7 +181,14 @@ namespace iSeries.Champions.Marksman.Tristana
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            
+            if (this.GetItemValue<bool>("com.iseries.tristana.drawing.drawE"))
+            {
+                Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
+            }
+            if (this.GetItemValue<bool>("com.iseries.tristana.drawing.drawW"))
+            {
+                Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.W].Range, Color.DarkRed);
+            }
         }
 
         /// <summary>

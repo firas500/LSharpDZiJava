@@ -457,7 +457,7 @@ namespace IKalista
             switch (this.stringListLinks["eDamageType"].Value.SelectedIndex)
             {
                 case 0:
-                    if (target.HasBuff("ColossalStrength"))
+                    if (target.HasBuff("ferocioushowl"))
                     {
                         return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
                     }

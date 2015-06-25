@@ -1091,7 +1091,7 @@ namespace IKalista
                         .FirstOrDefault();
                 if (target != null)
                 {
-                    var stacks = target.GetBuffCount("kalistaexpungemarker");
+                    var stacks = this.spells[SpellSlot.E].GetDamage(target);
                     var damage = Math.Ceiling(stacks * 100 / target.Health);
                     if (damage >= this.sliderLinks["eDeathC"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust"))
                     {

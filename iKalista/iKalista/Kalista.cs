@@ -647,7 +647,7 @@ namespace IKalista
                 this.ProcessLink("minStacks", comboMenu.AddLinkedSlider("Min Stacks E", 10, 5, 20));
                 this.ProcessLink("eDamageReduction", comboMenu.AddLinkedSlider("Damage Reduction", 20, 100, 0));
                 this.ProcessLink("eDeath", comboMenu.AddLinkedBool("E Before Death"));
-                this.ProcessLink("eDeathC", comboMenu.AddLinkedSlider("E Death Stacks", 5, 3, 10));
+                this.ProcessLink("eDeathC", comboMenu.AddLinkedSlider("E Death Damage %", 20, 10));
                 this.ProcessLink("eHealth", comboMenu.AddLinkedSlider("Health To E Death %", 15, 5, 50));
                 this.ProcessLink("saveAllyR", comboMenu.AddLinkedBool("Save Ally with R"));
                 this.ProcessLink("allyPercent", comboMenu.AddLinkedSlider("Save Ally Percentage", 20));
@@ -1092,8 +1092,8 @@ namespace IKalista
                 if (target != null)
                 {
                     var stacks = target.GetBuffCount("kalistaexpungemarker");
-                    if (stacks >= this.sliderLinks["eDeathC"].Value.Value
-                        && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                    var damage = Math.Ceiling(stacks * 100 / target.Health);
+                    if (damage >= this.sliderLinks["eDeathC"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust"))
                     {
                         Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
                     }

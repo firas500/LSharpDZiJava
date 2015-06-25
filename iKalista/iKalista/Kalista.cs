@@ -644,6 +644,7 @@ namespace IKalista
                 this.ProcessLink("useQMin", comboMenu.AddLinkedBool("Q > Minon Combo"));
                 this.ProcessLink("useE", comboMenu.AddLinkedBool("Use E"));
                 this.ProcessLink("eLeaving", comboMenu.AddLinkedBool("Auto E Leaving"));
+                this.ProcessLink("ePercent", comboMenu.AddLinkedSlider("Min Percent to E Leaving", 50, 10));
                 this.ProcessLink("minStacks", comboMenu.AddLinkedSlider("Min Stacks E", 10, 5, 20));
                 this.ProcessLink("eDamageReduction", comboMenu.AddLinkedSlider("Damage Reduction", 20, 100, 0));
                 this.ProcessLink("eDeath", comboMenu.AddLinkedBool("E Before Death"));
@@ -828,8 +829,9 @@ namespace IKalista
                 && this.spells[SpellSlot.E].IsInRange(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
             {
                 var stacks = target.GetBuffCount("kalistaexpungemarker");
+                var damage = Math.Ceiling(this.spells[SpellSlot.E].GetDamage(target) * 100 / target.Health);
 
-                if (BoolLinks["eLeaving"].Value && stacks >= this.sliderLinks["minStacks"].Value.Value
+                if (BoolLinks["eLeaving"].Value && damage >= this.sliderLinks["ePercent"].Value.Value
                     && target.HealthPercent > 20
                     && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
                     > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))

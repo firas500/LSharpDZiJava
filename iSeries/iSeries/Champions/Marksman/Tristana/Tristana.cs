@@ -96,14 +96,23 @@ namespace iSeries.Champions.Marksman.Tristana
         /// </param>
         private void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
-            if (target is Obj_AI_Hero && unit.IsMe)
+            var hero = target as Obj_AI_Hero;
+            if (hero == null || !unit.IsMe)
             {
+                return;
+            }
+            if (this.spells[SpellSlot.Q].IsReady()
+                && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
+                && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ") && hero.IsValidTarget(1000f))
+            {
+                this.spells[SpellSlot.Q].Cast();
+            }
 
-                if (this.spells[SpellSlot.Q].IsReady()
-                    && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
-                    && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ") && target.IsValidTarget(1000f))
+            if (this.GetItemValue<bool>("com.iseries.tristana.combo.useE") && this.spells[SpellSlot.E].IsReady() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                if (hero.IsValidTarget(this.spells[SpellSlot.E].Range))
                 {
-                    this.spells[SpellSlot.Q].Cast();
+                    this.spells[SpellSlot.E].CastOnUnit(hero);
                 }
             }
         }
@@ -128,7 +137,7 @@ namespace iSeries.Champions.Marksman.Tristana
         /// </summary>
         public override void OnCombo()
         {
-            if (this.GetItemValue<bool>("com.iseries.tristana.combo.useE") && this.spells[SpellSlot.E].IsReady())
+            /*if (this.GetItemValue<bool>("com.iseries.tristana.combo.useE") && this.spells[SpellSlot.E].IsReady())
             {
                 var target = TargetSelector.GetTarget(
                     this.spells[SpellSlot.E].Range,
@@ -138,7 +147,7 @@ namespace iSeries.Champions.Marksman.Tristana
                 {
                     this.spells[SpellSlot.E].CastOnUnit(target);
                 }
-            }
+            }*/
 
             if (this.GetItemValue<bool>("com.iseries.tristana.combo.useR") && this.spells[SpellSlot.R].IsReady())
             {

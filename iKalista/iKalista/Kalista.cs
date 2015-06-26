@@ -756,10 +756,10 @@ namespace IKalista
                 HeroManager.Enemies.Where(
                     x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
             {
-                if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source)
-                    && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source) && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
                     this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
 
@@ -826,15 +826,17 @@ namespace IKalista
                 if (BoolLinks["eLeaving"].Value && damage >= this.sliderLinks["ePercent"].Value.Value
                     && target.HealthPercent > 20
                     && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
-                    > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2))
+                    > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2) && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
                     this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
 
-                if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target))
+                if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target) && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                     || (stacks >= this.sliderLinks["minStacks"].Value.Value))
                 {
-                    Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
+                    this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
         }
@@ -916,10 +918,14 @@ namespace IKalista
                 if (rendTarget != null && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     var stackCount = rendTarget.GetBuffCount("kalistaexpungemarker");
-                    if (this.GetRealDamage(rendTarget) > this.GetTargetHealth(rendTarget)
-                        || stackCount >= this.sliderLinks["minStacks"].Value.Value)
+                    if (this.GetRealDamage(rendTarget) > this.GetTargetHealth(rendTarget) || stackCount >= this.sliderLinks["minStacks"].Value.Value)
                     {
+                        if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
+                        {
+                            return;
+                        }
                         this.spells[SpellSlot.E].Cast();
+                        this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                     }
                 }
             }
@@ -940,9 +946,10 @@ namespace IKalista
                         .FirstOrDefault();
 
                 if (minion != null && target != null && this.spells[SpellSlot.E].CanCast(minion)
-                    && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                    && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
-                    Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
+                    this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
         }
@@ -998,9 +1005,10 @@ namespace IKalista
 
             if (BoolLinks["minLC"].Value && harassableMinion != null && rendTarget != null
                 && this.spells[SpellSlot.E].CanCast(harassableMinion) && this.spells[SpellSlot.E].CanCast(rendTarget)
-                && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
             {
                 this.spells[SpellSlot.E].Cast();
+                this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
             }
 
             if (this.spells[SpellSlot.E].IsReady() && BoolLinks["useELC"].Value)
@@ -1009,9 +1017,10 @@ namespace IKalista
                     minions.Count(
                         x => this.spells[SpellSlot.E].CanCast(x) && x.Health < this.spells[SpellSlot.E].GetDamage(x));
 
-                if (count >= this.sliderLinks["eHit"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                if (count >= this.sliderLinks["eHit"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
                     this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
         }
@@ -1087,9 +1096,10 @@ namespace IKalista
                 {
                     var stacks = this.spells[SpellSlot.E].GetDamage(target);
                     var damage = Math.Ceiling(stacks * 100 / target.Health);
-                    if (damage >= this.sliderLinks["eDeathC"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                    if (damage >= this.sliderLinks["eDeathC"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                     {
-                        Utility.DelayAction.Add(Game.Ping + 10, () => this.spells[SpellSlot.E].Cast());
+                        this.spells[SpellSlot.E].Cast();
+                        this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                     }
                 }
             }

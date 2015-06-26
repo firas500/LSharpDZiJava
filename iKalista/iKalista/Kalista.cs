@@ -452,10 +452,9 @@ namespace IKalista
         /// </returns>
         [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1407:ArithmeticExpressionsMustDeclarePrecedence", 
             Justification = "Reviewed. Suppression is OK here.")]
-        private float GetRealDamage(Obj_AI_Base target)
+        private float GetRealDamage(Obj_AI_Hero target)
         {
-            var alistar = target as Obj_AI_Hero;
-            if (alistar != null && (target.HasBuff("ferocioushowl") && alistar.ChampionName == "Alistar"))
+            if (target.HasBuff("ferocioushowl") && target.ChampionName == "Alistar")
             {
                 return this.spells[SpellSlot.E].GetDamage(target) * 0.7f;
             }

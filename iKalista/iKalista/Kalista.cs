@@ -716,8 +716,8 @@ namespace IKalista
         /// </summary>
         private void InitSpells()
         {
-            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
-            this.spells[SpellSlot.R].SetSkillshot(0.50f, 1500, float.MaxValue, false, SkillshotType.SkillshotCircle);
+            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1700f, true, SkillshotType.SkillshotLine);
+            this.spells[SpellSlot.R].SetSkillshot(0.50f, 1500f, float.MaxValue, false, SkillshotType.SkillshotCircle);
         }
 
         /// <summary>
@@ -763,7 +763,7 @@ namespace IKalista
                 }
             }
 
-            var target =
+           /* var target =
                 HeroManager.Enemies.FirstOrDefault(
                     x => this.spells[SpellSlot.Q].IsInRange(x) && this.spells[SpellSlot.Q].GetDamage(x) > x.Health + 10);
 
@@ -776,7 +776,7 @@ namespace IKalista
                 {
                     this.spells[SpellSlot.Q].Cast(target);
                 }
-            }
+            }*/
         }
 
         /// <summary>
@@ -809,7 +809,7 @@ namespace IKalista
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(target);
                 if (prediction.Hitchance >= HitChance.VeryHigh)
                 {
-                    this.spells[SpellSlot.Q].Cast(target);
+                    this.spells[SpellSlot.Q].Cast(prediction.CastPosition);
                 }
                 else if (prediction.Hitchance == HitChance.Collision)
                 {

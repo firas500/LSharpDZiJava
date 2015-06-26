@@ -454,20 +454,13 @@ namespace IKalista
             Justification = "Reviewed. Suppression is OK here.")]
         private float GetRealDamage(Obj_AI_Base target)
         {
-            switch (this.stringListLinks["eDamageType"].Value.SelectedIndex)
+            var alistar = target as Obj_AI_Hero;
+            if (alistar != null && (target.HasBuff("ferocioushowl") && alistar.ChampionName == "Alistar"))
             {
-                case 0:
-                    if (target.HasBuff("ferocioushowl"))
-                    {
-                        return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
-                    }
-
-                    return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
-                case 1:
-                    return this.GetCustomDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
-                default:
-                    return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
             }
+
+            return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;
         }
 
         /// <summary>

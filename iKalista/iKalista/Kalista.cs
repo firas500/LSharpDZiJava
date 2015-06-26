@@ -457,7 +457,7 @@ namespace IKalista
             var alistar = target as Obj_AI_Hero;
             if (alistar != null && (target.HasBuff("ferocioushowl") && alistar.ChampionName == "Alistar"))
             {
-                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
+                return this.spells[SpellSlot.E].GetDamage(target) * 0.7f;
             }
 
             return this.spells[SpellSlot.E].GetDamage(target) - this.sliderLinks["eDamageReduction"].Value.Value;

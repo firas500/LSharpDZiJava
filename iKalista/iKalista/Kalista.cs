@@ -590,8 +590,28 @@ namespace IKalista
                             link.Value.Value.Radius, 
                             link.Value.Value.Color);
                     }
-
                     CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
+
+                    if (BoolLinks["drawPercentage"].Value)
+                    {
+                        foreach (
+                            Obj_AI_Hero source in
+                                HeroManager.Enemies.Where(x => ObjectManager.Player.Distance(x) <= 2000f && !x.IsDead))
+                        {
+
+
+
+                            var currentPercentage = this.GetRealDamage(source) * 100 / this.GetTargetHealth(source);
+
+                            Drawing.DrawText(
+                                Drawing.WorldToScreen(source.Position)[0],
+                                Drawing.WorldToScreen(source.Position)[1],
+                                currentPercentage >= 100 ? Color.DarkRed : Color.White,
+                                currentPercentage >= 100
+                                    ? "Killable With E"
+                                    : "Current Damage: " + currentPercentage + "%");
+                        }
+                    }
                 };
         }
 
@@ -694,6 +714,7 @@ namespace IKalista
                 this.ProcessLink(
                     "drawEDamage", 
                     drawing.AddLinkedCircle("Draw E Damage", true, Color.FromArgb(150, Color.LawnGreen), 0));
+                this.ProcessLink("drawPercentage", drawing.AddLinkedBool("Draw Percentage Damage"));
                 this.ProcessLink(
                     "drawQ", 
                     drawing.AddLinkedCircle(

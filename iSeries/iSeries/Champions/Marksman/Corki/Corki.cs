@@ -165,12 +165,10 @@ namespace iSeries.Champions.Marksman.Corki
 
             if (this.GetItemValue<bool>("com.iseries.corki.combo.useE") && this.spells[SpellSlot.E].IsReady())
             {
-                var target = TargetSelector.GetTarget(
-                    this.spells[SpellSlot.E].Range, 
-                    TargetSelector.DamageType.Physical);
-                if (target.IsValidTarget(this.spells[SpellSlot.E].Range))
+                var target = HeroManager.Enemies.FirstOrDefault(h => h.IsValidTarget(this.spells[SpellSlot.E].Range));
+                if (target.IsValidTarget())
                 {
-                    this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].Cast(target);
                 }
             }
 

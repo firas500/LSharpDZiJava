@@ -65,6 +65,8 @@
   <ItemGroup>
     <Compile Include="Bootstrap.cs" />
     <Compile Include="Champions\Champion.cs" />
+    <Compile Include="Champions\Marksman\Corki\Corki.cs" />
+    <Compile Include="Champions\Marksman\Corki\MenuGenerator.cs" />
     <Compile Include="Champions\Marksman\Draven\Draven.cs" />
     <Compile Include="Champions\Marksman\Draven\MenuGenerator.cs" />
     <Compile Include="Champions\Marksman\Ezreal\Ezreal.cs" />

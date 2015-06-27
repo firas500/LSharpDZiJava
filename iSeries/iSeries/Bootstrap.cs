@@ -26,6 +26,7 @@ namespace iSeries
     using System;
     using System.Collections.Generic;
 
+    using iSeries.Champions.Marksman.Corki;
     using iSeries.Champions.Marksman.Draven;
     using iSeries.Champions.Marksman.Ezreal;
     using iSeries.Champions.Marksman.Graves;
@@ -62,6 +63,7 @@ namespace iSeries
                                                                                { "Sivir", () => new Sivir().Invoke() }, 
                                                                                { "Vayne", () => new Vayne().Invoke() }, 
                                                                                { "Tristana", () => new Tristana().Invoke() },
+                                                                               { "Corki", () => new Corki().Invoke() }
                                                                            };
 
         /// <summary>

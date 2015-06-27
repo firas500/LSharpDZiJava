@@ -160,6 +160,7 @@ namespace iSeries.Champions.Marksman.Kalista
         public float GetActualHealth(Obj_AI_Base target)
         {
             var result = target.Health;
+
             if (target.AttackShield > 0)
             {
                 result += target.AttackShield;
@@ -328,15 +329,14 @@ namespace iSeries.Champions.Marksman.Kalista
                     }
                 }
 
-                if (this.GetItemValue<bool>("com.iseries.kalista.drawing.drawStacksKill"))
+                if (this.GetItemValue<bool>("com.iseries.kalista.drawing.drawPercentage"))
                 {
-                    var stacksToKill = Math.Ceiling(source.Health / this.spells[SpellSlot.E].GetDamage(source)) - 1;
+                    var currentPercentage = this.GetActualDamage(source) * 100 / this.GetActualHealth(source);
 
                     Drawing.DrawText(
                         Drawing.WorldToScreen(source.Position)[0], 
                         Drawing.WorldToScreen(source.Position)[1], 
-                        Color.White, 
-                        "Stack Kill: " + stacksToKill);
+                        Color.White, currentPercentage >= 100 ? "Killable With E" : "Current Damage: "+currentPercentage);
                 }
             }
         }

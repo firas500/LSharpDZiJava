@@ -163,23 +163,19 @@ namespace IKalista
         ///     Gets the targets current health including shield damage
         /// </summary>
         /// <param name="target"> The Target </param>
-        /// <param name="includeShield">Include shield</param>
         /// <returns>
         ///     <see cref="float" />
         /// </returns>
-        public float GetTargetHealth(Obj_AI_Hero target, bool includeShield = true)
+        public float GetTargetHealth(Obj_AI_Hero target)
         {
             var result = target.Health;
-            if (includeShield)
+            if (target.AttackShield > 0)
             {
-                if (target.AttackShield > 0)
-                {
-                    result += target.AttackShield;
-                }
-                else if (target.MagicShield > 0)
-                {
-                    result += target.MagicShield;
-                }
+                result += target.AttackShield;
+            }
+            else if (target.MagicShield > 0)
+            {
+                result += target.MagicShield;
             }
 
             return result;
@@ -590,23 +586,20 @@ namespace IKalista
                             link.Value.Value.Radius, 
                             link.Value.Value.Color);
                     }
+
                     CustomDamageIndicator.DrawingColor = this.circleLinks["drawEDamage"].Value.Color;
 
                     if (BoolLinks["drawPercentage"].Value)
                     {
-                        foreach (
-                            Obj_AI_Hero source in
-                                HeroManager.Enemies.Where(x => ObjectManager.Player.Distance(x) <= 2000f && !x.IsDead))
+                        foreach (var source in
+                            HeroManager.Enemies.Where(x => ObjectManager.Player.Distance(x) <= 2000f && !x.IsDead))
                         {
-
-
-
                             var currentPercentage = this.GetRealDamage(source) * 100 / this.GetTargetHealth(source);
 
                             Drawing.DrawText(
-                                Drawing.WorldToScreen(source.Position)[0],
-                                Drawing.WorldToScreen(source.Position)[1],
-                                currentPercentage >= 100 ? Color.DarkRed : Color.White,
+                                Drawing.WorldToScreen(source.Position)[0], 
+                                Drawing.WorldToScreen(source.Position)[1], 
+                                currentPercentage >= 100 ? Color.DarkRed : Color.White, 
                                 currentPercentage >= 100
                                     ? "Killable With E"
                                     : "Current Damage: " + currentPercentage + "%");
@@ -777,14 +770,16 @@ namespace IKalista
                 HeroManager.Enemies.Where(
                     x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
             {
-                if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source) && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source)
+                    && !ObjectManager.Player.HasBuff("summonerexhaust")
+                    && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
             }
 
-           /* var target =
+            /* var target =
                 HeroManager.Enemies.FirstOrDefault(
                     x => this.spells[SpellSlot.Q].IsInRange(x) && this.spells[SpellSlot.Q].GetDamage(x) > x.Health + 10);
 
@@ -847,13 +842,15 @@ namespace IKalista
                 if (BoolLinks["eLeaving"].Value && damage >= this.sliderLinks["ePercent"].Value.Value
                     && target.HealthPercent > 20
                     && target.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true)
-                    > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2) && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                    > Math.Pow(this.spells[SpellSlot.E].Range * 0.8, 2)
+                    && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
 
-                if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target) && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target)
+                     && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                     || (stacks >= this.sliderLinks["minStacks"].Value.Value))
                 {
                     this.spells[SpellSlot.E].Cast();
@@ -939,12 +936,14 @@ namespace IKalista
                 if (rendTarget != null && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     var stackCount = rendTarget.GetBuffCount("kalistaexpungemarker");
-                    if (this.GetRealDamage(rendTarget) > this.GetTargetHealth(rendTarget) || stackCount >= this.sliderLinks["minStacks"].Value.Value)
+                    if (this.GetRealDamage(rendTarget) > this.GetTargetHealth(rendTarget)
+                        || stackCount >= this.sliderLinks["minStacks"].Value.Value)
                     {
                         if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
                         {
                             return;
                         }
+
                         this.spells[SpellSlot.E].Cast();
                         this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                     }
@@ -967,7 +966,8 @@ namespace IKalista
                         .FirstOrDefault();
 
                 if (minion != null && target != null && this.spells[SpellSlot.E].CanCast(minion)
-                    && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                    && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust")
+                    && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
@@ -1026,7 +1026,8 @@ namespace IKalista
 
             if (BoolLinks["minLC"].Value && harassableMinion != null && rendTarget != null
                 && this.spells[SpellSlot.E].CanCast(harassableMinion) && this.spells[SpellSlot.E].CanCast(rendTarget)
-                && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                && !ObjectManager.Player.HasBuff("summonerexhaust")
+                && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
             {
                 this.spells[SpellSlot.E].Cast();
                 this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
@@ -1038,7 +1039,8 @@ namespace IKalista
                     minions.Count(
                         x => this.spells[SpellSlot.E].CanCast(x) && x.Health < this.spells[SpellSlot.E].GetDamage(x));
 
-                if (count >= this.sliderLinks["eHit"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                if (count >= this.sliderLinks["eHit"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust")
+                    && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                 {
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
@@ -1117,7 +1119,9 @@ namespace IKalista
                 {
                     var stacks = this.spells[SpellSlot.E].GetDamage(target);
                     var damage = Math.Ceiling(stacks * 100 / target.Health);
-                    if (damage >= this.sliderLinks["eDeathC"].Value.Value && !ObjectManager.Player.HasBuff("summonerexhaust") && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                    if (damage >= this.sliderLinks["eDeathC"].Value.Value
+                        && !ObjectManager.Player.HasBuff("summonerexhaust")
+                        && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                     {
                         this.spells[SpellSlot.E].Cast();
                         this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;

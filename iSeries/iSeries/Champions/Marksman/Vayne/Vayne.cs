@@ -52,6 +52,7 @@ namespace iSeries.Champions.Marksman.Vayne
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 590f) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R) }
                                                                    };
+        private static float LastMoveC;
 
         #endregion
 
@@ -148,9 +149,19 @@ namespace iSeries.Champions.Marksman.Vayne
         /// </param>
         public override void OnDraw(EventArgs args)
         {
-            if (this.GetItemValue<bool>("com.iseries.twitch.vayne.drawE"))
+            var drakeWallQPos = new Vector2(11514, 4462);
+
+            if (this.GetItemValue<bool>("com.iseries.vayne.drawE"))
             {
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, this.spells[SpellSlot.E].Range, Color.Red);
+            }
+
+            if (GetItemValue<bool>("com.iseries.vayne.drawSpots"))
+            {
+                if (ObjectManager.Player.Distance(drakeWallQPos) <= 1500f && IsSummonersRift())
+                {
+                    Render.Circle.DrawCircle(drakeWallQPos.To3D2(), 65f, Color.AliceBlue);
+                }
             }
         }
 
@@ -262,6 +273,11 @@ namespace iSeries.Champions.Marksman.Vayne
                 case Orbwalking.OrbwalkingMode.Mixed:
                     this.OnHarass();
                     break;
+            }
+
+            if (GetItemValue<KeyBind>("com.iseries.vayne.misc.wt").Active)
+            {
+                WallTumble();
             }
         }
 
@@ -418,6 +434,46 @@ namespace iSeries.Champions.Marksman.Vayne
                         }
                     });
             }
+        }
+
+        private void WallTumble()
+        {
+            if (!IsSummonersRift())
+            {
+                return;
+            }
+
+            Vector2 drakeWallQPos = new Vector2(11514, 4462);
+
+            if (ObjectManager.Player.Position.X < 12000 || ObjectManager.Player.Position.X > 12070 || ObjectManager.Player.Position.Y < 4800 ||
+                ObjectManager.Player.Position.Y > 4872)
+            {
+                MoveToLimited(new Vector2(12050, 4827).To3D());
+            }
+            else
+            {
+                MoveToLimited(new Vector2(12050, 4827).To3D());
+                spells[SpellSlot.Q].Cast(drakeWallQPos, true);
+            }
+        }
+        private bool IsSummonersRift()
+        {
+            var map = LeagueSharp.Common.Utility.Map.GetMap();
+            if (map != null && map.Type == LeagueSharp.Common.Utility.Map.MapType.SummonersRift)
+            {
+                return true;
+            }
+            return false;
+        }
+
+        private void MoveToLimited(Vector3 where)
+        {
+            if (Environment.TickCount - LastMoveC < 80)
+            {
+                return;
+            }
+            LastMoveC = Environment.TickCount;
+            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, where);
         }
 
         #endregion

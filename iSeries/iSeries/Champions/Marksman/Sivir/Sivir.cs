@@ -68,7 +68,7 @@ namespace iSeries.Champions.Marksman.Sivir
                     if (this.spells[SpellSlot.W].IsReady()
                         && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
                         && this.GetItemValue<bool>("com.iseries.sivir.combo.useW")
-                        && target.IsValidTarget(ObjectManager.Player.AttackRange)
+                        && target.IsValidTarget(Orbwalking.GetRealAutoAttackRange(target))
                         && ObjectManager.Player.ManaPercent
                         >= this.GetItemValue<Slider>("com.iseries.sivir.combo.wmana").Value)
                     {

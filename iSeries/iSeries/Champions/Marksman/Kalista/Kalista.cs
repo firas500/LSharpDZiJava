@@ -33,7 +33,6 @@ namespace iSeries.Champions.Marksman.Kalista
 
     using SharpDX;
 
-    using Collision = LeagueSharp.Common.Collision;
     using Color = System.Drawing.Color;
 
     /// <summary>
@@ -420,8 +419,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         }
                     }
 
-                    if (killable >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useQNum").Value
-                        && !this.Player.IsWindingUp && !this.Player.IsDashing())
+                    if (killable >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useQNum").Value && !this.Player.IsWindingUp && !this.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].Cast(source.ServerPosition);
                         break;
@@ -583,7 +581,7 @@ namespace iSeries.Champions.Marksman.Kalista
         {
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
             {
-                Orbwalking.ResetAutoAttackTimer();
+                Utility.DelayAction.Add(0xFA, Orbwalking.ResetAutoAttackTimer);
             }
 
             if (sender.IsEnemy)

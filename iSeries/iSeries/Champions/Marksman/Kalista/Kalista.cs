@@ -23,6 +23,7 @@ namespace iSeries.Champions.Marksman.Kalista
 {
     using System;
     using System.Collections.Generic;
+    using System.Diagnostics.CodeAnalysis;
     using System.Linq;
 
     using iSeries.Champions.Utilities;
@@ -576,6 +577,8 @@ namespace iSeries.Champions.Marksman.Kalista
         /// <param name="args">
         ///     The Arguments
         /// </param>
+        [SuppressMessage("ReSharper", "BitwiseOperatorOnEnumWithoutFlags")]
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1404:CodeAnalysisSuppressionMustHaveJustification", Justification = "Reviewed. Suppression is OK here.")]
         private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
@@ -618,7 +621,6 @@ namespace iSeries.Champions.Marksman.Kalista
                                 Game.Time + 2, 
                                 (float)attacker.GetSummonerSpellDamage(this.SoulBound, Damage.SummonerSpell.Ignite));
                         }
-                        // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
                         else if (slot.HasFlag(SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)
                                  && ((args.Target != null && args.Target.NetworkId == this.SoulBound.NetworkId)
                                      || args.End.Distance(this.SoulBound.ServerPosition, true)

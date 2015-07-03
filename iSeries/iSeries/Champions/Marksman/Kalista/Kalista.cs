@@ -57,7 +57,7 @@ namespace iSeries.Champions.Marksman.Kalista
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
-                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q, 1130) }, 
+                                                                       { SpellSlot.Q, new Spell(SpellSlot.Q, 1150) }, 
                                                                        { SpellSlot.W, new Spell(SpellSlot.W, 5200) }, 
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 950) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 1200) }
@@ -76,7 +76,7 @@ namespace iSeries.Champions.Marksman.Kalista
             this.CreateMenu = MenuGenerator.Generate;
 
             // Spell initialization
-            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1600f, true, SkillshotType.SkillshotLine);
+            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 40f, 1200f, true, SkillshotType.SkillshotLine);
             this.spells[SpellSlot.R].SetSkillshot(0.50f, 1500, float.MaxValue, false, SkillshotType.SkillshotCircle);
 
             // Useful shit
@@ -88,8 +88,7 @@ namespace iSeries.Champions.Marksman.Kalista
                         return;
                     }
 
-                    if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion)
-                        && minion.Health <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
+                    if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion) && minion.Health <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
                     {
                         if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
                         {
@@ -581,7 +580,7 @@ namespace iSeries.Champions.Marksman.Kalista
         {
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
             {
-                Utility.DelayAction.Add(0xFA, Orbwalking.ResetAutoAttackTimer);
+                Utility.DelayAction.Add(0x7D, Orbwalking.ResetAutoAttackTimer);
             }
 
             if (sender.IsEnemy)
@@ -720,13 +719,17 @@ namespace iSeries.Champions.Marksman.Kalista
                     this.spells[SpellSlot.Q].IsInRange(x)
                     && this.GetActualHealth(x) < this.spells[SpellSlot.Q].GetDamage(x)))
             {
-                if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
-                    || hero.HasBuffOfType(BuffType.SpellShield))
+                if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity) || hero.HasBuffOfType(BuffType.SpellShield) || this.spells[SpellSlot.E].IsReady())
                 {
                     return;
                 }
 
-                this.spells[SpellSlot.Q].Cast(hero);
+                var prediction = this.spells[SpellSlot.Q].GetPrediction(hero);
+
+                if (prediction.Hitchance >= HitChance.VeryHigh)
+                {
+                    this.spells[SpellSlot.Q].Cast(prediction.CastPosition);
+                }
             }
 
             if (this.GetItemValue<bool>("com.iseries.kalista.misc.mobsteal") && this.spells[SpellSlot.E].IsReady())

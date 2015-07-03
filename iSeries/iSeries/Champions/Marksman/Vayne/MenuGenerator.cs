@@ -62,12 +62,14 @@ namespace iSeries.Champions.Marksman.Vayne
             {
                 misc.AddItem(new MenuItem("com.iseries.vayne.misc.gapcloser", "Anti Gapcloser").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.vayne.misc.interrupter", "Spell Interrupter").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.vayne.misc.wt", "Wall Tumble").SetValue(new KeyBind("Y".ToCharArray()[0],KeyBindType.Press)));
                 root.AddSubMenu(misc);
             }
 
             var drawing = new Menu("Drawing Options", "com.iseries.vayne.drawing");
             {
-                drawing.AddItem(new MenuItem("com.iseries.twitch.vayne.drawE", "Draw E Range").SetValue(true));
+                drawing.AddItem(new MenuItem("com.iseries.vayne.drawE", "Draw E Range").SetValue(true));
+                drawing.AddItem(new MenuItem("com.iseries.vayne.drawSpots", "Draw WallTumble Spots").SetValue(true));
                 root.AddSubMenu(drawing);
             }
 

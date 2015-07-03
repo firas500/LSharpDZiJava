@@ -484,24 +484,6 @@ namespace iSeries.Champions.Marksman.Kalista
             this.OnUpdateFunctions();
         }
 
-        /// <summary>
-        ///     Credits daniel, i suck at math
-        /// </summary>
-        /// <param name="target">
-        ///     The Target
-        /// </param>
-        public void OpDrawingShit(Obj_AI_Base target)
-        {
-            if (target.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsReady())
-            {
-                var damagePerSpear = new[] { 10, 14, 19, 25, 32 };
-                var additionalDamage = new[] { 0.2f, 0.225f, 0.25f, 0.275f, 0.3f };
-
-                var calculation = target.Health / damagePerSpear[this.Player.Level]
-                                  + additionalDamage[this.Player.Level];
-            }
-        }
-
         #endregion
 
         #region Methods
@@ -549,34 +531,6 @@ namespace iSeries.Champions.Marksman.Kalista
         }
 
         /// <summary>
-        ///     TODO The get collision minions.
-        /// </summary>
-        /// <param name="source">
-        ///     TODO The source.
-        /// </param>
-        /// <param name="targetPosition">
-        ///     TODO The target position.
-        /// </param>
-        /// <returns>
-        ///     a list of minions
-        /// </returns>
-        private IEnumerable<Obj_AI_Base> GetCollisionMinions(Obj_AI_Base source, Vector3 targetPosition)
-        {
-            var input = new PredictionInput
-                            {
-                                Unit = source, Radius = this.spells[SpellSlot.Q].Width, 
-                                Delay = this.spells[SpellSlot.Q].Delay, Speed = this.spells[SpellSlot.Q].Speed, 
-                            };
-
-            input.CollisionObjects[0] = CollisionableObjects.Minions;
-
-            return
-                Collision.GetCollision(new List<Vector3> { targetPosition }, input)
-                    .OrderBy(obj => obj.Distance(source))
-                    .ToList();
-        }
-
-        /// <summary>
         ///     Gets the damage to drake
         /// </summary>
         /// <param name="target">
@@ -592,44 +546,6 @@ namespace iSeries.Champions.Marksman.Kalista
                        ? this.spells[SpellSlot.E].GetDamage(target)
                          * (1 - (.07f * this.Player.GetBuffCount("s5test_dragonslayerbuff")))
                        : this.spells[SpellSlot.E].GetDamage(target);
-        }
-
-        /// <summary>
-        ///     Gets the real damage for the spell
-        /// </summary>
-        /// <param name="target">
-        ///     The Target
-        /// </param>
-        /// <returns>
-        ///     The <see cref="float" />.
-        /// </returns>
-        private float GetRealDamage(Obj_AI_Base target)
-        {
-            var baseDamage = new[] { 20, 30, 40, 50, 60 };
-            var baseMultiplier = new[] { 0.6, 0.6, 0.6, 0.6, 0.6 };
-
-            var baseSpearDamage = new[] { 10, 14, 19, 25, 32 };
-            var spearMultiplier = new[] { 0.2, 0.225, 0.25, 0.275, 0.3 };
-
-            var buff =
-                target.Buffs.Find(x => x.Caster.IsMe && x.IsValidBuff() && x.DisplayName == "KalistaExpungeMarker");
-
-            if (buff != null)
-            {
-                var totalDamage = baseDamage[this.spells[SpellSlot.E].Level - 1]
-                                  + baseMultiplier[this.spells[SpellSlot.E].Level - 1] * this.Player.TotalAttackDamage()
-                                  + (buff.Count - 1)
-                                  * (baseSpearDamage[this.spells[SpellSlot.E].Level - 1]
-                                     + spearMultiplier[this.spells[SpellSlot.E].Level - 1]
-                                     * this.Player.TotalAttackDamage());
-                return
-                    (float)
-                    (100
-                     / (100 + (target.Armor * this.Player.PercentArmorPenetrationMod)
-                        - this.Player.FlatArmorPenetrationMod) * totalDamage);
-            }
-
-            return 0;
         }
 
         /// <summary>
@@ -705,6 +621,7 @@ namespace iSeries.Champions.Marksman.Kalista
                                 Game.Time + 2, 
                                 (float)attacker.GetSummonerSpellDamage(this.SoulBound, Damage.SummonerSpell.Ignite));
                         }
+                        // ReSharper disable once BitwiseOperatorOnEnumWithoutFlags
                         else if (slot.HasFlag(SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)
                                  && ((args.Target != null && args.Target.NetworkId == this.SoulBound.NetworkId)
                                      || args.End.Distance(this.SoulBound.ServerPosition, true)

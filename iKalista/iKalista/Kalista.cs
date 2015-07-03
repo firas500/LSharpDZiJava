@@ -730,7 +730,7 @@ namespace IKalista
         /// </summary>
         private void InitSpells()
         {
-            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 60f, 1700f, true, SkillshotType.SkillshotLine);
+            this.spells[SpellSlot.Q].SetSkillshot(0.25f, 40f, 1200f, true, SkillshotType.SkillshotLine);
             this.spells[SpellSlot.R].SetSkillshot(0.50f, 1500f, float.MaxValue, false, SkillshotType.SkillshotCircle);
         }
 

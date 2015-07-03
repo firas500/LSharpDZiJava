@@ -166,10 +166,10 @@ namespace iSeries.Champions.Marksman.Kalista
                 result += target.AttackShield;
             }
             
-            if (target.MagicShield > 0)
-            {
-                result += target.MagicShield;
-            }
+            //if (target.MagicShield > 0)
+            //{
+            //    result += target.MagicShield;
+            //}
 
             return result;
         }

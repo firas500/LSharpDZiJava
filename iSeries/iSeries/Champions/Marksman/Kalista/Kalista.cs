@@ -89,7 +89,8 @@ namespace iSeries.Champions.Marksman.Kalista
                         return;
                     }
 
-                    if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion) && minion.Health <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
+                    if (this.spells[SpellSlot.E].CanCast((Obj_AI_Base)minion)
+                        && minion.Health <= this.spells[SpellSlot.E].GetDamage((Obj_AI_Base)minion))
                     {
                         if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
                         {
@@ -98,6 +99,13 @@ namespace iSeries.Champions.Marksman.Kalista
 
                         this.spells[SpellSlot.E].Cast();
                         this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
+                    }
+                };
+            Spellbook.OnCastSpell += (sender, args) =>
+                {
+                    if (sender.Owner.IsMe && args.Slot == SpellSlot.Q && ObjectManager.Player.IsDashing())
+                    {
+                        args.Process = false;
                     }
                 };
             Obj_AI_Base.OnProcessSpellCast += this.OnProcessSpellCast;
@@ -414,7 +422,8 @@ namespace iSeries.Champions.Marksman.Kalista
                         }
                     }
 
-                    if (killable >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useQNum").Value && !this.Player.IsWindingUp && !this.Player.IsDashing())
+                    if (killable >= this.GetItemValue<Slider>("com.iseries.kalista.laneclear.useQNum").Value
+                        && !this.Player.IsWindingUp && !this.Player.IsDashing())
                     {
                         this.spells[SpellSlot.Q].Cast(source.ServerPosition);
                         break;
@@ -573,7 +582,8 @@ namespace iSeries.Champions.Marksman.Kalista
         ///     The Arguments
         /// </param>
         [SuppressMessage("ReSharper", "BitwiseOperatorOnEnumWithoutFlags")]
-        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1404:CodeAnalysisSuppressionMustHaveJustification", Justification = "Reviewed. Suppression is OK here.")]
+        [SuppressMessage("StyleCop.CSharp.MaintainabilityRules", "SA1404:CodeAnalysisSuppressionMustHaveJustification", 
+            Justification = "Reviewed. Suppression is OK here.")]
         private void OnProcessSpellCast(Obj_AI_Base sender, GameObjectProcessSpellCastEventArgs args)
         {
             if (sender.IsMe && args.SData.Name == "KalistaExpungeWrapper")
@@ -716,7 +726,8 @@ namespace iSeries.Champions.Marksman.Kalista
                     this.spells[SpellSlot.Q].IsInRange(x)
                     && this.GetActualHealth(x) < this.spells[SpellSlot.Q].GetDamage(x)))
             {
-                if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity) || hero.HasBuffOfType(BuffType.SpellShield) || this.spells[SpellSlot.E].IsReady())
+                if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
+                    || hero.HasBuffOfType(BuffType.SpellShield) || this.spells[SpellSlot.E].IsReady())
                 {
                     return;
                 }

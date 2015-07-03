@@ -15,10 +15,8 @@
 //             You should have received a copy of the GNU General Public License
 //             along with this program.  If not, see <http://www.gnu.org/licenses/>.
 // </copyright>
-// <summary>
-//   The Champion Class
-// </summary>
 // --------------------------------------------------------------------------------------------------------------------
+
 namespace iSeries.Champions.Marksman.Vayne
 {
     using System;
@@ -52,7 +50,11 @@ namespace iSeries.Champions.Marksman.Vayne
                                                                        { SpellSlot.E, new Spell(SpellSlot.E, 590f) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R) }
                                                                    };
-        private static float LastMoveC;
+
+        /// <summary>
+        ///     The Last Move Command Time
+        /// </summary>
+        private static float lastMoveT;
 
         #endregion
 
@@ -142,10 +144,10 @@ namespace iSeries.Champions.Marksman.Vayne
         }
 
         /// <summary>
-        ///     <c>OnDraw</c> subscribed event function.
+        /// <c>OnDraw</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnDraw(EventArgs args)
         {
@@ -156,9 +158,9 @@ namespace iSeries.Champions.Marksman.Vayne
                 Render.Circle.DrawCircle(ObjectManager.Player.Position, this.spells[SpellSlot.E].Range, Color.Red);
             }
 
-            if (GetItemValue<bool>("com.iseries.vayne.drawSpots"))
+            if (this.GetItemValue<bool>("com.iseries.vayne.drawSpots"))
             {
-                if (ObjectManager.Player.Distance(drakeWallQPos) <= 1500f && IsSummonersRift())
+                if (ObjectManager.Player.Distance(drakeWallQPos) <= 1500f && this.IsSummonersRift())
                 {
                     Render.Circle.DrawCircle(drakeWallQPos.To3D2(), 65f, Color.AliceBlue);
                 }
@@ -198,16 +200,16 @@ namespace iSeries.Champions.Marksman.Vayne
         }
 
         /// <summary>
-        /// TODO The check condemn.
+        ///     Checks the Condemn
         /// </summary>
         /// <param name="fromPosition">
-        /// TODO The from position.
+        ///     From Position
         /// </param>
         /// <param name="target">
-        /// TODO The target.
+        ///     The target
         /// </param>
         /// <returns>
-        /// The <see cref="bool"/>.
+        ///     The <see cref="bool"/>.
         /// </returns>
         private bool CheckCondemn(Vector3 fromPosition, out Obj_AI_Hero target)
         {
@@ -216,6 +218,7 @@ namespace iSeries.Champions.Marksman.Vayne
                 target = null;
                 return false;
             }
+
             if (
                 !HeroManager.Enemies.Any(
                     h =>
@@ -246,6 +249,7 @@ namespace iSeries.Champions.Marksman.Vayne
                     }
                 }
             }
+
             target = null;
             return false;
         }
@@ -258,10 +262,10 @@ namespace iSeries.Champions.Marksman.Vayne
         }
 
         /// <summary>
-        ///     <c>OnUpdate</c> subscribed event function.
+        /// <c>OnUpdate</c> subscribed event function.
         /// </summary>
         /// <param name="args">
-        ///     The event data
+        /// The event data
         /// </param>
         public override void OnUpdate(EventArgs args)
         {
@@ -275,20 +279,20 @@ namespace iSeries.Champions.Marksman.Vayne
                     break;
             }
 
-            if (GetItemValue<KeyBind>("com.iseries.vayne.misc.wt").Active)
+            if (this.GetItemValue<KeyBind>("com.iseries.vayne.misc.wt").Active)
             {
-                WallTumble();
+                this.WallTumble();
             }
         }
 
         /// <summary>
-        ///     The After
+        /// The After
         /// </summary>
         /// <param name="unit">
-        ///     The Unit
+        /// The Unit
         /// </param>
         /// <param name="target">
-        ///     The Target
+        /// The Target
         /// </param>
         public void OrbwalkingAfterAttack(AttackableUnit unit, AttackableUnit target)
         {
@@ -304,14 +308,14 @@ namespace iSeries.Champions.Marksman.Vayne
                 case Orbwalking.OrbwalkingMode.Combo:
                     if (this.GetItemValue<bool>("com.iseries.vayne.combo.useQ"))
                     {
-                        this.CastQE((Obj_AI_Hero) target);
+                        this.CastQe((Obj_AI_Hero) target);
                     }
 
                     break;
                 case Orbwalking.OrbwalkingMode.Mixed:
                     if (this.GetItemValue<bool>("com.iseries.vayne.harass.useQ"))
                     {
-                        this.CastQE((Obj_AI_Hero)target);
+                        this.CastQe((Obj_AI_Hero)target);
                         Utility.DelayAction.Add((int)(Game.Ping / 2f + 250 + 325), Orbwalking.ResetAutoAttackTimer);
                     }
 
@@ -353,35 +357,13 @@ namespace iSeries.Champions.Marksman.Vayne
         #region Methods
 
         /// <summary>
-        ///     TODO The cast tumble.
-        /// </summary>
-        /// <param name="target">
-        ///     TODO The target.
-        /// </param>
-        private void CastTumble(Obj_AI_Base target)
-        {
-            if (!this.spells[SpellSlot.Q].IsReady())
-            {
-                return;
-            }
-
-            var positionAfter = this.Player.ServerPosition.To2D().Extend(Game.CursorPos.To2D(), 300f).To3D();
-            var distanceAfterTumble = Vector3.DistanceSquared(positionAfter, target.ServerPosition);
-
-            if (distanceAfterTumble <= 550 * 550 && distanceAfterTumble >= 100 * 100 && PositionHelper.IsSafePosition(positionAfter))
-            {
-                this.spells[SpellSlot.Q].Cast(Game.CursorPos);
-            }
-        }
-
-        /// <summary>
-        /// TODO The cast tumble.
+        ///     Cast tumble to the given Position
         /// </summary>
         /// <param name="position">
-        /// TODO The position.
+        ///     The Position
         /// </param>
         /// <param name="target">
-        /// TODO The target.
+        ///     The Target
         /// </param>
         private void CastTumble(Vector3 position, Obj_AI_Base target)
         {
@@ -395,11 +377,17 @@ namespace iSeries.Champions.Marksman.Vayne
 
             if (distanceAfterTumble <= 550 * 550 && distanceAfterTumble >= 100 * 100 && PositionHelper.IsSafePosition(positionAfter))
             {
-                this.spells[SpellSlot.Q].Cast(Game.CursorPos);
+                this.spells[SpellSlot.Q].Cast(position);
             }
         }
 
-        private void CastQE(Obj_AI_Base target)
+        /// <summary>
+        ///     Casts Q and E using certain position.
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        private void CastQe(Obj_AI_Base target)
         {
             var myPosition = Game.CursorPos;
             Obj_AI_Hero myTarget = null;
@@ -412,11 +400,13 @@ namespace iSeries.Champions.Marksman.Vayne
                 {
                     var angleRad = Geometry.DegreeToRadian(i);
                     var rotatedPosition = ObjectManager.Player.Position.To2D() + (300f * direction.Rotated(angleRad));
-                    if (this.CheckCondemn(rotatedPosition.To3D(), out myTarget) && PositionHelper.IsSafePosition(rotatedPosition.To3D()))
+                    if (!this.CheckCondemn(rotatedPosition.To3D(), out myTarget) || !PositionHelper.IsSafePosition(rotatedPosition.To3D()))
                     {
-                        myPosition = rotatedPosition.To3D();
-                        break;
+                        continue;
                     }
+
+                    myPosition = rotatedPosition.To3D();
+                    break;
                 }
             }
 
@@ -425,55 +415,73 @@ namespace iSeries.Champions.Marksman.Vayne
             if (myPosition != Game.CursorPos && myTarget != null && myTarget.IsValidTarget(300f + this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsReady())
             {
                 Utility.DelayAction.Add(
-                    (int)(Game.Ping / 2f + this.spells[SpellSlot.Q].Delay * 1000 + 300f / 1500f + 50f),
+                    (int)(Game.Ping / 2f + this.spells[SpellSlot.Q].Delay * 1000 + 300f / 1500f + 50f), 
                     () =>
                         {
                         if (!this.spells[SpellSlot.Q].IsReady())
                         {
-                            this.spells[SpellSlot.E].Cast(myTarget);
+                            this.spells[SpellSlot.E].CastOnUnit(myTarget);
                         }
                     });
             }
         }
 
+        /// <summary>
+        ///     Wall Tumble
+        /// </summary>
         private void WallTumble()
         {
-            if (!IsSummonersRift())
+            if (!this.IsSummonersRift())
             {
                 return;
             }
 
-            Vector2 drakeWallQPos = new Vector2(11514, 4462);
+            var drakeWallQPos = new Vector2(11514, 4462);
 
             if (ObjectManager.Player.Position.X < 12000 || ObjectManager.Player.Position.X > 12070 || ObjectManager.Player.Position.Y < 4800 ||
                 ObjectManager.Player.Position.Y > 4872)
             {
-                MoveToLimited(new Vector2(12050, 4827).To3D());
+                this.MoveToLimited(new Vector2(12050, 4827).To3D());
             }
             else
             {
-                MoveToLimited(new Vector2(12050, 4827).To3D());
-                spells[SpellSlot.Q].Cast(drakeWallQPos, true);
+                this.MoveToLimited(new Vector2(12050, 4827).To3D());
+                this.spells[SpellSlot.Q].Cast(drakeWallQPos, true);
             }
         }
+
+        /// <summary>
+        ///     Checks the map type
+        /// </summary>
+        /// <returns>
+        ///     The <see cref="bool"/>.
+        /// </returns>
         private bool IsSummonersRift()
         {
-            var map = LeagueSharp.Common.Utility.Map.GetMap();
-            if (map != null && map.Type == LeagueSharp.Common.Utility.Map.MapType.SummonersRift)
+            var map = Utility.Map.GetMap();
+            if (map != null && map.Type == Utility.Map.MapType.SummonersRift)
             {
                 return true;
             }
+
             return false;
         }
 
-        private void MoveToLimited(Vector3 where)
+        /// <summary>
+        ///     Move Command?
+        /// </summary>
+        /// <param name="position">
+        ///     The Position to move
+        /// </param>
+        private void MoveToLimited(Vector3 position)
         {
-            if (Environment.TickCount - LastMoveC < 80)
+            if (Environment.TickCount - lastMoveT < 80)
             {
                 return;
             }
-            LastMoveC = Environment.TickCount;
-            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, where);
+
+            lastMoveT = Environment.TickCount;
+            ObjectManager.Player.IssueOrder(GameObjectOrder.MoveTo, position);
         }
 
         #endregion

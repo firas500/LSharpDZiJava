@@ -54,7 +54,7 @@ namespace iSeries.Champions.Marksman.Kalista
         private readonly Dictionary<float, float> instantDamage = new Dictionary<float, float>();
 
         /// <summary>
-        ///     The dictionary to call the Spell slot and the Spell Class
+        ///     The dictionary to call the Spell Slot and the Spell Class
         /// </summary>
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
@@ -593,48 +593,50 @@ namespace iSeries.Champions.Marksman.Kalista
 
             if (sender.IsEnemy)
             {
-                if (this.SoulBound != null && this.GetItemValue<bool>("com.iseries.kalista.misc.saveAlly"))
+                if (this.SoulBound == null || !this.GetItemValue<bool>("com.iseries.kalista.misc.saveAlly"))
                 {
-                    if ((!(sender is Obj_AI_Hero) || args.SData.IsAutoAttack()) && args.Target != null
+                    return;
+                }
+
+                if ((!(sender is Obj_AI_Hero) || args.SData.IsAutoAttack()) && args.Target != null
+                    && args.Target.NetworkId == this.SoulBound.NetworkId)
+                {
+                    this.incomingDamage.Add(
+                        this.SoulBound.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed
+                        + Game.Time, 
+                        (float)sender.GetAutoAttackDamage(this.SoulBound));
+                }
+                else
+                {
+                    var hero = sender as Obj_AI_Hero;
+                    if (hero == null)
+                    {
+                        return;
+                    }
+
+                    var attacker = hero;
+                    var slot = attacker.GetSpellSlot(args.SData.Name);
+
+                    if (slot == SpellSlot.Unknown)
+                    {
+                        return;
+                    }
+
+                    if (slot == attacker.GetSpellSlot("SummonerDot") && args.Target != null
                         && args.Target.NetworkId == this.SoulBound.NetworkId)
                     {
-                        this.incomingDamage.Add(
-                            this.SoulBound.ServerPosition.Distance(sender.ServerPosition) / args.SData.MissileSpeed
-                            + Game.Time, 
-                            (float)sender.GetAutoAttackDamage(this.SoulBound));
+                        this.instantDamage.Add(
+                            Game.Time + 2, 
+                            (float)attacker.GetSummonerSpellDamage(this.SoulBound, Damage.SummonerSpell.Ignite));
                     }
-                    else
+                    else if (slot.HasFlag(SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)
+                             && ((args.Target != null && args.Target.NetworkId == this.SoulBound.NetworkId)
+                                 || args.End.Distance(this.SoulBound.ServerPosition, true)
+                                 < Math.Pow(args.SData.LineWidth, 2)))
                     {
-                        var hero = sender as Obj_AI_Hero;
-                        if (hero == null)
-                        {
-                            return;
-                        }
-
-                        var attacker = hero;
-                        var slot = attacker.GetSpellSlot(args.SData.Name);
-
-                        if (slot == SpellSlot.Unknown)
-                        {
-                            return;
-                        }
-
-                        if (slot == attacker.GetSpellSlot("SummonerDot") && args.Target != null
-                            && args.Target.NetworkId == this.SoulBound.NetworkId)
-                        {
-                            this.instantDamage.Add(
-                                Game.Time + 2, 
-                                (float)attacker.GetSummonerSpellDamage(this.SoulBound, Damage.SummonerSpell.Ignite));
-                        }
-                        else if (slot.HasFlag(SpellSlot.Q | SpellSlot.W | SpellSlot.E | SpellSlot.R)
-                                 && ((args.Target != null && args.Target.NetworkId == this.SoulBound.NetworkId)
-                                     || args.End.Distance(this.SoulBound.ServerPosition, true)
-                                     < Math.Pow(args.SData.LineWidth, 2)))
-                        {
-                            this.instantDamage.Add(
-                                Game.Time + 2, 
-                                (float)attacker.GetSpellDamage(this.SoulBound, slot));
-                        }
+                        this.instantDamage.Add(
+                            Game.Time + 2, 
+                            (float)attacker.GetSpellDamage(this.SoulBound, slot));
                     }
                 }
             }

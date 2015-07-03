@@ -101,6 +101,7 @@ namespace iSeries.Champions.Marksman.Tristana
             {
                 return;
             }
+
             if (this.spells[SpellSlot.Q].IsReady()
                 && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
                 && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ") && hero.IsValidTarget(1000f))
@@ -194,6 +195,7 @@ namespace iSeries.Champions.Marksman.Tristana
             {
                 Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.E].Range, Color.DarkRed);
             }
+
             if (this.GetItemValue<bool>("com.iseries.tristana.drawing.drawW"))
             {
                 Render.Circle.DrawCircle(this.Player.Position, this.spells[SpellSlot.W].Range, Color.DarkRed);

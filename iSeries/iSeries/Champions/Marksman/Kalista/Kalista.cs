@@ -331,12 +331,13 @@ namespace iSeries.Champions.Marksman.Kalista
 
                 if (this.GetItemValue<bool>("com.iseries.kalista.drawing.drawPercentage"))
                 {
-                    var currentPercentage = Math.Ceiling(this.GetActualDamage(source) * 100 / this.GetActualHealth(source));
+                    var currentPercentage =
+                        Math.Ceiling(this.GetActualDamage(source) * 100 / this.GetActualHealth(source));
 
                     Drawing.DrawText(
-                        Drawing.WorldToScreen(source.Position)[0],
-                        Drawing.WorldToScreen(source.Position)[1],
-                        currentPercentage >= 100 ? Color.DarkRed : Color.White,
+                        Drawing.WorldToScreen(source.Position)[0], 
+                        Drawing.WorldToScreen(source.Position)[1], 
+                        currentPercentage >= 100 ? Color.DarkRed : Color.White, 
                         currentPercentage >= 100 ? "Killable With E" : "Current Damage: " + currentPercentage + "%");
                 }
             }
@@ -752,21 +753,19 @@ namespace iSeries.Champions.Marksman.Kalista
             if (Variables.Orbwalker.ActiveMode != Orbwalking.OrbwalkingMode.Combo
                 && this.GetItemValue<bool>("com.iseries.kalista.misc.autoHarass"))
             {
-                var minion =
-                    MinionManager.GetMinions(this.spells[SpellSlot.E].Range, MinionTypes.All, MinionTeam.NotAlly)
-                        .Where(x => x.Health <= this.spells[SpellSlot.E].GetDamage(x))
-                        .OrderBy(x => x.Health)
-                        .FirstOrDefault();
                 var target =
-                    HeroManager.Enemies.Where(
-                        x =>
-                        this.spells[SpellSlot.E].CanCast(x) && this.spells[SpellSlot.E].GetDamage(x) >= 1
-                        && !x.HasBuffOfType(BuffType.SpellShield))
-                        .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
-                        .FirstOrDefault();
-
-                if (minion != null && target != null && this.spells[SpellSlot.E].CanCast(minion)
-                    && this.spells[SpellSlot.E].CanCast(target) && !ObjectManager.Player.HasBuff("summonerexhaust"))
+                    ObjectManager.Get<Obj_AI_Hero>()
+                        .Where(x => x.IsEnemy && x.HasBuff("kalistaexpungewrapper"))
+                        .MinOrDefault(x => x.Distance(ObjectManager.Player));
+                var killableMinion =
+                    ObjectManager.Get<Obj_AI_Base>()
+                        .Any(
+                            x =>
+                            x.IsEnemy && this.spells[SpellSlot.E].IsInRange(x)
+                            && this.spells[SpellSlot.E].GetDamage(x) > x.Health);
+                if (target != null
+                    && target.Distance(ObjectManager.Player) < Math.Pow(this.spells[SpellSlot.E].Range + 200, 2)
+                    && killableMinion)
                 {
                     if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
                     {

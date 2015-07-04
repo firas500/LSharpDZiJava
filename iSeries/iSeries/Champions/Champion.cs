@@ -22,6 +22,7 @@
 namespace iSeries.Champions
 {
     using System;
+    using System.Linq;
 
     using iSeries.General;
 

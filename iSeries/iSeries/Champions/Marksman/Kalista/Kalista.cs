@@ -274,6 +274,14 @@ namespace iSeries.Champions.Marksman.Kalista
                     this.spells[SpellSlot.Q].Range, 
                     TargetSelector.DamageType.Physical);
                 var prediction = this.spells[SpellSlot.Q].GetPrediction(spearTarget);
+
+                var dashPosition = this.Player.GetDashInfo().EndPos.To3D();
+
+                if (dashPosition != Vector3.Zero)
+                {
+                    this.spells[SpellSlot.Q].UpdateSourcePosition(dashPosition);
+                }
+
                 if (prediction.Hitchance >= HitChance.VeryHigh)
                 {
                     if (!this.Player.IsDashing() && !this.Player.IsWindingUp)

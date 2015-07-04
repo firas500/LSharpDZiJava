@@ -37,13 +37,13 @@ namespace iSeries.Champions.Utilities
         #region Public Methods and Operators
 
         /// <summary>
-        ///     Enemies please
+        ///     Enemies GetChampionValue
         /// </summary>
         /// <param name="position">
-        ///     Position please
+        ///     Position GetChampionValue
         /// </param>
         /// <param name="range">
-        ///     Range please
+        ///     Range GetChampionValue
         /// </param>
         /// <returns>
         ///     The List of enemies

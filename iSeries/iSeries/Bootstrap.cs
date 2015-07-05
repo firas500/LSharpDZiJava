@@ -36,6 +36,7 @@ namespace iSeries
     using iSeries.Champions.Marksman.Tristana;
     using iSeries.Champions.Marksman.Twitch;
     using iSeries.Champions.Marksman.Vayne;
+    using iSeries.Champions.Utilities;
 
     using LeagueSharp;
     using LeagueSharp.Common;
@@ -131,6 +132,8 @@ namespace iSeries
                         }
                     };
             Variables.Menu.AddItem(new MenuItem("com.iseries.autobuy", "AutoBuy (Scrying Orb, etc)").SetValue(true));
+
+            Cleanser.OnLoad(Variables.Menu);
 
             // TODO add an item manager / auto qss etc / some utils maybe?
             // Activator# Bik

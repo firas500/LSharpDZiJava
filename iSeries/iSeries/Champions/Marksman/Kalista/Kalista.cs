@@ -326,7 +326,7 @@ namespace iSeries.Champions.Marksman.Kalista
 
             foreach (var source in HeroManager.Enemies.Where(x => this.Player.Distance(x) <= 2000f && !x.IsDead))
             {
-                var stacks = source.GetBuffCount("kalistaexpungemarker");
+                var stacks = source.Buffs.Count(x => x.Name == "kalistaexpungemarker");
 
                 if (stacks > 0)
                 {

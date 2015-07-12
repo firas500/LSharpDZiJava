@@ -712,7 +712,7 @@ namespace iSeries.Champions.Marksman.Kalista
             foreach (var hero in
                 HeroManager.Enemies.Where(
                     x =>
-                    this.spells[SpellSlot.E].IsInRange(x) && this.GetActualHealth(x) < this.GetActualDamage(x)
+                    this.spells[SpellSlot.E].IsInRange(x) && x.Health < this.GetActualDamage(x)
                     && !x.IsDead))
             {
                 if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)

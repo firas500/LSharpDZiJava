@@ -160,22 +160,21 @@ namespace IKalista
         }
 
         /// <summary>
-        ///     Gets the targets current health including shield damage
+        ///     Gets the targets health including the shield amount
         /// </summary>
-        /// <param name="target"> The Target </param>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
         /// <returns>
-        ///     <see cref="float" />
+        ///     The targets health
         /// </returns>
-        public float GetTargetHealth(Obj_AI_Hero target)
+        public float GetActualHealth(Obj_AI_Base target)
         {
             var result = target.Health;
+
             if (target.AttackShield > 0)
             {
                 result += target.AttackShield;
-            }
-            else if (target.MagicShield > 0)
-            {
-                result += target.MagicShield;
             }
 
             return result;
@@ -594,7 +593,7 @@ namespace IKalista
                         foreach (var source in
                             HeroManager.Enemies.Where(x => ObjectManager.Player.Distance(x) <= 2000f && !x.IsDead))
                         {
-                            var currentPercentage = this.GetRealDamage(source) * 100 / this.GetTargetHealth(source);
+                            var currentPercentage = this.GetRealDamage(source) * 100 / source.Health;
 
                             Drawing.DrawText(
                                 Drawing.WorldToScreen(source.Position)[0], 
@@ -849,7 +848,7 @@ namespace IKalista
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }
 
-                if ((this.GetRealDamage(target) >= this.GetTargetHealth(target) && !this.HasUndyingBuff(target)
+                if ((this.GetRealDamage(target) >= target.Health && !this.HasUndyingBuff(target)
                      && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
                     || (stacks >= this.sliderLinks["minStacks"].Value.Value))
                 {
@@ -889,7 +888,7 @@ namespace IKalista
                 if (BoolLinks["qMana"].Value
                     && ObjectManager.Player.Mana
                     < this.spells[SpellSlot.Q].Instance.ManaCost + this.spells[SpellSlot.E].Instance.ManaCost
-                    && this.spells[SpellSlot.Q].GetDamage(spearTarget) < this.GetTargetHealth(spearTarget))
+                    && this.spells[SpellSlot.Q].GetDamage(spearTarget) < spearTarget.Health)
                 {
                     return;
                 }
@@ -936,7 +935,7 @@ namespace IKalista
                 if (rendTarget != null && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     var stackCount = rendTarget.GetBuffCount("kalistaexpungemarker");
-                    if (this.GetRealDamage(rendTarget) > this.GetTargetHealth(rendTarget)
+                    if (this.GetRealDamage(rendTarget) > rendTarget.Health
                         || stackCount >= this.sliderLinks["minStacks"].Value.Value)
                     {
                         if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)

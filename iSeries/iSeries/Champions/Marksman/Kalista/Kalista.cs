@@ -386,7 +386,7 @@ namespace iSeries.Champions.Marksman.Kalista
 
                 if (target != null)
                 {
-                    var stacks = target.GetBuffCount("kalistaexpungemarker");
+                    var stacks = target.Buffs.Count(x => x.Name == "kalistaexpungemarker");
                     if (this.GetActualDamage(target) >= this.GetActualHealth(target)
                         || stacks >= this.GetItemValue<Slider>("com.iseries.kalista.harass.stacks").Value)
                     {

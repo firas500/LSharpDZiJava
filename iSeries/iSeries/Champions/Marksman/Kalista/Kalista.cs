@@ -343,7 +343,7 @@ namespace iSeries.Champions.Marksman.Kalista
                 if (this.GetItemValue<bool>("com.iseries.kalista.drawing.drawPercentage"))
                 {
                     var currentPercentage =
-                        Math.Ceiling(this.GetActualDamage(source) * 100 / this.GetActualHealth(source));
+                        Math.Ceiling(this.GetActualDamage(source) * 100 / source.Health);
 
                     Drawing.DrawText(
                         Drawing.WorldToScreen(source.Position)[0], 

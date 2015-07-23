@@ -300,7 +300,7 @@ namespace iSeries.Champions.Marksman.Tristana
         /// </summary>
         private void OnUpdateFunctions()
         {
-            foreach (var source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.R].IsKillable(x) && this.spells[SpellSlot.R].IsInRange(x) && !x.HasBuffOfType(BuffType.SpellShield)))
+            foreach (var source in HeroManager.Enemies.Where(x => this.spells[SpellSlot.R].IsKillable(x) && this.spells[SpellSlot.R].IsInRange(x) && !x.HasBuffOfType(BuffType.SpellShield)).Where(source => this.spells[SpellSlot.R].IsReady()))
             {
                 this.spells[SpellSlot.R].CastOnUnit(source);
             }

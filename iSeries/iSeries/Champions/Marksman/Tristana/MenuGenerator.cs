@@ -64,6 +64,7 @@ namespace iSeries.Champions.Marksman.Tristana
                 misc.AddItem(new MenuItem("com.iseries.tristana.misc.gapcloser", "Anti Gapcloser").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.tristana.misc.interrupter", "Spell Interrupter").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.tristana.misc.useRE", "Try R-E Finisher").SetValue(false));
+                misc.AddItem(new MenuItem("com.iseries.tristana.misc.kickFlash", "Ult away flashes (BETA)").SetValue(false));
                 root.AddSubMenu(misc);
             }
 

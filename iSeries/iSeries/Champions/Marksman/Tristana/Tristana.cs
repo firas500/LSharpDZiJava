@@ -37,6 +37,7 @@ namespace iSeries.Champions.Marksman.Tristana
     /// </summary>
     internal class Tristana : Champion
     {
+        #region Fields
 
         /// <summary>
         ///     The dictionary to call the Spell slot and the Spell Class
@@ -44,10 +45,12 @@ namespace iSeries.Champions.Marksman.Tristana
         private readonly Dictionary<SpellSlot, Spell> spells = new Dictionary<SpellSlot, Spell>
                                                                    {
                                                                        { SpellSlot.Q, new Spell(SpellSlot.Q) }, 
-                                                                       { SpellSlot.W, new Spell(SpellSlot.W, 900f) },
-                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 630f) },
+                                                                       { SpellSlot.W, new Spell(SpellSlot.W, 900f) }, 
+                                                                       { SpellSlot.E, new Spell(SpellSlot.E, 630f) }, 
                                                                        { SpellSlot.R, new Spell(SpellSlot.R, 630f) }
                                                                    };
+
+        #endregion
 
         #region Constructors and Destructors
 
@@ -78,44 +81,13 @@ namespace iSeries.Champions.Marksman.Tristana
             Interrupter2.OnInterruptableTarget += (sender, args) =>
                 {
                     if (sender.IsValidTarget(this.spells[SpellSlot.R].Range) && this.spells[SpellSlot.R].IsReady()
-                        && args.DangerLevel > Interrupter2.DangerLevel.Medium && this.GetItemValue<bool>("com.iseries.tristana.misc.interrupter"))
+                        && args.DangerLevel > Interrupter2.DangerLevel.Medium
+                        && this.GetItemValue<bool>("com.iseries.tristana.misc.interrupter"))
                     {
                         this.spells[SpellSlot.R].CastOnUnit(sender);
                     }
                 };
-        }
-
-        /// <summary>
-        ///     The After Attack Event
-        /// </summary>
-        /// <param name="unit">
-        ///     The Unit
-        /// </param>
-        /// <param name="target">
-        ///     The Target
-        /// </param>
-        private void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
-        {
-            var hero = target as Obj_AI_Hero;
-            if (hero == null || !unit.IsMe)
-            {
-                return;
-            }
-
-            if (this.spells[SpellSlot.Q].IsReady()
-                && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
-                && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ") && hero.IsValidTarget(1000f))
-            {
-                this.spells[SpellSlot.Q].Cast();
-            }
-
-            if (this.GetItemValue<bool>("com.iseries.tristana.combo.useE") && this.spells[SpellSlot.E].IsReady() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
-            {
-                if (hero.IsValidTarget(this.spells[SpellSlot.E].Range))
-                {
-                    this.spells[SpellSlot.E].CastOnUnit(hero);
-                }
-            }
+            Obj_AI_Base.OnProcessSpellCast += this.OnSpellCast;
         }
 
         #endregion
@@ -149,7 +121,6 @@ namespace iSeries.Champions.Marksman.Tristana
                     this.spells[SpellSlot.E].CastOnUnit(target);
                 }
             }*/
-
             if (this.GetItemValue<bool>("com.iseries.tristana.combo.useR") && this.spells[SpellSlot.R].IsReady())
             {
                 var target =
@@ -159,7 +130,7 @@ namespace iSeries.Champions.Marksman.Tristana
                         && x.IsValidTarget(this.spells[SpellSlot.R].Range) && !x.HasBuffOfType(BuffType.Invulnerability)
                         && !x.HasBuffOfType(BuffType.SpellShield));
 
-                if (target != null)
+                if (target != null && !target.HasBuffOfType(BuffType.SpellShield))
                 {
                     this.spells[SpellSlot.R].CastOnUnit(target);
                 }
@@ -168,19 +139,18 @@ namespace iSeries.Champions.Marksman.Tristana
             if (this.GetItemValue<bool>("com.iseries.tristana.misc.useRE") && this.spells[SpellSlot.R].IsReady())
             {
                 var target = TargetSelector.GetTarget(
-                    this.spells[SpellSlot.R].Range,
+                    this.spells[SpellSlot.R].Range, 
                     TargetSelector.DamageType.Physical);
                 var stacks = target.GetBuffCount("tristanaecharge");
 
                 var totalDamage = this.spells[SpellSlot.E].GetDamage(target) * (0.30 * stacks)
                                   + this.spells[SpellSlot.R].GetDamage(target);
 
-                if (target.IsValidTarget(this.spells[SpellSlot.R].Range) && totalDamage > target.Health + 10)
+                if (target.IsValidTarget(this.spells[SpellSlot.R].Range) && totalDamage > target.Health + 10 && !target.HasBuffOfType(BuffType.SpellShield))
                 {
                     this.spells[SpellSlot.R].CastOnUnit(target);
                 }
             }
-
         }
 
         /// <summary>
@@ -210,10 +180,10 @@ namespace iSeries.Champions.Marksman.Tristana
             if (this.GetItemValue<bool>("com.iseries.tristana.harass.useE") && this.spells[SpellSlot.E].IsReady())
             {
                 var target = TargetSelector.GetTarget(
-                  this.spells[SpellSlot.E].Range,
-                  TargetSelector.DamageType.Physical);
+                    this.spells[SpellSlot.E].Range, 
+                    TargetSelector.DamageType.Physical);
 
-                if (target.IsValidTarget(this.spells[SpellSlot.E].Range))
+                if (target.IsValidTarget(this.spells[SpellSlot.E].Range) && !target.HasBuffOfType(BuffType.SpellShield))
                 {
                     this.spells[SpellSlot.E].CastOnUnit(target);
                 }
@@ -225,7 +195,6 @@ namespace iSeries.Champions.Marksman.Tristana
         /// </summary>
         public override void OnLaneclear()
         {
-            
         }
 
         /// <summary>
@@ -254,14 +223,6 @@ namespace iSeries.Champions.Marksman.Tristana
             this.OnUpdateFunctions();
         }
 
-        /// <summary>
-        ///     The Functions to always process
-        /// </summary>
-        private void OnUpdateFunctions()
-        {
-
-        }
-
         #endregion
 
         #region Methods
@@ -278,6 +239,67 @@ namespace iSeries.Champions.Marksman.Tristana
         private float GetComboDamage(Obj_AI_Hero target)
         {
             return 0;
+        }
+
+        /// <summary>
+        ///     The After Attack Event
+        /// </summary>
+        /// <param name="unit">
+        ///     The Unit
+        /// </param>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        private void OnAfterAttack(AttackableUnit unit, AttackableUnit target)
+        {
+            var hero = target as Obj_AI_Hero;
+            if (hero == null || !unit.IsMe)
+            {
+                return;
+            }
+
+            if (this.spells[SpellSlot.Q].IsReady() && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo
+                && this.GetItemValue<bool>("com.iseries.tristana.combo.useQ") && hero.IsValidTarget(1000f))
+            {
+                this.spells[SpellSlot.Q].Cast();
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.tristana.combo.useE") && this.spells[SpellSlot.E].IsReady()
+                && Variables.Orbwalker.ActiveMode == Orbwalking.OrbwalkingMode.Combo)
+            {
+                if (hero.IsValidTarget(this.spells[SpellSlot.E].Range) && !hero.HasBuffOfType(BuffType.SpellShield))
+                {
+                    this.spells[SpellSlot.E].CastOnUnit(hero);
+                }
+            }
+        }
+
+        /// <summary>
+        ///     The spell casting shit
+        /// </summary>
+        /// <param name="sender1">
+        ///     The sender 1.
+        /// </param>
+        /// <param name="args">
+        ///     The Args
+        /// </param>
+        private void OnSpellCast(Obj_AI_Base sender1, GameObjectProcessSpellCastEventArgs args)
+        {
+            var sender = sender1 as Obj_AI_Hero;
+            if (sender != null
+                && (sender.IsEnemy && args.SData.Name.ToLower() == "summonerflash"
+                    && args.End.Distance(ObjectManager.Player.Position, true) <= this.spells[SpellSlot.R].Range
+                    && this.spells[SpellSlot.R].IsReady() && this.GetItemValue<bool>("com.iseries.tristana.misc.kickFlash")))
+            {
+                this.spells[SpellSlot.R].CastOnUnit(sender);
+            }
+        }
+
+        /// <summary>
+        ///     The Functions to always process
+        /// </summary>
+        private void OnUpdateFunctions()
+        {
         }
 
         #endregion

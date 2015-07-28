@@ -130,7 +130,7 @@ namespace iSeries.Champions.Marksman.Tristana
                         && x.IsValidTarget(this.spells[SpellSlot.R].Range) && !x.HasBuffOfType(BuffType.Invulnerability)
                         && !x.HasBuffOfType(BuffType.SpellShield) && !x.IsInvulnerable);
 
-                if (target != null && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical))
+                if (target != null && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical, false))
                 {
                     this.spells[SpellSlot.R].CastOnUnit(target);
                 }
@@ -147,7 +147,7 @@ namespace iSeries.Champions.Marksman.Tristana
                                   + this.spells[SpellSlot.R].GetDamage(target);
 
                 if (target.IsValidTarget(this.spells[SpellSlot.R].Range) 
-                    && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical) 
+                    && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical, false) 
                     && !target.IsInvulnerable && totalDamage > target.Health + 10 
                     && !target.HasBuffOfType(BuffType.SpellShield))
                 {

@@ -154,46 +154,58 @@ namespace iSeries.Champions.Marksman.Twitch
         /// </summary>
         public override void OnCombo()
         {
-            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEKillable") && this.spells[SpellSlot.E].IsReady())
+            if (ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.twitch.combo.eMana").Value)
             {
-                var killableTarget =
+                var Target =
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
-                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && this.GetActualDamage(x) > this.GetActualHealth(x) && !this.GetItemValue<bool>("com.iseries.twitch.noe."+x.ChampionName.ToLowerInvariant()));
-                if (killableTarget != null)
-                {
-                    this.spells[SpellSlot.E].Cast();
-                }
-            }
-
-            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEMaxStacks") && this.spells[SpellSlot.E].IsReady())
-            {
-                var killableTarget =
-                    HeroManager.Enemies.FirstOrDefault(
-                        x =>
-                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && x.GetBuffCount("twitchdeadlyvenom") == 6 && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
-                if (killableTarget != null)
-                {
-                    this.spells[SpellSlot.E].Cast();
-                }
-            }
-
-            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useENearlyOutOfRange") && this.spells[SpellSlot.E].IsReady())
-            {
-                var killableTarget =
-                    HeroManager.Enemies.FirstOrDefault(
-                        x =>
-                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                        && x.GetBuffCount("twitchdeadlyvenom") >= 4 && x.Distance(ObjectManager.Player) >= 1000f && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
-                if (killableTarget != null)
+                            x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x) &&
+                            x.GetBuffCount("twitchdeadlyvenom") ==
+                            this.GetItemValue<Slider>("com.iseries.twitch.combo.useEXStacks").Value &&
+                            !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                if (Target != null)
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
 
+                #region E Modes
+
+                if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEMaxStacks") &&
+                    this.spells[SpellSlot.E].IsReady())
+                {
+                    var killableTarget =
+                        HeroManager.Enemies.FirstOrDefault(
+                            x =>
+                                x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x) &&
+                                x.GetBuffCount("twitchdeadlyvenom") == 6 &&
+                                !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                    if (killableTarget != null)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
+                }
+
+                if (this.GetItemValue<bool>("com.iseries.twitch.combo.useENearlyOutOfRange") &&
+                    this.spells[SpellSlot.E].IsReady())
+                {
+                    var killableTarget =
+                        HeroManager.Enemies.FirstOrDefault(
+                            x =>
+                                x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x) &&
+                                x.GetBuffCount("twitchdeadlyvenom") >= 4 && x.Distance(ObjectManager.Player) >= 1000f &&
+                                !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                    if (killableTarget != null)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
+
+                }
+
+                #endregion
+
             }
 
+            #region W
             if (this.GetItemValue<bool>("com.iseries.twitch.combo.useW") && this.spells[SpellSlot.W].IsReady())
             {
                 if (this.Player.ManaPercent < this.GetItemValue<Slider>("com.iseries.twitch.combo.wMana").Value)
@@ -209,6 +221,17 @@ namespace iSeries.Champions.Marksman.Twitch
                     this.spells[SpellSlot.W].Cast(wTarget);
                 }
             }
+            #endregion
+
+            #region R
+            //com.iseries.twitch.combo.useR
+            if (GetItemValue<bool>("com.iseries.twitch.combo.useR") 
+                && spells[SpellSlot.R].IsReady()
+                && ObjectManager.Player.CountEnemiesInRange(1000f) >= GetItemValue<Slider>("com.iseries.twitch.combo.minEnR").Value)
+            {
+                this.spells[SpellSlot.R].Cast();
+            }
+            #endregion
         }
 
         /// <summary>
@@ -282,7 +305,34 @@ namespace iSeries.Champions.Marksman.Twitch
         /// </summary>
         public override void OnLaneclear()
         {
+            if (ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.twitch.laneclear.manaManager").Value)
+            {
+                var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 700f);
+                if (GetItemValue<bool>("com.iseries.twitch.laneclear.useE") && spells[SpellSlot.E].IsReady() &&
+                    ObjectManager.Player.IsWindingUp)
+                {
+                    var numberOfMinions =
+                        minions.Count(
+                            x =>
+                                x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x) &&
+                                x.GetBuffCount("twitchdeadlyvenom") >= 4);
+                    if (numberOfMinions > 3)
+                    {
+                        spells[SpellSlot.E].Cast();
+                    }
+                }
+
+                if (GetItemValue<bool>("com.iseries.twitch.laneclear.useW") && spells[SpellSlot.W].IsReady())
+                {
+                    var location = spells[SpellSlot.W].GetCircularFarmLocation(minions);
+                    if (location.MinionsHit > 3)
+                    {
+                        spells[SpellSlot.W].Cast();
+                    }
+                }
+            }
         }
+
 
         /// <summary>
         ///     <c>OnUpdate</c> subscribed event function.

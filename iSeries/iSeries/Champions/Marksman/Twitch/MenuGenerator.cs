@@ -41,11 +41,16 @@ namespace iSeries.Champions.Marksman.Twitch
             var comboMenu = new Menu("Combo Options", "com.iseries.twitch.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useW", "Use W").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEKillable", "Use E When Killable").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEXStacks", "Use E At X Stacks").SetValue(new Slider(4,1,6)));
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEMaxStacks", "Use E At Max Stacks").SetValue(false));
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useENearlyOutOfRange", "Use E When Target is Nearly Out of Range").SetValue(false));
                 comboMenu.AddItem(
                     new MenuItem("com.iseries.twitch.combo.wMana", "Min Mana W %").SetValue(new Slider(40, 10)));
+                comboMenu.AddItem(
+                    new MenuItem("com.iseries.twitch.combo.eMana", "Min Mana E %").SetValue(new Slider(20, 10)));
+
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useR", "Use R").SetValue(true));
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.minEnR", "Min Enemies R R").SetValue(new Slider(3, 1, 5)));
                 root.AddSubMenu(comboMenu);
             }
 
@@ -62,13 +67,15 @@ namespace iSeries.Champions.Marksman.Twitch
 
             var laneclearMenu = new Menu("Laneclear Options", "com.iseries.twitch.laneclear");
             {
+                laneclearMenu.AddItem(new MenuItem("com.iseries.twitch.laneclear.useW", "Use W").SetValue(true));
                 laneclearMenu.AddItem(new MenuItem("com.iseries.twitch.laneclear.useE", "Use E").SetValue(true));
+                laneclearMenu.AddItem(new MenuItem("com.iseries.twitch.laneclear.manaManager", "Min Mana %").SetValue(true));
                 root.AddSubMenu(laneclearMenu);
             }
 
             var misc = new Menu("Misc Options", "com.iseries.twitch.misc");
             {
-                misc.AddItem(new MenuItem("com.iseries.twitch.misc.killsteal", "Always Killsteal").SetValue(true));
+                misc.AddItem(new MenuItem("com.iseries.twitch.misc.killsteal", "E KS").SetValue(true));
                 misc.AddItem(new MenuItem("com.iseries.twitch.misc.mobsteal", "Mobsteal").SetValue(true));
                 root.AddSubMenu(misc);
             }

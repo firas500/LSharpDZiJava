@@ -128,9 +128,9 @@ namespace iSeries.Champions.Marksman.Tristana
                         x =>
                         x.Health + 10 <= this.spells[SpellSlot.R].GetDamage(x)
                         && x.IsValidTarget(this.spells[SpellSlot.R].Range) && !x.HasBuffOfType(BuffType.Invulnerability)
-                        && !x.HasBuffOfType(BuffType.SpellShield));
+                        && !x.HasBuffOfType(BuffType.SpellShield) && !x.IsInvulnerable);
 
-                if (target != null && !target.HasBuffOfType(BuffType.SpellShield))
+                if (target != null && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical))
                 {
                     this.spells[SpellSlot.R].CastOnUnit(target);
                 }
@@ -146,7 +146,10 @@ namespace iSeries.Champions.Marksman.Tristana
                 var totalDamage = this.spells[SpellSlot.E].GetDamage(target) * (0.30 * stacks)
                                   + this.spells[SpellSlot.R].GetDamage(target);
 
-                if (target.IsValidTarget(this.spells[SpellSlot.R].Range) && totalDamage > target.Health + 10 && !target.HasBuffOfType(BuffType.SpellShield))
+                if (target.IsValidTarget(this.spells[SpellSlot.R].Range) 
+                    && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical) 
+                    && !target.IsInvulnerable && totalDamage > target.Health + 10 
+                    && !target.HasBuffOfType(BuffType.SpellShield))
                 {
                     this.spells[SpellSlot.R].CastOnUnit(target);
                 }

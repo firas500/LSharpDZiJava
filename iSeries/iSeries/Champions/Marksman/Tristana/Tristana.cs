@@ -144,8 +144,7 @@ namespace iSeries.Champions.Marksman.Tristana
                     TargetSelector.DamageType.Physical);
                 var stacks = target.GetBuffCount("tristanaecharge");
 
-                var totalDamage = this.spells[SpellSlot.E].GetDamage(target) * (0.30 * stacks)
-                                  + this.spells[SpellSlot.R].GetDamage(target);
+                var totalDamage = this.spells[SpellSlot.E].GetDamage(target) * (0.30 * stacks) + GetActualRDamage(target);
 
                 if (target.IsValidTarget(this.spells[SpellSlot.R].Range) 
                     && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical, false) 
@@ -155,6 +154,21 @@ namespace iSeries.Champions.Marksman.Tristana
                     this.spells[SpellSlot.R].CastOnUnit(target);
                 }
             }
+        }
+
+        private float GetActualRDamage(Obj_AI_Base target)
+        {
+            if (target.HasBuff("FerociousHowl"))
+            {
+                return (float)(this.spells[SpellSlot.R].GetDamage(target) * 0.7);
+            }
+
+            if (this.Player.HasBuff("summonerexhaust"))
+            {
+                return (float)(this.spells[SpellSlot.R].GetDamage(target) * 0.4);
+            }
+
+            return this.spells[SpellSlot.R].GetDamage(target);
         }
 
         /// <summary>

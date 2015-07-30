@@ -70,7 +70,8 @@ namespace iSeries.Champions.Marksman.Tristana
                 {
                     if (!this.spells[SpellSlot.R].IsReady()
                         || !gapcloser.Sender.IsValidTarget(this.spells[SpellSlot.R].Range)
-                        || !this.GetItemValue<bool>("com.iseries.tristana.misc.gapcloser"))
+                        || !this.GetItemValue<bool>("com.iseries.tristana.misc.gapcloser")
+                        || gapcloser.End.Distance(ObjectManager.Player.ServerPosition, true) > gapcloser.Sender.ServerPosition.Distance(ObjectManager.Player.ServerPosition, true))
                     {
                         return;
                     }

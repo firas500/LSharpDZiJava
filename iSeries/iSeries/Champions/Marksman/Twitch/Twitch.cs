@@ -156,17 +156,21 @@ namespace iSeries.Champions.Marksman.Twitch
         {
             if (ObjectManager.Player.ManaPercent >= GetItemValue<Slider>("com.iseries.twitch.combo.eMana").Value)
             {
-                var Target =
+                if (GetItemValue<Slider>("com.iseries.twitch.combo.useEXStacks").Value != 0)
+                {
+                    var Target =
                     HeroManager.Enemies.FirstOrDefault(
                         x =>
                             x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x) &&
                             x.GetBuffCount("twitchdeadlyvenom") ==
                             this.GetItemValue<Slider>("com.iseries.twitch.combo.useEXStacks").Value &&
                             !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
-                if (Target != null)
-                {
-                    this.spells[SpellSlot.E].Cast();
+                    if (Target != null)
+                    {
+                        this.spells[SpellSlot.E].Cast();
+                    }
                 }
+                
 
                 #region E Modes
 

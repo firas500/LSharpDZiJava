@@ -41,7 +41,7 @@ namespace iSeries.Champions.Marksman.Twitch
             var comboMenu = new Menu("Combo Options", "com.iseries.twitch.combo");
             {
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useW", "Use W").SetValue(true));
-                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEXStacks", "Use E At X Stacks").SetValue(new Slider(4,1,6)));
+                comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEXStacks", "Use E At X Stacks (0 = Disable)").SetValue(new Slider(4,0,6)));
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useEMaxStacks", "Use E At Max Stacks").SetValue(false));
                 comboMenu.AddItem(new MenuItem("com.iseries.twitch.combo.useENearlyOutOfRange", "Use E When Target is Nearly Out of Range").SetValue(false));
                 comboMenu.AddItem(

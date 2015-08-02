@@ -34,6 +34,7 @@ namespace iSeries.Champions.Marksman.Twitch
 
     using ItemData = LeagueSharp.Common.Data.ItemData;
 
+
     /// <summary>
     ///     TODO The twitch.
     /// </summary>
@@ -73,23 +74,29 @@ namespace iSeries.Champions.Marksman.Twitch
             Spellbook.OnCastSpell += this.OnCastSpell;
         }
 
+        /// <summary>
+        ///     The on cast spell stuff
+        /// </summary>
+        /// <param name="sender">
+        ///     The Sender
+        /// </param>
+        /// <param name="args">
+        ///     The Args
+        /// </param>
+        private void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
+        {
+            if (args.Slot == SpellSlot.R)
+            {
+                if (ItemData.Youmuus_Ghostblade.GetItem().IsReady())
+                {
+                    ItemData.Youmuus_Ghostblade.GetItem().Cast();
+                }
+            }
+        }
+
         #endregion
 
         #region Public Methods and Operators
-
-        /// <summary>
-        ///     Gets the targets health including the shield amount
-        /// </summary>
-        /// <param name="target">
-        ///     The Target
-        /// </param>
-        /// <returns>
-        ///     The targets health
-        /// </returns>
-        public float GetActualHealth(Obj_AI_Base target)
-        {
-            return target.Health;
-        }
 
         /// <summary>
         ///     Gets the champion type
@@ -103,58 +110,88 @@ namespace iSeries.Champions.Marksman.Twitch
         }
 
         /// <summary>
+        ///     Gets actual damage blah blah
+        /// </summary>
+        /// <param name="target">
+        ///     The target
+        /// </param>
+        /// <returns>
+        ///     The <see cref="float"/>.
+        /// </returns>
+        private float GetActualDamage(Obj_AI_Base target)
+        {
+            if (target.HasBuff("ColossalStrength"))
+            {
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
+            }
+
+            if (this.Player.HasBuff("summonerexhaust"))
+            {
+                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.4);
+            }
+
+            return this.spells[SpellSlot.E].GetDamage(target);
+        }
+
+        /// <summary>
+        ///     Gets the targets health including the shield amount
+        /// </summary>
+        /// <param name="target">
+        ///     The Target
+        /// </param>
+        /// <returns>
+        ///     The targets health
+        /// </returns>
+        public float GetActualHealth(Obj_AI_Base target)
+        {
+            return target.AttackShield > 0
+                       ? target.Health + target.AttackShield
+                       : target.MagicShield > 0 ? target.Health + target.MagicShield : target.Health;
+        }
+
+        /// <summary>
         ///     <c>OnCombo</c> subscribed orb walker function.
         /// </summary>
         public override void OnCombo()
         {
-            if (ObjectManager.Player.ManaPercent >= this.GetItemValue<Slider>("com.iseries.twitch.combo.eMana").Value)
+            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEKillable") && this.spells[SpellSlot.E].IsReady())
             {
-                if (this.GetItemValue<Slider>("com.iseries.twitch.combo.useEXStacks").Value != 0)
+                var killableTarget =
+                    HeroManager.Enemies.FirstOrDefault(
+                        x =>
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
+                        && this.GetActualDamage(x) > this.GetActualHealth(x) && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                if (killableTarget != null)
                 {
-                    var target =
-                        HeroManager.Enemies.FirstOrDefault(
-                            x =>
-                            x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                            && x.GetBuffCount("twitchdeadlyvenom")
-                            == this.GetItemValue<Slider>("com.iseries.twitch.combo.useEXStacks").Value
-                            && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
-                    if (target != null)
-                    {
-                        this.spells[SpellSlot.E].Cast();
-                    }
+                    this.spells[SpellSlot.E].Cast();
+                }
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEMaxStacks") && this.spells[SpellSlot.E].IsReady())
+            {
+                var killableTarget =
+                    HeroManager.Enemies.FirstOrDefault(
+                        x =>
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
+                        && x.GetBuffCount("twitchdeadlyvenom") == 6 && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                if (killableTarget != null)
+                {
+                    this.spells[SpellSlot.E].Cast();
+                }
+            }
+
+            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useENearlyOutOfRange") && this.spells[SpellSlot.E].IsReady())
+            {
+                var killableTarget =
+                    HeroManager.Enemies.FirstOrDefault(
+                        x =>
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
+                        && x.GetBuffCount("twitchdeadlyvenom") >= 4 && x.Distance(ObjectManager.Player) >= 1000f && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                if (killableTarget != null)
+                {
+                    this.spells[SpellSlot.E].Cast();
                 }
 
-                
-
-                if (this.GetItemValue<bool>("com.iseries.twitch.combo.useEMaxStacks")
-                    && this.spells[SpellSlot.E].IsReady())
-                {
-                    var killableTarget =
-                        HeroManager.Enemies.FirstOrDefault(
-                            x =>
-                            x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                            && x.GetBuffCount("twitchdeadlyvenom") == 6
-                            && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
-                    if (killableTarget != null)
-                    {
-                        this.spells[SpellSlot.E].Cast();
-                    }
-                }
-
-                if (this.GetItemValue<bool>("com.iseries.twitch.combo.useENearlyOutOfRange")
-                    && this.spells[SpellSlot.E].IsReady())
-                {
-                    var killableTarget =
-                        HeroManager.Enemies.FirstOrDefault(
-                            x =>
-                            x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                            && x.GetBuffCount("twitchdeadlyvenom") >= 4 && x.Distance(ObjectManager.Player) >= 1000f
-                            && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
-                    if (killableTarget != null)
-                    {
-                        this.spells[SpellSlot.E].Cast();
-                    }
-                }
             }
 
             if (this.GetItemValue<bool>("com.iseries.twitch.combo.useW") && this.spells[SpellSlot.W].IsReady())
@@ -165,25 +202,13 @@ namespace iSeries.Champions.Marksman.Twitch
                 }
 
                 var wTarget = TargetSelector.GetTarget(
-                    this.spells[SpellSlot.W].Range, 
+                    this.spells[SpellSlot.W].Range,
                     TargetSelector.DamageType.Physical);
                 if (wTarget.IsValidTarget(this.spells[SpellSlot.W].Range))
                 {
                     this.spells[SpellSlot.W].Cast(wTarget);
                 }
             }
-
-            #region R
-
-            // com.iseries.twitch.combo.useR
-            if (this.GetItemValue<bool>("com.iseries.twitch.combo.useR") && this.spells[SpellSlot.R].IsReady()
-                && ObjectManager.Player.CountEnemiesInRange(1000f)
-                >= this.GetItemValue<Slider>("com.iseries.twitch.combo.minEnR").Value)
-            {
-                this.spells[SpellSlot.R].Cast();
-            }
-
-            #endregion
         }
 
         /// <summary>
@@ -208,9 +233,9 @@ namespace iSeries.Champions.Marksman.Twitch
                     if (stacks > 0)
                     {
                         Drawing.DrawText(
-                            Drawing.WorldToScreen(source.Position)[0] - 20, 
-                            Drawing.WorldToScreen(source.Position)[1], 
-                            Color.White, 
+                            Drawing.WorldToScreen(source.Position)[0] - 20,
+                            Drawing.WorldToScreen(source.Position)[1],
+                            Color.White,
                             "Stacks: " + stacks);
                     }
                 }
@@ -222,33 +247,31 @@ namespace iSeries.Champions.Marksman.Twitch
         /// </summary>
         public override void OnHarass()
         {
-            if (ObjectManager.Player.ManaPercent > this.GetItemValue<Slider>("com.iseries.twitch.harass.mana").Value)
+            if (ObjectManager.Player.ManaPercent > GetItemValue<Slider>("com.iseries.twitch.harass.mana").Value)
             {
-                // com.iseries.twitch.harass.eStacks
-                if (this.GetItemValue<bool>("com.iseries.twitch.harass.useE") && this.spells[SpellSlot.E].IsReady())
+                //com.iseries.twitch.harass.eStacks
+                if (GetItemValue<bool>("com.iseries.twitch.harass.useE") && spells[SpellSlot.E].IsReady())
                 {
                     var target =
                         HeroManager.Enemies.FirstOrDefault(
                             x =>
-                            x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                            && x.GetBuffCount("twitchdeadlyvenom")
-                            >= this.GetItemValue<Slider>("com.iseries.twitch.harass.eStacks").Value
-                            && !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
+                                x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x) &&
+                                x.GetBuffCount("twitchdeadlyvenom") >=
+                                GetItemValue<Slider>("com.iseries.twitch.harass.eStacks").Value &&
+                                !this.GetItemValue<bool>("com.iseries.twitch.noe." + x.ChampionName.ToLowerInvariant()));
                     if (target != null)
                     {
                         this.spells[SpellSlot.E].Cast();
                     }
                 }
 
-                if (this.GetItemValue<bool>("com.iseries.twitch.harass.useW") && this.spells[SpellSlot.W].IsReady())
+                if (GetItemValue<bool>("com.iseries.twitch.harass.useW") && spells[SpellSlot.W].IsReady())
                 {
-                    var Target = TargetSelector.GetTarget(
-                        this.spells[SpellSlot.W].Range, 
-                        TargetSelector.DamageType.Physical);
-                    if (Target.IsValidTarget() && this.spells[SpellSlot.W].CanCast(Target))
+                    var Target = TargetSelector.GetTarget(spells[SpellSlot.W].Range, TargetSelector.DamageType.Physical);
+                    if (Target.IsValidTarget() && spells[SpellSlot.W].CanCast(Target))
                     {
-                        this.spells[SpellSlot.W].CastIfHitchanceEquals(Target, HitChance.VeryHigh);
-                        this.spells[SpellSlot.W].CastIfWillHit(Target, 2);
+                        spells[SpellSlot.W].CastIfHitchanceEquals(Target, HitChance.VeryHigh);
+                        spells[SpellSlot.W].CastIfWillHit(Target, 2);
                     }
                 }
             }
@@ -259,33 +282,6 @@ namespace iSeries.Champions.Marksman.Twitch
         /// </summary>
         public override void OnLaneclear()
         {
-            if (ObjectManager.Player.ManaPercent
-                >= this.GetItemValue<Slider>("com.iseries.twitch.laneclear.manaManager").Value)
-            {
-                var minions = MinionManager.GetMinions(ObjectManager.Player.ServerPosition, 700f);
-                if (this.GetItemValue<bool>("com.iseries.twitch.laneclear.useE") && this.spells[SpellSlot.E].IsReady()
-                    && ObjectManager.Player.IsWindingUp)
-                {
-                    var numberOfMinions =
-                        minions.Count(
-                            x =>
-                            x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].IsInRange(x)
-                            && x.GetBuffCount("twitchdeadlyvenom") >= 4);
-                    if (numberOfMinions > 3)
-                    {
-                        this.spells[SpellSlot.E].Cast();
-                    }
-                }
-
-                if (this.GetItemValue<bool>("com.iseries.twitch.laneclear.useW") && this.spells[SpellSlot.W].IsReady())
-                {
-                    var location = this.spells[SpellSlot.W].GetCircularFarmLocation(minions);
-                    if (location.MinionsHit > 3)
-                    {
-                        this.spells[SpellSlot.W].Cast();
-                    }
-                }
-            }
         }
 
         /// <summary>
@@ -319,30 +315,6 @@ namespace iSeries.Champions.Marksman.Twitch
         #region Methods
 
         /// <summary>
-        ///     Gets actual damage blah blah
-        /// </summary>
-        /// <param name="target">
-        ///     The target
-        /// </param>
-        /// <returns>
-        ///     The <see cref="float" />.
-        /// </returns>
-        private float GetActualDamage(Obj_AI_Base target)
-        {
-            if (target.HasBuff("ColossalStrength"))
-            {
-                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.7);
-            }
-
-            if (this.Player.HasBuff("summonerexhaust"))
-            {
-                return (float)(this.spells[SpellSlot.E].GetDamage(target) * 0.4);
-            }
-
-            return this.spells[SpellSlot.E].GetDamage(target);
-        }
-
-        /// <summary>
         ///     Gets the total E Damage
         /// </summary>
         /// <param name="hero">
@@ -364,37 +336,15 @@ namespace iSeries.Champions.Marksman.Twitch
         }
 
         /// <summary>
-        ///     The on cast spell stuff
-        /// </summary>
-        /// <param name="sender">
-        ///     The Sender
-        /// </param>
-        /// <param name="args">
-        ///     The Args
-        /// </param>
-        private void OnCastSpell(Spellbook sender, SpellbookCastSpellEventArgs args)
-        {
-            if (args.Slot == SpellSlot.R)
-            {
-                if (ItemData.Youmuus_Ghostblade.GetItem().IsReady())
-                {
-                    ItemData.Youmuus_Ghostblade.GetItem().Cast();
-                }
-            }
-        }
-
-        /// <summary>
         ///     The Functions to always process
         /// </summary>
         private void OnUpdateFunctions()
         {
             if (this.GetItemValue<bool>("com.iseries.twitch.misc.killsteal") && this.spells[SpellSlot.E].IsReady())
             {
-                var target =
-                    HeroManager.Enemies.FirstOrDefault(
-                        x => this.GetActualDamage(x) >= this.GetActualHealth(x) && this.spells[SpellSlot.E].IsInRange(x));
-
-                if (target != null)
+                foreach (var hero in
+                    HeroManager.Enemies.Where(
+                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.GetActualDamage(x) > this.GetActualHealth(x)))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }
@@ -404,10 +354,10 @@ namespace iSeries.Champions.Marksman.Twitch
             {
                 var bigMinion =
                     MinionManager.GetMinions(
-                        this.Player.ServerPosition, 
-                        this.spells[SpellSlot.E].Range, 
-                        MinionTypes.All, 
-                        MinionTeam.Neutral, 
+                        this.Player.ServerPosition,
+                        this.spells[SpellSlot.E].Range,
+                        MinionTypes.All,
+                        MinionTeam.Neutral,
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
                             x =>

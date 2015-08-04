@@ -144,7 +144,7 @@ namespace iSeries.Champions.Marksman.Tristana
                     TargetSelector.DamageType.Physical);
                 var stacks = target.GetBuffCount("tristanaecharge");
 
-                var totalDamage = this.spells[SpellSlot.E].GetDamage(target) * (0.30 * stacks) + GetActualRDamage(target);
+                var totalDamage = this.spells[SpellSlot.E].GetDamage(target) * (0.30 * stacks) + this.GetActualRDamage(target);
 
                 if (target.IsValidTarget(this.spells[SpellSlot.R].Range) 
                     && !TargetSelector.IsInvulnerable(target, TargetSelector.DamageType.Magical, false) 

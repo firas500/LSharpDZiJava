@@ -166,6 +166,10 @@ namespace iSeries.Champions.Marksman.Kalista
         /// </returns>
         public float GetActualHealth(Obj_AI_Base target)
         {
+            return target.Health + target.HPRegenRate;
+
+            /*
+            Shields are broken
             var result = target.Health;
 
             if (target.AttackShield > 0)
@@ -173,7 +177,13 @@ namespace iSeries.Champions.Marksman.Kalista
                 result += target.AttackShield;
             }
 
+            if (target.MagicShield > 0)
+            {
+                result += target.MagicShield;
+            }
+
             return result;
+            */
         }
 
         /// <summary>
@@ -217,7 +227,7 @@ namespace iSeries.Champions.Marksman.Kalista
         /// <returns>
         ///     The <see cref="bool" />.
         /// </returns>
-        public bool HasUndyingBuff(Obj_AI_Hero target)
+        public bool HasNoDmgBuff(Obj_AI_Hero target)
         {
             // Tryndamere R
             if (target.ChampionName == "Tryndamere"
@@ -253,6 +263,31 @@ namespace iSeries.Champions.Marksman.Kalista
                 {
                     return true;
                 }
+            }
+
+            //Banshee's Veil
+            if (target.Buffs.Any(b => b.IsValidBuff() && b.DisplayName == "bansheesveil"))
+            {
+                return true;
+            }
+
+            //Sivir E
+            if (target.Buffs.Any(b => b.IsValidBuff() && b.DisplayName == "SivirE"))
+            {
+                return true;
+            }
+
+            //Nocturne W
+            if (target.Buffs.Any(b => b.IsValidBuff() && b.DisplayName == "NocturneW"))
+            {
+                return true;
+            }
+
+            if (target.HasBuffOfType(BuffType.Invulnerability)
+                || target.HasBuffOfType(BuffType.SpellImmunity)
+                || target.HasBuffOfType(BuffType.SpellShield))
+            {
+                return true;
             }
 
             return false;
@@ -296,14 +331,17 @@ namespace iSeries.Champions.Marksman.Kalista
                 var rendTarget =
                     HeroManager.Enemies.Where(
                         x =>
-                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) > 1
-                        && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range)
+                        && this.spells[SpellSlot.E].GetDamage(x) > 1
+                        && !HasNoDmgBuff(x))
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
-                if (rendTarget != null && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget)
-                    && !rendTarget.IsDead && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500
-                    && !this.HasUndyingBuff(rendTarget))
+                if (rendTarget != null
+                    && this.GetActualDamage(rendTarget) >= this.GetActualHealth(rendTarget)
+                    && !rendTarget.IsDead
+                    && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500
+                    && !this.HasNoDmgBuff(rendTarget))
                 {
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
@@ -326,7 +364,7 @@ namespace iSeries.Champions.Marksman.Kalista
 
             foreach (var source in HeroManager.Enemies.Where(x => this.Player.Distance(x) <= 2000f && !x.IsDead))
             {
-                var stacks = source.Buffs.Count(x => x.Name == "kalistaexpungemarker");
+                var stacks = source.GetBuffCount("kalistaexpungemarker");
 
                 if (stacks > 0)
                 {
@@ -374,19 +412,20 @@ namespace iSeries.Champions.Marksman.Kalista
                 }
             }
 
-            if (this.GetItemValue<bool>("com.iseries.kalista.combo.useE") && this.spells[SpellSlot.E].IsReady())
+            if (this.GetItemValue<bool>("com.iseries.kalista.harass.useE") && this.spells[SpellSlot.E].IsReady())
             {
                 var target =
                     HeroManager.Enemies.Where(
                         x =>
-                        x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= 1
-                        && !x.HasBuffOfType(BuffType.Invulnerability) && !x.HasBuffOfType(BuffType.SpellShield))
+                        x.IsValidTarget(this.spells[SpellSlot.E].Range)
+                        && this.spells[SpellSlot.E].GetDamage(x) >= 1
+                        && !HasNoDmgBuff(x))
                         .OrderByDescending(x => this.spells[SpellSlot.E].GetDamage(x))
                         .FirstOrDefault();
 
                 if (target != null)
                 {
-                    var stacks = target.Buffs.Count(x => x.Name == "kalistaexpungemarker");
+                    var stacks = target.GetBuffCount("kalistaexpungemarker");
                     if (this.GetActualDamage(target) >= this.GetActualHealth(target)
                         || stacks >= this.GetItemValue<Slider>("com.iseries.kalista.harass.stacks").Value)
                     {
@@ -712,16 +751,12 @@ namespace iSeries.Champions.Marksman.Kalista
             foreach (var hero in
                 HeroManager.Enemies.Where(
                     x =>
-                    this.spells[SpellSlot.E].IsInRange(x) && x.Health < this.GetActualDamage(x)
+                    this.spells[SpellSlot.E].IsInRange(x)
+                    && this.GetActualHealth(x) < this.GetActualDamage(x)
                     && !x.IsDead))
             {
-                if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
-                    || hero.HasBuffOfType(BuffType.SpellShield))
-                {
-                    return;
-                }
-
-                if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500 || this.HasUndyingBuff(hero))
+                if (HasNoDmgBuff(hero) 
+                    || Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
                 {
                     return;
                 }
@@ -736,8 +771,7 @@ namespace iSeries.Champions.Marksman.Kalista
                     this.spells[SpellSlot.Q].IsInRange(x)
                     && this.GetActualHealth(x) < this.spells[SpellSlot.Q].GetDamage(x)))
             {
-                if (hero.HasBuffOfType(BuffType.Invulnerability) || hero.HasBuffOfType(BuffType.SpellImmunity)
-                    || hero.HasBuffOfType(BuffType.SpellShield) || this.spells[SpellSlot.E].IsReady())
+                if (HasNoDmgBuff(hero) || this.spells[SpellSlot.E].IsReady())
                 {
                     return;
                 }
@@ -757,12 +791,24 @@ namespace iSeries.Champions.Marksman.Kalista
                         this.Player.ServerPosition, 
                         this.spells[SpellSlot.E].Range, 
                         MinionTypes.All, 
-                        MinionTeam.NotAlly, 
+                        MinionTeam.Neutral, 
                         MinionOrderTypes.MaxHealth)
                         .FirstOrDefault(
                             x =>
                             x.IsValid && x.Health < this.GetActualDamage(x) && !x.Name.Contains("Mini")
                             && !x.Name.Contains("Dragon") && !x.Name.Contains("Baron"));
+
+                var superMinion =
+                    MinionManager.GetMinions(
+                        this.Player.ServerPosition,
+                        this.spells[SpellSlot.E].Range,
+                        MinionTypes.All,
+                        MinionTeam.Enemy,
+                        MinionOrderTypes.MaxHealth)
+                        .FirstOrDefault(
+                            x =>
+                            x.IsValid && x.Health <= this.GetActualDamage(x)
+                            && x.SkinName.ToLower().Contains("super"));
 
                 var baron =
                     MinionManager.GetMinions(
@@ -785,6 +831,7 @@ namespace iSeries.Champions.Marksman.Kalista
                             x => x.IsValid && x.Health < this.GetDragonReduction(x) && x.Name.Contains("Dragon"));
 
                 if ((normalMob != null && this.spells[SpellSlot.E].CanCast(normalMob))
+                    || (superMinion != null && this.spells[SpellSlot.E].CanCast(superMinion))
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))
                     || (dragon != null && this.spells[SpellSlot.E].CanCast(dragon)))
                 {

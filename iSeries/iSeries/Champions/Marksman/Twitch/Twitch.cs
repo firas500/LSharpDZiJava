@@ -340,7 +340,7 @@ namespace iSeries.Champions.Marksman.Twitch
             {
                 foreach (var hero in
                     HeroManager.Enemies.Where(
-                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.GetActualDamage(x) > this.GetActualHealth(x)))
+                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.spells[SpellSlot.E].GetDamage(x) >= this.GetActualHealth(x)))
                 {
                     this.spells[SpellSlot.E].Cast();
                 }

@@ -135,6 +135,7 @@ namespace iSeries
 
             Cleanser.OnLoad(Variables.Menu);
 
+            ItemManager.OnLoad(Variables.Menu);
             // TODO add an item manager / auto qss etc / some utils maybe?
             // Activator# Bik
         }

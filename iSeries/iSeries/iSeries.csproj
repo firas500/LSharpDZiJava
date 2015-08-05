@@ -88,6 +88,7 @@
     <Compile Include="Champions\Marksman\Vayne\Vayne.cs" />
     <Compile Include="Champions\Utilities\Cleanser.cs" />
     <Compile Include="Champions\Utilities\DamageIndicator.cs" />
+    <Compile Include="Champions\Utilities\ItemManager.cs" />
     <Compile Include="Champions\Utilities\PositionHelper.cs" />
     <Compile Include="General\ChampionType.cs" />
     <Compile Include="General\Enumerators.cs" />

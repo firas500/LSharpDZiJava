@@ -74,7 +74,7 @@ namespace iSeries.Champions.Marksman.Tristana
                 drawing.AddItem(new MenuItem("com.iseries.tristana.drawing.drawE", "Draw E Range").SetValue(true));
                 root.AddSubMenu(drawing);
             }
-
+            /**
             var noEOnMenu = new Menu("Don't E Options", "com.iseries.tristana.noe.");
             {
                 foreach (var champ in HeroManager.Enemies)
@@ -87,7 +87,7 @@ namespace iSeries.Champions.Marksman.Tristana
 
                 root.AddSubMenu(noEOnMenu);
             }
-
+            */
             root.AddToMainMenu();
         }
 

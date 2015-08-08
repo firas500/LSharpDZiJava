@@ -338,11 +338,12 @@ namespace iSeries.Champions.Marksman.Twitch
         {
             if (this.GetItemValue<bool>("com.iseries.twitch.misc.killsteal") && this.spells[SpellSlot.E].IsReady())
             {
-                foreach (var hero in
-                    HeroManager.Enemies.Where(
-                        x => x.IsValidTarget(this.spells[SpellSlot.E].Range) && this.GetActualDamage(x) > this.GetActualHealth(x)))
+                var KillableHero =
+                    HeroManager.Enemies.FirstOrDefault(x => x.IsValidTarget(this.spells[SpellSlot.E].Range) &&
+                            this.GetActualDamage(x) > this.GetActualHealth(x));
+                if(KillableHero != null)
                 {
-                    this.spells[SpellSlot.E].Cast();
+                    this.spells[SpellSlot.E].Cast(KillableHero);
                 }
             }
 

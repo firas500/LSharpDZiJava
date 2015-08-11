@@ -170,6 +170,9 @@ namespace IKalista
         /// </returns>
         public float GetActualHealth(Obj_AI_Base target)
         {
+            return target.Health + 5;
+
+            /*
             var result = target.Health;
 
             if (target.AttackShield > 0)
@@ -177,7 +180,7 @@ namespace IKalista
                 result += target.AttackShield;
             }
 
-            return result;
+            return result;*/
         }
 
         /// <summary>
@@ -767,11 +770,10 @@ namespace IKalista
         {
             foreach (var source in
                 HeroManager.Enemies.Where(
-                    x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health))
+                    x => this.spells[SpellSlot.E].IsInRange(x) && this.GetRealDamage(x) >= x.Health + 5))
             {
                 if (source.IsValidTarget(this.spells[SpellSlot.E].Range) && !this.HasUndyingBuff(source)
-                    && !ObjectManager.Player.HasBuff("summonerexhaust")
-                    && Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT > 500)
+                    && !ObjectManager.Player.HasBuff("summonerexhaust"))
                 {
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;

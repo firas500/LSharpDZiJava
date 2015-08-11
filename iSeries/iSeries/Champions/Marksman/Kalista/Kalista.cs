@@ -166,7 +166,7 @@ namespace iSeries.Champions.Marksman.Kalista
         /// </returns>
         public float GetActualHealth(Obj_AI_Base target)
         {
-            return target.Health + target.HPRegenRate;
+            return target.Health + 5;
 
             /*
             Shields are broken
@@ -835,11 +835,6 @@ namespace iSeries.Champions.Marksman.Kalista
                     || (baron != null && this.spells[SpellSlot.E].CanCast(baron))
                     || (dragon != null && this.spells[SpellSlot.E].CanCast(dragon)))
                 {
-                    if (Environment.TickCount - this.spells[SpellSlot.E].LastCastAttemptT < 500)
-                    {
-                        return;
-                    }
-
                     this.spells[SpellSlot.E].Cast();
                     this.spells[SpellSlot.E].LastCastAttemptT = Environment.TickCount;
                 }

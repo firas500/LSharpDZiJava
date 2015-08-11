@@ -47,7 +47,7 @@ namespace iSeries.Champions.Marksman.Tristana
                 root.AddSubMenu(comboMenu);
             }
 
-            var harassMenu = new Menu("Harass Options", "com.tristana.vayne.harass");
+            var harassMenu = new Menu("Harass Options", "com.iseries.tristana.harass");
             {
                 harassMenu.AddItem(new MenuItem("com.iseries.tristana.harass.useE", "Use E").SetValue(false));
                 root.AddSubMenu(harassMenu);
@@ -74,20 +74,20 @@ namespace iSeries.Champions.Marksman.Tristana
                 drawing.AddItem(new MenuItem("com.iseries.tristana.drawing.drawE", "Draw E Range").SetValue(true));
                 root.AddSubMenu(drawing);
             }
-
-            /*var noEOnMenu = new Menu("Don't E Options", "com.iseries.vayne.noe.");
+            /**
+            var noEOnMenu = new Menu("Don't E Options", "com.iseries.tristana.noe.");
             {
                 foreach (var champ in HeroManager.Enemies)
                 {
                     noEOnMenu.AddItem(
                         new MenuItem(
-                            "com.iseries.twitch.noe." + champ.ChampionName.ToLowerInvariant(), 
+                            "com.iseries.tristana.noe." + champ.ChampionName.ToLowerInvariant(), 
                             champ.ChampionName).SetValue(false));
                 }
 
                 root.AddSubMenu(noEOnMenu);
-            }*/
-
+            }
+            */
             root.AddToMainMenu();
         }
 

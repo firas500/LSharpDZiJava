@@ -474,9 +474,10 @@ namespace IKalista
                 HeroManager.Allies.FirstOrDefault(
                     x =>
                     x.IsAlly
+                    && x.ChampionName == "Blitzcrank"
                     && ObjectManager.Player.Distance(x.ServerPosition) < this.sliderLinks["maxRange"].Value.Value
                     && ObjectManager.Player.Distance(x.ServerPosition) >= this.sliderLinks["minRange"].Value.Value
-                    && x.ChampionName == "Blitzcrank");
+                   );
 
             if (blitzcrank != null)
             {

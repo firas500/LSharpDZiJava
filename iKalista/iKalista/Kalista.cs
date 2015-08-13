@@ -1073,7 +1073,7 @@ namespace IKalista
                 Orbwalking.ResetAutoAttackTimer();
             }
 
-            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && BoolLinks["saveAllyR"].Value)
+            if (sender.Type == GameObjectType.obj_AI_Hero && sender.IsEnemy && args.Target != null && BoolLinks["saveAllyR"].Value)
             {
                 var soulboundhero =
                     HeroManager.Allies.FirstOrDefault(

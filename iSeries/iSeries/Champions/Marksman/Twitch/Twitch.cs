@@ -141,9 +141,7 @@ namespace iSeries.Champions.Marksman.Twitch
         /// </returns>
         public float GetActualHealth(Obj_AI_Base target)
         {
-            return target.AttackShield > 0
-                       ? target.Health + target.AttackShield
-                       : target.MagicShield > 0 ? target.Health + target.MagicShield : target.Health;
+            return target.Health;
         }
 
         /// <summary>

@@ -806,7 +806,12 @@ namespace IKalista
                 TargetSelector.GetTarget(
                     BoolLinks["useQ"].Value ? this.spells[SpellSlot.Q].Range : this.spells[SpellSlot.E].Range, 
                     TargetSelector.DamageType.Physical);
-
+                    
+            if(!target.IsValidTarget())
+            {
+                return;
+            }
+            
             if (this.spells[SpellSlot.Q].IsReady() && BoolLinks["useQ"].Value && !ObjectManager.Player.IsDashing()
                 && !ObjectManager.Player.IsWindingUp)
             {

@@ -45,7 +45,7 @@ namespace AntiFUCKINGRengar
 
             _gapcloseSpell = GetSpell();
 
-            Game.PrintChat("Cause Sometimes RENGO IS 2 STRONK.");
+            Game.PrintChat("Cause Sometimes <b>RENGO IS 2 STRONK</b>."); // kappa
 
             GameObject.OnCreate += OnCreateObject;
         }
@@ -96,7 +96,7 @@ namespace AntiFUCKINGRengar
                     _rengarObj.Distance(_player) <= _gapcloseSpell.Range)
                 {
                     _gapcloseSpell.Cast(_rengarObj);
-                    Game.PrintChat("Butt Fucked Rengar");
+                    //Game.PrintChat("Butt Fucked Rengar");
                 }
             }
         }
